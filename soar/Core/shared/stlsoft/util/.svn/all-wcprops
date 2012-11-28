@@ -1,0 +1,185 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/stlsoft/util
+END
+remove_from_scope.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/remove_from_scope.hpp
+END
+null.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/null.hpp
+END
+forward_enums.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/stlsoft/util/forward_enums.hpp
+END
+must_init.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/must_init.hpp
+END
+integral_printf_traits.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/integral_printf_traits.hpp
+END
+zero.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/zero.hpp
+END
+operator_bool_adaptor.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/operator_bool_adaptor.hpp
+END
+inert.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/inert.hpp
+END
+exception_string.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/stlsoft/util/exception_string.hpp
+END
+std_swap.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/stlsoft/util/std_swap.hpp
+END
+placement_aid.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/placement_aid.hpp
+END
+sign_traits.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/sign_traits.hpp
+END
+options_verifier.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/options_verifier.hpp
+END
+pod_veneer.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/pod_veneer.hpp
+END
+printf_traits.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/printf_traits.hpp
+END
+64bit_integers.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/64bit_integers.hpp
+END
+trip_bool.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/trip_bool.hpp
+END
+minmax.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/stlsoft/util/minmax.hpp
+END
+nulldef.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/nulldef.h
+END
+pair.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/pair.hpp
+END
+argument_proxies.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/argument_proxies.hpp
+END
+zerodef.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/zerodef.h
+END
+compiler_optimisation_traits.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/compiler_optimisation_traits.hpp
+END
+true_typedef.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/true_typedef.hpp
+END
+size_traits.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/size_traits.hpp
+END
+limit_traits.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/limit_traits.h
+END
+unused_return_value_monitor.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/unused_return_value_monitor.hpp
+END
+static_initialisers.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/static_initialisers.hpp
+END
+operator_bool.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/stlsoft/util/operator_bool.hpp
+END
+constraints.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/stlsoft/util/constraints.hpp
+END

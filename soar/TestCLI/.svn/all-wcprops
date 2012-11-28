@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/13625/trunk/SoarSuite/TestCLI
+END
+testcli.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/13266/trunk/SoarSuite/TestCLI/testcli.cpp
+END
+mincli.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/13625/trunk/SoarSuite/TestCLI/mincli.cpp
+END
+testcli.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/13266/trunk/SoarSuite/TestCLI/testcli.h
+END
+SConscript
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/13566/trunk/SoarSuite/TestCLI/SConscript
+END
