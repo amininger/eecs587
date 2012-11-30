@@ -3,8 +3,10 @@
 #ifndef EPMEM_WORKER_H_
 #define EPMEM_WORKER_H_
 
-#include "soar_module.h"
-#include "episodic_memory.h"
+class epmem_worker;
+
+#include "../soar_module.h"
+#include "../episodic_memory.h"
 #include "new_episode.h"
 
 class epmem_worker{

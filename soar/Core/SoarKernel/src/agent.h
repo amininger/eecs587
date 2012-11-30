@@ -901,7 +901,7 @@ kernel time and total_cpu_time greater than the derived total CPU time. REW */
   soar_module::sqlite_database *epmem_db;
   epmem_master_statement_container *epmem_stmts_master;
 
-  epmem_worker *epmem_worker;
+  epmem_worker *epmem_worker_p;
   //  soar_module::sqlite_database *epmem_db;
   //  epmem_common_statement_container *epmem_stmts_common;
   //  epmem_graph_statement_container *epmem_stmts_graph;

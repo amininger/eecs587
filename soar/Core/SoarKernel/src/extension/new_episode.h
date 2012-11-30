@@ -8,6 +8,8 @@
 #ifndef NEW_EPISODE_H_
 #define NEW_EPISODE_H_
 
+class new_episode;
+
 #include "../episodic_memory.h"
 #include "../agent.h"
 

@@ -338,6 +338,10 @@ public:
 	soar_module::sqlite_statement *commit;
 	soar_module::sqlite_statement *rollback;
 
+	soar_module::sqlite_statement *valid_episode;
+	soar_module::sqlite_statement *next_episode;
+	soar_module::sqlite_statement *prev_episode;
+
 	//
 	epmem_master_statement_container( agent *new_agent );
 };
@@ -392,10 +396,10 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		soar_module::sqlite_statement *find_edge_unique_shared;
 
 		//
-
-		soar_module::sqlite_statement *valid_episode;
-		soar_module::sqlite_statement *next_episode;
-		soar_module::sqlite_statement *prev_episode;
+//
+//		soar_module::sqlite_statement *valid_episode;
+//		soar_module::sqlite_statement *next_episode;
+//		soar_module::sqlite_statement *prev_episode;
 
 		soar_module::sqlite_statement *get_nodes;
 		soar_module::sqlite_statement *get_edges;

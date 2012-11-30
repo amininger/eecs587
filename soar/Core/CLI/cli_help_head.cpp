@@ -31,4 +31,3 @@ bool CommandLineInterface::DoHelp(const std::vector<std::string> &argv) {
 	return true;
 }
 
-void initdocstrings() {

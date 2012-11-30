@@ -33,3 +33,7 @@
 #include "src/wma.cpp"
 #include "src/wmem.cpp"
 #include "src/xml.cpp"
+
+// E587: AM: Include
+#include "src/extension/new_episode.cpp"
+#include "src/extension/epmem_worker.cpp"

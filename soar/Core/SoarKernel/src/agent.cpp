@@ -369,7 +369,7 @@ agent * create_soar_agent (char * agent_name) {                                 
   newAgent->epmem_timers = new epmem_timer_container( newAgent );
 
   // E587: AM: new thread
-  newAgent->epmem_worker = NULL;
+  newAgent->epmem_worker_p = NULL;
 //  newAgent->epmem_db = new soar_module::sqlite_database();
 //  newAgent->epmem_stmts_common = NULL;
 //  newAgent->epmem_stmts_graph = NULL;
