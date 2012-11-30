@@ -368,10 +368,16 @@ agent * create_soar_agent (char * agent_name) {                                 
   newAgent->epmem_stats = new epmem_stat_container( newAgent );  
   newAgent->epmem_timers = new epmem_timer_container( newAgent );
 
-  newAgent->epmem_db = new soar_module::sqlite_database();
-  newAgent->epmem_stmts_common = NULL;  
-  newAgent->epmem_stmts_graph = NULL;
+  // E587: AM: new thread
+  newAgent->epmem_worker = NULL;
+//  newAgent->epmem_db = new soar_module::sqlite_database();
+//  newAgent->epmem_stmts_common = NULL;
+//  newAgent->epmem_stmts_graph = NULL;
   
+  // E587: AM: master database
+  newAgent->epmem_db = new soar_module::sqlite_database();
+  newAgent->epmem_stmts_master = NULL;
+
   newAgent->epmem_node_mins = new std::vector<epmem_time_id>();
   newAgent->epmem_node_maxes = new std::vector<bool>();
 

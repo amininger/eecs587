@@ -394,6 +394,7 @@ epmem_mem_high_stat::epmem_mem_high_stat( agent *new_agent, const char *new_name
 int64_t epmem_mem_high_stat::get_value()
 {
 	return my_agent->epmem_db->memory_highwater();
+
 }
 
 
@@ -524,15 +525,28 @@ epmem_timer::epmem_timer(const char *new_name, agent *new_agent, soar_module::ti
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 
-epmem_common_statement_container::epmem_common_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_db )
+epmem_master_statement_container::epmem_master_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_db )
 {
 	soar_module::sqlite_database *new_db = new_agent->epmem_db;
 
 	//
 
+	add_structure( "CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY)" );
+
+
+	add_structure( "CREATE TABLE IF NOT EXISTS node_unique (child_id INTEGER PRIMARY KEY AUTOINCREMENT,parent_id INTEGER,attrib INTEGER, value INTEGER)" );
+	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS node_unique_parent_attrib_value ON node_unique (parent_id,attrib,value)" );
+
+	add_structure( "CREATE TABLE IF NOT EXISTS edge_unique (parent_id INTEGER PRIMARY KEY AUTOINCREMENT,q0 INTEGER,w INTEGER,q1 INTEGER, last INTEGER)" );
+	add_structure( "CREATE INDEX IF NOT EXISTS edge_unique_q0_w_last ON edge_unique (q0,w,last)" );
+	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS edge_unique_q0_w_q1 ON edge_unique (q0,w,q1)" );
+
+	add_structure( "CREATE TABLE IF NOT EXISTS lti (parent_id INTEGER PRIMARY KEY, letter INTEGER, num INTEGER, time_id INTEGER)" );
+	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS lti_letter_num ON lti (letter,num)" );
+
+
 	add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
-	add_structure( "CREATE TABLE IF NOT EXISTS rit_left_nodes (min INTEGER, max INTEGER)" );
-	add_structure( "CREATE TABLE IF NOT EXISTS rit_right_nodes (node INTEGER)" );
+
 	add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
 
@@ -542,7 +556,88 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 	// workaround for acceptable preference wmes: id 1 = "operator+"
 	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
 
+	// adding an ascii table just to make lti queries easier when inspecting database
+	add_structure( "CREATE TABLE IF NOT EXISTS ascii (ascii_num INTEGER PRIMARY KEY, ascii_chr TEXT)" );
+	add_structure( "DELETE FROM ascii" );
+	{
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (65,'A')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (66,'B')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (67,'C')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (68,'D')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (69,'E')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (70,'F')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (71,'G')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (72,'H')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (73,'I')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (74,'J')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (75,'K')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (76,'L')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (77,'M')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (78,'N')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (79,'O')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (80,'P')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (81,'Q')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (82,'R')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (83,'S')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (84,'T')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (85,'U')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (86,'V')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (87,'W')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (88,'X')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (89,'Y')" );
+		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (90,'Z')" );
+	}
+
 	//
+
+	add_time = new soar_module::sqlite_statement( new_db, "INSERT INTO times (id) VALUES (?)" );
+	add( add_time );
+
+	//
+
+	add_node_unique = new soar_module::sqlite_statement( new_db, "INSERT INTO node_unique (parent_id,attrib,value) VALUES (?,?,?)" );
+	add( add_node_unique );
+
+	find_node_unique = new soar_module::sqlite_statement( new_db, "SELECT child_id FROM node_unique WHERE parent_id=? AND attrib=? AND value=?" );
+	add( find_node_unique );
+
+	//
+
+	add_edge_unique = new soar_module::sqlite_statement( new_db, "INSERT INTO edge_unique (q0,w,q1,last) VALUES (?,?,?,?)" );
+	add( add_edge_unique );
+
+	find_edge_unique = new soar_module::sqlite_statement( new_db, "SELECT parent_id, q1 FROM edge_unique WHERE q0=? AND w=?" );
+	add( find_edge_unique );
+
+	find_edge_unique_shared = new soar_module::sqlite_statement( new_db, "SELECT parent_id, q1 FROM edge_unique WHERE q0=? AND w=? AND q1=?" );
+	add( find_edge_unique_shared );
+
+	//
+
+	promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
+	add( promote_id );
+
+	find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id FROM lti WHERE letter=? AND num=?" );
+	add( find_lti );
+
+	find_lti_promotion_time = new soar_module::sqlite_statement( new_db, "SELECT time_id FROM lti WHERE parent_id=?" );
+	add( find_lti_promotion_time );
+
+	//
+
+	hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
+	add( hash_get );
+
+	hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
+	add( hash_add );
+
+
+	var_get = new soar_module::sqlite_statement( new_db, "SELECT value FROM vars WHERE id=?" );
+	add( var_get );
+
+	var_set = new soar_module::sqlite_statement( new_db, "REPLACE INTO vars (id,value) VALUES (?,?)" );
+	add( var_set );
+
 
 	begin = new soar_module::sqlite_statement( new_db, "BEGIN" );
 	add( begin );
@@ -553,13 +648,48 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 	rollback = new soar_module::sqlite_statement( new_db, "ROLLBACK" );
 	add( rollback );
 
+}
+
+
+
+// E587: AM: moving onto worker processor
+epmem_common_statement_container::epmem_common_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_worker->epmem_db )
+{
+	soar_module::sqlite_database *new_db = new_agent->epmem_worker->epmem_db;
+
+
 	//
 
-	var_get = new soar_module::sqlite_statement( new_db, "SELECT value FROM vars WHERE id=?" );
-	add( var_get );
+	//add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
+	add_structure( "CREATE TABLE IF NOT EXISTS rit_left_nodes (min INTEGER, max INTEGER)" );
+	add_structure( "CREATE TABLE IF NOT EXISTS rit_right_nodes (node INTEGER)" );
+//	add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
+//	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
+//
+//	// workaround for tree: type 1 = IDENTIFIER_SYMBOL_TYPE
+//	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (0,NULL,1)" );
+//
+//	// workaround for acceptable preference wmes: id 1 = "operator+"
+//	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
 
-	var_set = new soar_module::sqlite_statement( new_db, "REPLACE INTO vars (id,value) VALUES (?,?)" );
-	add( var_set );
+	//
+//
+//	begin = new soar_module::sqlite_statement( new_db, "BEGIN" );
+//	add( begin );
+//
+//	commit = new soar_module::sqlite_statement( new_db, "COMMIT" );
+//	add( commit );
+//
+//	rollback = new soar_module::sqlite_statement( new_db, "ROLLBACK" );
+//	add( rollback );
+
+	//
+//	// E587: AM:
+//	var_get = new soar_module::sqlite_statement( new_db, "SELECT value FROM vars WHERE id=?" );
+//	add( var_get );
+//
+//	var_set = new soar_module::sqlite_statement( new_db, "REPLACE INTO vars (id,value) VALUES (?,?)" );
+//	add( var_set );
 
 	//
 
@@ -576,17 +706,19 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 	add( rit_truncate_right );
 
 	//
-
-	hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
-	add( hash_get );
-
-	hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
-	add( hash_add );
+//	// E587: AM:
+//	hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
+//	add( hash_get );
+//
+//	hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
+//	add( hash_add );
 }
 
-epmem_graph_statement_container::epmem_graph_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_db )
+epmem_graph_statement_container::epmem_graph_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_worker->epmem_db )
+//epmem_graph_statement_container::epmem_graph_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_db )
 {
-	soar_module::sqlite_database *new_db = new_agent->epmem_db;
+	soar_module::sqlite_database *new_db = new_agent->epmem_worker->epmem_db;
+	//soar_module::sqlite_database *new_db = new_agent->epmem_db;
 
 	//
 
@@ -1020,7 +1152,8 @@ inline void epmem_buffer_add_wme( soar_module::symbol_triple_list& my_list, Symb
 bool epmem_get_variable( agent *my_agent, epmem_variable_key variable_id, int64_t *variable_value )
 {
 	soar_module::exec_result status;
-	soar_module::sqlite_statement *var_get = my_agent->epmem_stmts_common->var_get;
+	// E587: AM:
+	soar_module::sqlite_statement *var_get = my_agent->epmem_stmts_master->var_get;
 
 	var_get->bind_int( 1, variable_id );
 	status = var_get->execute();
@@ -1042,7 +1175,8 @@ bool epmem_get_variable( agent *my_agent, epmem_variable_key variable_id, int64_
  **************************************************************************/
 void epmem_set_variable( agent *my_agent, epmem_variable_key variable_id, int64_t variable_value )
 {
-	soar_module::sqlite_statement *var_set = my_agent->epmem_stmts_common->var_set;
+	// E587: AM:
+	soar_module::sqlite_statement *var_set = my_agent->epmem_stmts_master->var_set;
 
 	var_set->bind_int( 1, variable_id );
 	var_set->bind_int( 2, variable_value );
@@ -1116,8 +1250,9 @@ int64_t epmem_rit_fork_node( int64_t lower, int64_t upper, bool /*bounds_offset*
  **************************************************************************/
 void epmem_rit_clear_left_right( agent *my_agent )
 {
-	my_agent->epmem_stmts_common->rit_truncate_left->execute( soar_module::op_reinit );
-	my_agent->epmem_stmts_common->rit_truncate_right->execute( soar_module::op_reinit );
+	// E587: AM:
+	my_agent->epmem_worker->epmem_stmts_common->rit_truncate_left->execute( soar_module::op_reinit );
+	my_agent->epmem_worker->epmem_stmts_common->rit_truncate_right->execute( soar_module::op_reinit );
 }
 
 /***************************************************************************
@@ -1127,9 +1262,10 @@ void epmem_rit_clear_left_right( agent *my_agent )
  **************************************************************************/
 void epmem_rit_add_left( agent *my_agent, epmem_time_id min, epmem_time_id max )
 {
-	my_agent->epmem_stmts_common->rit_add_left->bind_int( 1, min );
-	my_agent->epmem_stmts_common->rit_add_left->bind_int( 2, max );
-	my_agent->epmem_stmts_common->rit_add_left->execute( soar_module::op_reinit );
+	// E587: AM:
+	my_agent->epmem_worker->epmem_stmts_common->rit_add_left->bind_int( 1, min );
+	my_agent->epmem_worker->epmem_stmts_common->rit_add_left->bind_int( 2, max );
+	my_agent->epmem_worker->epmem_stmts_common->rit_add_left->execute( soar_module::op_reinit );
 }
 
 /***************************************************************************
@@ -1139,8 +1275,9 @@ void epmem_rit_add_left( agent *my_agent, epmem_time_id min, epmem_time_id max )
  **************************************************************************/
 void epmem_rit_add_right( agent *my_agent, epmem_time_id id )
 {
-	my_agent->epmem_stmts_common->rit_add_right->bind_int( 1, id );
-	my_agent->epmem_stmts_common->rit_add_right->execute( soar_module::op_reinit );
+	// E587: AM:
+	my_agent->epmem_worker->epmem_stmts_common->rit_add_right->bind_int( 1, id );
+	my_agent->epmem_worker->epmem_stmts_common->rit_add_right->execute( soar_module::op_reinit );
 }
 
 /***************************************************************************
@@ -1339,12 +1476,13 @@ void epmem_rit_insert_interval( agent *my_agent, int64_t lower, int64_t upper, e
  **************************************************************************/
 void epmem_close( agent *my_agent )
 {
-	if ( my_agent->epmem_db->get_status() == soar_module::connected )
+	// E587: AM:
+	if ( my_agent->epmem_worker->epmem_db->get_status() == soar_module::connected )
 	{
 		// if lazy, commit
 		if ( my_agent->epmem_params->lazy_commit->get_value() == soar_module::on )
 		{
-			my_agent->epmem_stmts_common->commit->execute( soar_module::op_reinit );
+			my_agent->epmem_stmts_master->commit->execute( soar_module::op_reinit );
 		}
 
 		// de-allocate statement pools
@@ -1355,7 +1493,8 @@ void epmem_close( agent *my_agent )
 			{
 				for ( k=0; k<=1; k++ )
 				{
-					delete my_agent->epmem_stmts_graph->pool_find_edge_queries[ j ][ k ];
+					// E587: AM:
+					delete my_agent->epmem_worker->epmem_stmts_graph->pool_find_edge_queries[ j ][ k ];
 				}
 			}
 
@@ -1365,7 +1504,8 @@ void epmem_close( agent *my_agent )
 				{
 					for( m=EPMEM_RANGE_EP; m<=EPMEM_RANGE_POINT; m++ )
 					{
-						delete my_agent->epmem_stmts_graph->pool_find_interval_queries[ j ][ k ][ m ];
+						// E587: AM:
+						delete my_agent->epmem_worker->epmem_stmts_graph->pool_find_interval_queries[ j ][ k ][ m ];
 					}
 				}
 			}
@@ -1374,16 +1514,15 @@ void epmem_close( agent *my_agent )
 			{
 				for( m=EPMEM_RANGE_EP; m<=EPMEM_RANGE_POINT; m++ )
 				{
-					delete my_agent->epmem_stmts_graph->pool_find_lti_queries[ k ][ m ];
+					delete my_agent->epmem_worker->epmem_stmts_graph->pool_find_lti_queries[ k ][ m ];
 				}
 			}
 
-			delete my_agent->epmem_stmts_graph->pool_dummy;
+			delete my_agent->epmem_worker->epmem_stmts_graph->pool_dummy;
 		}
 
 		// de-allocate statements
-		delete my_agent->epmem_stmts_common;
-		delete my_agent->epmem_stmts_graph;
+		delete my_agent->epmem_worker;
 
 		// de-allocate local data structures
 		{
@@ -1417,8 +1556,10 @@ void epmem_close( agent *my_agent )
 			my_agent->epmem_promotions->clear();
 		}
 
-		// close the database
-		my_agent->epmem_db->disconnect();
+		delete my_agent->epmem_stmts_master;
+		if(my_agent->epmem_db->get_status() == soar_module::connected){
+			my_agent->epmem_db->disconnect();
+		}
 	}
 
 #ifdef EPMEM_EXPERIMENT
@@ -1508,6 +1649,7 @@ void epmem_reset( agent *my_agent, Symbol *state )
  **************************************************************************/
 void epmem_init_db( agent *my_agent, bool readonly = false )
 {
+	// E587: AM:
 	if ( my_agent->epmem_db->get_status() != soar_module::disconnected )
 	{
 		return;
