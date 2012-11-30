@@ -673,14 +673,14 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 	//add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
 	add_structure( "CREATE TABLE IF NOT EXISTS rit_left_nodes (min INTEGER, max INTEGER)" );
 	add_structure( "CREATE TABLE IF NOT EXISTS rit_right_nodes (node INTEGER)" );
-//	add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
-//	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
-//
-//	// workaround for tree: type 1 = IDENTIFIER_SYMBOL_TYPE
-//	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (0,NULL,1)" );
-//
-//	// workaround for acceptable preference wmes: id 1 = "operator+"
-//	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
+	add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
+	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
+
+	// workaround for tree: type 1 = IDENTIFIER_SYMBOL_TYPE
+	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (0,NULL,1)" );
+
+	// workaround for acceptable preference wmes: id 1 = "operator+"
+	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
 
 	//
 //
@@ -717,11 +717,11 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 
 	//
 //	// E587: AM:
-//	hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
-//	add( hash_get );
-//
-//	hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
-//	add( hash_add );
+	hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
+	add( hash_get );
+
+	hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
+	add( hash_add );
 }
 
 epmem_graph_statement_container::epmem_graph_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_worker_p->epmem_db )
@@ -1788,6 +1788,11 @@ void epmem_init_db( agent *my_agent, bool readonly = false )
 
 		// E587: AM:
 		my_agent->epmem_worker_p = new epmem_worker();
+		my_agent->epmem_worker_p->initialize(my_agent->epmem_params, my_agent);
+
+		my_agent->epmem_stmts_master = new epmem_master_statement_container(my_agent);
+		my_agent->epmem_stmts_master->structure();
+		my_agent->epmem_stmts_master->prepare();
 
 //		// setup common structures/queries
 //		my_agent->epmem_stmts_common = new epmem_common_statement_container( my_agent );
@@ -2132,22 +2137,27 @@ epmem_hash_id epmem_temporal_hash( agent *my_agent, Symbol *sym, bool add_on_fai
 			{
 				// E587: AM:
 				my_agent->epmem_stmts_master->hash_add->bind_int( 1, sym->common.symbol_type );
+				my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int(1, sym->common.symbol_type);
 				switch ( sym->common.symbol_type )
 				{
 					case SYM_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_text( 2, static_cast<const char *>( sym->sc.name ) );
+						my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_text( 2, static_cast<const char *>( sym->sc.name ) );
 						break;
 
 					case INT_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_int( 2, sym->ic.value );
+						my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int( 2, sym->ic.value );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_double( 2, sym->fc.value );
+						my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_double( 2, sym->fc.value );
 						break;
 				}
 
 				my_agent->epmem_stmts_master->hash_add->execute( soar_module::op_reinit );
+				my_agent->epmem_worker_p->epmem_stmts_common->hash_add->execute( soar_module::op_reinit );
 				return_val = static_cast<epmem_hash_id>( my_agent->epmem_db->last_insert_rowid() );
 			}
 
@@ -2520,6 +2530,13 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 				my_agent->epmem_stmts_master->add_edge_unique->bind_int( 4, LLONG_MAX );
 				my_agent->epmem_stmts_master->add_edge_unique->execute( soar_module::op_reinit );
 
+				// XXX: To Remove: notify workers
+				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 1, parent_id );
+				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 2, my_hash );
+				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 3, (*w_p)->value->id.epmem_id );
+				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 4, LLONG_MAX );
+				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->execute( soar_module::op_reinit );
+
 				(*w_p)->epmem_id = static_cast<epmem_node_id>( my_agent->epmem_db->last_insert_rowid() );
 
 				if ( !(*w_p)->value->id.smem_lti )
@@ -2608,6 +2625,12 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 					my_agent->epmem_stmts_master->add_node_unique->bind_int( 2, my_hash );
 					my_agent->epmem_stmts_master->add_node_unique->bind_int( 3, my_hash2 );
 					my_agent->epmem_stmts_master->add_node_unique->execute( soar_module::op_reinit );
+					
+					// XXX: To Remove, Notify the workers
+					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->bind_int( 1, parent_id );
+					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->bind_int( 2, my_hash );
+					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->bind_int( 3, my_hash2 );
+					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->execute( soar_module::op_reinit );
 
 					(*w_p)->epmem_id = (epmem_node_id) my_agent->epmem_db->last_insert_rowid();
 
@@ -2871,6 +2894,10 @@ void epmem_new_episode( agent *my_agent )
 		// add the time id to the times table
 		my_agent->epmem_worker_p->epmem_stmts_graph->add_time->bind_int( 1, time_counter );
 		my_agent->epmem_worker_p->epmem_stmts_graph->add_time->execute( soar_module::op_reinit );
+		
+		// XXX: Remove, add to worker
+		my_agent->epmem_stmts_master->add_time->bind_int( 1, time_counter );
+		my_agent->epmem_stmts_master->add_time->execute( soar_module::op_reinit );
 
 		my_agent->epmem_stats->time->set_value( time_counter + 1 );
 
@@ -3720,7 +3747,10 @@ bool epmem_register_pedges(epmem_node_id parent, epmem_literal* literal, epmem_p
 	// otherwse, if the pedge has not been registered with this literal
 	epmem_triple_pedge_map* pedge_cache = &(pedge_caches[is_edge]);
 	epmem_triple_pedge_map::iterator pedge_iter = pedge_cache->find(triple);
-	epmem_pedge* child_pedge = (*pedge_iter).second;
+	epmem_pedge* child_pedge = NULL;
+	if(pedge_iter != pedge_cache->end()){
+		child_pedge = (*pedge_iter).second;
+	}
 	if (pedge_iter == pedge_cache->end() || (*pedge_iter).second == NULL) {
 		int has_value = (literal->q1 != EPMEM_NODEID_BAD ? 1 : 0);
 		// E587: AM:
@@ -3846,9 +3876,11 @@ bool epmem_satisfy_literal(epmem_literal* literal, epmem_node_id parent, epmem_n
 						}
 					} else {
 						uedge_iter = uedge_cache->find(child_triple);
-						child_uedge = (*uedge_iter).second;
-						if (uedge_iter != uedge_cache->end() && child_uedge->activated && (!literal->is_current || child_uedge->activation_count == 1)) {
-							changed_score |= epmem_satisfy_literal(child_lit, child_triple.q0, child_triple.q1, current_score, current_cardinality, symbol_node_count, uedge_caches, symbol_num_incoming);
+						if(uedge_iter != uedge_cache->end()){
+							child_uedge = (*uedge_iter).second;
+							if (child_uedge->activated && (!literal->is_current || child_uedge->activation_count == 1)) {
+								changed_score |= epmem_satisfy_literal(child_lit, child_triple.q0, child_triple.q1, current_score, current_cardinality, symbol_node_count, uedge_caches, symbol_num_incoming);
+							}
 						}
 					}
 				}
@@ -6060,6 +6092,8 @@ void epmem_go( agent *my_agent, bool allow_store )
 		epmem_consider_new_episode( my_agent );
 	}
 	epmem_respond_to_cmd( my_agent );
+	//E587: backup
+	//	my_agent->epmem_worker_p->epmem_db->backup( "debug.db", new std::string("Backup error"));
 
 #else // EPMEM_EXPERIMENT
 

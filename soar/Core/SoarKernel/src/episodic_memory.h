@@ -363,8 +363,8 @@ class epmem_common_statement_container: public soar_module::sqlite_statement_con
 		soar_module::sqlite_statement *rit_truncate_right;
 
 		// E587: AM:
-//		soar_module::sqlite_statement *hash_get;
-//		soar_module::sqlite_statement *hash_add;
+		soar_module::sqlite_statement *hash_get;
+		soar_module::sqlite_statement *hash_add;
 
 		epmem_common_statement_container( agent *new_agent );
 };

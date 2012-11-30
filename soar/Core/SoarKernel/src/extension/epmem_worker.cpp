@@ -2,7 +2,9 @@
 
 
 epmem_worker::epmem_worker(){
-
+	 epmem_db = new soar_module::sqlite_database();
+	 epmem_stmts_common = NIL;
+	 epmem_stmts_graph = NIL;
 }
 
 void epmem_worker::initialize(epmem_param_container* epmem_params, agent* my_agent){
@@ -13,9 +15,6 @@ void epmem_worker::initialize(epmem_param_container* epmem_params, agent* my_age
 			return;
 		}
 
-		////////////////////////////////////////////////////////////////////////////
-		//epmem_timers->init->start();
-		////////////////////////////////////////////////////////////////////////////
 
 		const char *db_path = ":memory:";
 
