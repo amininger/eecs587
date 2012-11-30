@@ -15,6 +15,9 @@
 
 #include <portability.h>
 
+// E587: AM:
+#include <stdint.h>
+
 #include <map>
 #include <list>
 #include <stack>
@@ -304,23 +307,60 @@ class epmem_timer: public soar_module::timer
 // EpMem Statements
 //////////////////////////////////////////////////////////
 
+
+// E587: AM: Statement container for the master processors (keeps the working memory graph)
+class epmem_master_statement_container: public soar_module::sqlite_statement_container
+{
+public:
+	soar_module::sqlite_statement *add_time;
+
+	// node_unique management
+	soar_module::sqlite_statement *add_node_unique;
+	soar_module::sqlite_statement *find_node_unique;
+
+	// edge_unique management
+	soar_module::sqlite_statement *add_edge_unique;
+	soar_module::sqlite_statement *find_edge_unique;
+	soar_module::sqlite_statement *find_edge_unique_shared;
+
+	// LTI and promotion management
+	soar_module::sqlite_statement *promote_id;
+	soar_module::sqlite_statement *find_lti;
+	soar_module::sqlite_statement *find_lti_promotion_time;
+
+	soar_module::sqlite_statement *hash_get;
+	soar_module::sqlite_statement *hash_add;
+
+	soar_module::sqlite_statement *var_get;
+	soar_module::sqlite_statement *var_set;
+
+	soar_module::sqlite_statement *begin;
+	soar_module::sqlite_statement *commit;
+	soar_module::sqlite_statement *rollback;
+
+	//
+	epmem_master_statement_container( agent *new_agent );
+};
+
 class epmem_common_statement_container: public soar_module::sqlite_statement_container
 {
 	public:
-		soar_module::sqlite_statement *begin;
-		soar_module::sqlite_statement *commit;
-		soar_module::sqlite_statement *rollback;
+//		soar_module::sqlite_statement *begin;
+//		soar_module::sqlite_statement *commit;
+//		soar_module::sqlite_statement *rollback;
 
-		soar_module::sqlite_statement *var_get;
-		soar_module::sqlite_statement *var_set;
+		// E587: AM:
+//		soar_module::sqlite_statement *var_get;
+//		soar_module::sqlite_statement *var_set;
 
 		soar_module::sqlite_statement *rit_add_left;
 		soar_module::sqlite_statement *rit_truncate_left;
 		soar_module::sqlite_statement *rit_add_right;
 		soar_module::sqlite_statement *rit_truncate_right;
 
-		soar_module::sqlite_statement *hash_get;
-		soar_module::sqlite_statement *hash_add;
+		// E587: AM:
+//		soar_module::sqlite_statement *hash_get;
+//		soar_module::sqlite_statement *hash_add;
 
 		epmem_common_statement_container( agent *new_agent );
 };

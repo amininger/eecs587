@@ -24,6 +24,10 @@
 #include"gsysparam.h"
 #endif
 
+// E587: AM:
+#include <stdint.h>
+#include "extension/epmem_worker.h"
+
 #include "kernel.h" 
 #include "init_soar.h"
 #include "mem.h"
@@ -892,10 +896,16 @@ kernel time and total_cpu_time greater than the derived total CPU time. REW */
   epmem_stat_container *epmem_stats;
   epmem_timer_container *epmem_timers;
 
-  soar_module::sqlite_database *epmem_db;
-  epmem_common_statement_container *epmem_stmts_common;  
-  epmem_graph_statement_container *epmem_stmts_graph;
   
+  // E587: AM: Added master database
+  soar_module::sqlite_database *epmem_db;
+  epmem_master_statement_container *epmem_stmts_master;
+
+  epmem_worker *epmem_worker;
+  //  soar_module::sqlite_database *epmem_db;
+  //  epmem_common_statement_container *epmem_stmts_common;
+  //  epmem_graph_statement_container *epmem_stmts_graph;
+
 
   epmem_id_removal_map *epmem_node_removals;
   std::vector<epmem_time_id> *epmem_node_mins;
