@@ -529,24 +529,23 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 {
 	soar_module::sqlite_database *new_db = new_agent->epmem_db;
 
-	//
-
+	// [TABLE] times: (id)
 	add_structure( "CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY)" );
 
-
+	// [TABLE] node_unique: (child_id, parent_id, attrib, value)
 	add_structure( "CREATE TABLE IF NOT EXISTS node_unique (child_id INTEGER PRIMARY KEY AUTOINCREMENT,parent_id INTEGER,attrib INTEGER, value INTEGER)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS node_unique_parent_attrib_value ON node_unique (parent_id,attrib,value)" );
 
+	// [TABLE] edge_unique: (parent_id, q0, w, q1, last)
 	add_structure( "CREATE TABLE IF NOT EXISTS edge_unique (parent_id INTEGER PRIMARY KEY AUTOINCREMENT,q0 INTEGER,w INTEGER,q1 INTEGER, last INTEGER)" );
 	add_structure( "CREATE INDEX IF NOT EXISTS edge_unique_q0_w_last ON edge_unique (q0,w,last)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS edge_unique_q0_w_q1 ON edge_unique (q0,w,q1)" );
 
+	// [TABLE] lti: (parent_id, letter, num, time_id)
 	add_structure( "CREATE TABLE IF NOT EXISTS lti (parent_id INTEGER PRIMARY KEY, letter INTEGER, num INTEGER, time_id INTEGER)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS lti_letter_num ON lti (letter,num)" );
 
-
-	add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
-
+	// [TABLE] temporal_symbol_hash: (id, sym_const, sym_type)
 	add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
 
@@ -555,7 +554,11 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 
 	// workaround for acceptable preference wmes: id 1 = "operator+"
 	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
+	
+	// [TABLE] vars: (id, value)
+	add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
 
+	// [TABLE] ascii: (ascii_num, ascii_char)
 	// adding an ascii table just to make lti queries easier when inspecting database
 	add_structure( "CREATE TABLE IF NOT EXISTS ascii (ascii_num INTEGER PRIMARY KEY, ascii_chr TEXT)" );
 	add_structure( "DELETE FROM ascii" );
@@ -601,6 +604,10 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 	find_node_unique = new soar_module::sqlite_statement( new_db, "SELECT child_id FROM node_unique WHERE parent_id=? AND attrib=? AND value=?" );
 	add( find_node_unique );
 
+  // E587: AM: returns the row of the given edge looked up by id
+	get_node_unique = new soar_module::sqlite_statement(new_db, "SELECT parent_id, attrib, value FROM node_unique WHERE child_id=?");
+	add(get_node_unique);
+
 	//
 
 	add_edge_unique = new soar_module::sqlite_statement( new_db, "INSERT INTO edge_unique (q0,w,q1,last) VALUES (?,?,?,?)" );
@@ -611,6 +618,10 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 
 	find_edge_unique_shared = new soar_module::sqlite_statement( new_db, "SELECT parent_id, q1 FROM edge_unique WHERE q0=? AND w=? AND q1=?" );
 	add( find_edge_unique_shared );
+	
+  // E587: AM: returns the row of the given edge looked up by id
+	get_edge_unique = new soar_module::sqlite_statement(new_db, "SELECT q0,w,q1,last FROM edge_unique WHERE parent_id=?");
+	add(get_edge_unique);
 
 	//
 
@@ -670,9 +681,6 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 
 	//
 
-	//add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
-	add_structure( "CREATE TABLE IF NOT EXISTS rit_left_nodes (min INTEGER, max INTEGER)" );
-	add_structure( "CREATE TABLE IF NOT EXISTS rit_right_nodes (node INTEGER)" );
 	add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
 
@@ -681,25 +689,23 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 
 	// workaround for acceptable preference wmes: id 1 = "operator+"
 	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
+	
+	// [TABLE] vars: (id, value)
+	add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
+
+	// [TABLE] rit_left_nodes: (min, max)
+	add_structure( "CREATE TABLE IF NOT EXISTS rit_left_nodes (min INTEGER, max INTEGER)" );
+
+	// [TABLE] rit_right_nodes: (node)
+	add_structure( "CREATE TABLE IF NOT EXISTS rit_right_nodes (node INTEGER)" );
 
 	//
-//
-//	begin = new soar_module::sqlite_statement( new_db, "BEGIN" );
-//	add( begin );
-//
-//	commit = new soar_module::sqlite_statement( new_db, "COMMIT" );
-//	add( commit );
-//
-//	rollback = new soar_module::sqlite_statement( new_db, "ROLLBACK" );
-//	add( rollback );
+	// E587: AM:
+	var_get = new soar_module::sqlite_statement( new_db, "SELECT value FROM vars WHERE id=?" );
+	add( var_get );
 
-	//
-//	// E587: AM:
-//	var_get = new soar_module::sqlite_statement( new_db, "SELECT value FROM vars WHERE id=?" );
-//	add( var_get );
-//
-//	var_set = new soar_module::sqlite_statement( new_db, "REPLACE INTO vars (id,value) VALUES (?,?)" );
-//	add( var_set );
+	var_set = new soar_module::sqlite_statement( new_db, "REPLACE INTO vars (id,value) VALUES (?,?)" );
+	add( var_set );
 
 	//
 
@@ -725,10 +731,8 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 }
 
 epmem_graph_statement_container::epmem_graph_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_worker_p->epmem_db )
-//epmem_graph_statement_container::epmem_graph_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_db )
 {
 	soar_module::sqlite_database *new_db = new_agent->epmem_worker_p->epmem_db;
-	//soar_module::sqlite_database *new_db = new_agent->epmem_db;
 
 	//
 
@@ -769,45 +773,25 @@ epmem_graph_statement_container::epmem_graph_statement_container( agent *new_age
 	add_structure( "CREATE INDEX IF NOT EXISTS edge_unique_q0_w_last ON edge_unique (q0,w,last)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS edge_unique_q0_w_q1 ON edge_unique (q0,w,q1)" );
 
+	//
+
+	// [TABLE] lti: (parent_id, letter, num, time_id)
 	add_structure( "CREATE TABLE IF NOT EXISTS lti (parent_id INTEGER PRIMARY KEY, letter INTEGER, num INTEGER, time_id INTEGER)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS lti_letter_num ON lti (letter,num)" );
 
-	// adding an ascii table just to make lti queries easier when inspecting database
-	add_structure( "CREATE TABLE IF NOT EXISTS ascii (ascii_num INTEGER PRIMARY KEY, ascii_chr TEXT)" );
-	add_structure( "DELETE FROM ascii" );
-	{
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (65,'A')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (66,'B')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (67,'C')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (68,'D')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (69,'E')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (70,'F')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (71,'G')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (72,'H')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (73,'I')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (74,'J')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (75,'K')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (76,'L')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (77,'M')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (78,'N')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (79,'O')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (80,'P')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (81,'Q')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (82,'R')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (83,'S')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (84,'T')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (85,'U')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (86,'V')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (87,'W')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (88,'X')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (89,'Y')" );
-		add_structure( "INSERT INTO ascii (ascii_num, ascii_chr) VALUES (90,'Z')" );
-	}
-
-	//
-
 	add_time = new soar_module::sqlite_statement( new_db, "INSERT INTO times (id) VALUES (?)" );
 	add( add_time );
+
+	
+	promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
+	add( promote_id );
+
+	find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id FROM lti WHERE letter=? AND num=?" );
+	add( find_lti );
+
+	find_lti_promotion_time = new soar_module::sqlite_statement( new_db, "SELECT time_id FROM lti WHERE parent_id=?" );
+	add( find_lti_promotion_time );
+
 
 	//
 
@@ -826,9 +810,17 @@ epmem_graph_statement_container::epmem_graph_statement_container( agent *new_age
 
 	add_node_unique = new soar_module::sqlite_statement( new_db, "INSERT INTO node_unique (parent_id,attrib,value) VALUES (?,?,?)" );
 	add( add_node_unique );
+	
+  // E587: AM: inserts a node_unique but with a specified id
+	add_node_unique_with_id = new soar_module::sqlite_statement( new_db, "INSERT INTO node_unique (child_id,parent_id,attrib,value) VALUES (?,?,?,?)");
+	add( add_node_unique_with_id);
 
 	find_node_unique = new soar_module::sqlite_statement( new_db, "SELECT child_id FROM node_unique WHERE parent_id=? AND attrib=? AND value=?" );
 	add( find_node_unique );
+
+  // E587: AM: returns the row of the given node looked up by id
+	get_node_unique = new soar_module::sqlite_statement(new_db, "SELECT parent_id, attrib, value FROM node_unique WHERE child_id=?");
+	add(get_node_unique);
 
 	//
 
@@ -847,6 +839,10 @@ epmem_graph_statement_container::epmem_graph_statement_container( agent *new_age
 
 	add_edge_unique = new soar_module::sqlite_statement( new_db, "INSERT INTO edge_unique (q0,w,q1,last) VALUES (?,?,?,?)" );
 	add( add_edge_unique );
+	
+  // E587: AM: inserts an edge_unique but with a specified id
+	add_edge_unique_with_id = new soar_module::sqlite_statement(new_db, "INSERT INTO edge_unique (parent_id,q0,w,q1,last) VALUES (?,?,?,?,?)");
+	add(add_edge_unique_with_id);
 
 	find_edge_unique = new soar_module::sqlite_statement( new_db, "SELECT parent_id, q1 FROM edge_unique WHERE q0=? AND w=?" );
 	add( find_edge_unique );
@@ -854,16 +850,11 @@ epmem_graph_statement_container::epmem_graph_statement_container( agent *new_age
 	find_edge_unique_shared = new soar_module::sqlite_statement( new_db, "SELECT parent_id, q1 FROM edge_unique WHERE q0=? AND w=? AND q1=?" );
 	add( find_edge_unique_shared );
 
+  // E587: AM: returns the row of the given edge looked up by id
+	get_edge_unique = new soar_module::sqlite_statement(new_db, "SELECT q0,w,q1,last FROM edge_unique WHERE parent_id=?");
+	add(get_edge_unique);
+
 	//
-//
-//	valid_episode = new soar_module::sqlite_statement( new_db, "SELECT COUNT(*) AS ct FROM times WHERE id=?" );
-//	add( valid_episode );
-//
-//	next_episode = new soar_module::sqlite_statement( new_db, "SELECT id FROM times WHERE id>? ORDER BY id ASC LIMIT 1" );
-//	add( next_episode );
-//
-//	prev_episode = new soar_module::sqlite_statement( new_db, "SELECT id FROM times WHERE id<? ORDER BY id DESC LIMIT 1" );
-//	add( prev_episode );
 
 
 	get_nodes = new soar_module::sqlite_statement( new_db, "SELECT f.child_id, f.parent_id, h1.sym_const, h2.sym_const, h1.sym_type, h2.sym_type FROM node_unique f, temporal_symbol_hash h1, temporal_symbol_hash h2 WHERE f.child_id IN (SELECT n.id FROM node_now n WHERE n.start<= ? UNION ALL SELECT p.id FROM node_point p WHERE p.start=? UNION ALL SELECT e1.id FROM node_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? UNION ALL SELECT e2.id FROM node_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) AND f.attrib=h1.id AND f.value=h2.id ORDER BY f.child_id ASC", new_agent->epmem_timers->ncb_node );
@@ -871,17 +862,6 @@ epmem_graph_statement_container::epmem_graph_statement_container( agent *new_age
 
 	get_edges = new soar_module::sqlite_statement( new_db, "SELECT f.q0, h.sym_const, f.q1, h.sym_type, lti.letter, lti.num FROM edge_unique f INNER JOIN temporal_symbol_hash h ON f.w=h.id LEFT JOIN lti ON (f.q1=lti.parent_id AND lti.time_id <= ?) WHERE f.parent_id IN (SELECT n.id FROM edge_now n WHERE n.start<= ? UNION ALL SELECT p.id FROM edge_point p WHERE p.start = ? UNION ALL SELECT e1.id FROM edge_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? UNION ALL SELECT e2.id FROM edge_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) ORDER BY f.q0 ASC, f.q1 ASC", new_agent->epmem_timers->ncb_edge );
 	add( get_edges );
-
-	//
-
-	promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
-	add( promote_id );
-
-	find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id FROM lti WHERE letter=? AND num=?" );
-	add( find_lti );
-
-	find_lti_promotion_time = new soar_module::sqlite_statement( new_db, "SELECT time_id FROM lti WHERE parent_id=?" );
-	add( find_lti_promotion_time );
 
 	//
 
@@ -2204,6 +2184,12 @@ inline void _epmem_promote_id( agent* my_agent, Symbol* id, epmem_time_id t )
 	my_agent->epmem_stmts_master->promote_id->bind_int( 3, static_cast<uint64_t>( id->id.name_number ) );
 	my_agent->epmem_stmts_master->promote_id->bind_int( 4, t );
 	my_agent->epmem_stmts_master->promote_id->execute( soar_module::op_reinit );
+
+	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 1, id->id.epmem_id );
+	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 2, static_cast<uint64_t>( id->id.name_letter ) );
+	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 3, static_cast<uint64_t>( id->id.name_number ) );
+	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 4, t );
+	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->execute( soar_module::op_reinit );
 }
 
 // three cases for sharing ids amongst identifiers in two passes:
@@ -2522,20 +2508,12 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 #endif
 				}
 
-				// E587: AM: XXX: Send to worker
 				// insert (q0,w,q1)
 				my_agent->epmem_stmts_master->add_edge_unique->bind_int( 1, parent_id );
 				my_agent->epmem_stmts_master->add_edge_unique->bind_int( 2, my_hash );
 				my_agent->epmem_stmts_master->add_edge_unique->bind_int( 3, (*w_p)->value->id.epmem_id );
 				my_agent->epmem_stmts_master->add_edge_unique->bind_int( 4, LLONG_MAX );
 				my_agent->epmem_stmts_master->add_edge_unique->execute( soar_module::op_reinit );
-
-				// XXX: To Remove: notify workers
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 1, parent_id );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 2, my_hash );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 3, (*w_p)->value->id.epmem_id );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->bind_int( 4, LLONG_MAX );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_unique->execute( soar_module::op_reinit );
 
 				(*w_p)->epmem_id = static_cast<epmem_node_id>( my_agent->epmem_db->last_insert_rowid() );
 
@@ -2625,12 +2603,6 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 					my_agent->epmem_stmts_master->add_node_unique->bind_int( 2, my_hash );
 					my_agent->epmem_stmts_master->add_node_unique->bind_int( 3, my_hash2 );
 					my_agent->epmem_stmts_master->add_node_unique->execute( soar_module::op_reinit );
-					
-					// XXX: To Remove, Notify the workers
-					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->bind_int( 1, parent_id );
-					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->bind_int( 2, my_hash );
-					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->bind_int( 3, my_hash2 );
-					my_agent->epmem_worker_p->epmem_stmts_graph->add_node_unique->execute( soar_module::op_reinit );
 
 					(*w_p)->epmem_id = (epmem_node_id) my_agent->epmem_db->last_insert_rowid();
 
@@ -2735,6 +2707,9 @@ void epmem_new_episode( agent *my_agent )
 				}
 			}
 		}
+		
+		new_episode* episode = new new_episode();
+		episode->time = time_counter;
 
 		// all inserts
 		{
@@ -2744,42 +2719,57 @@ void epmem_new_episode( agent *my_agent )
 			epmem_dc_interval_inserts = epmem_node.size() + epmem_edge.size();
 #endif
 
+			
+			episode->num_added_nodes = epmem_node.size();
+			episode->added_nodes = new epmem_node_unique[episode->num_added_nodes];
+
+			int cur_node = 0;
+
 			// nodes
 			while ( !epmem_node.empty() )
 			{
 				temp_node =& epmem_node.front();
 
-				// E587: AM:
-				// add NOW entry
-				// id = ?, start = ?
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_node_now->bind_int( 1, (*temp_node) );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_node_now->bind_int( 2, time_counter );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_node_now->execute( soar_module::op_reinit );
+				// If the id is not in the node_unique table then add it
+				my_agent->epmem_stmts_master->get_node_unique->bind_int( 1, (*temp_node) );
+				if ( my_agent->epmem_stmts_master->get_node_unique->execute() == soar_module::row ) {
+					episode->added_nodes[cur_node].id = (*temp_node);
+					episode->added_nodes[cur_node].parent_id = my_agent->epmem_stmts_master->get_node_unique->column_int(0);
+					episode->added_nodes[cur_node].attribute = my_agent->epmem_stmts_master->get_node_unique->column_int(1);
+					episode->added_nodes[cur_node].value = my_agent->epmem_stmts_master->get_node_unique->column_int(2);
+				}
+				my_agent->epmem_stmts_master->get_node_unique->reinitialize();
+				cur_node++;
 
 				// update min
 				(*my_agent->epmem_node_mins)[ (*temp_node) - 1 ] = time_counter;
 
 				epmem_node.pop();
 			}
+			
+			episode->num_added_edges = epmem_edge.size();
+			episode->added_edges = new epmem_edge_unique[episode->num_added_edges];
+
+			int cur_edge = 0;
 
 			// edges
 			while ( !epmem_edge.empty() )
 			{
 				temp_node =& epmem_edge.front();
 
-				// E587: AM:
-				// add NOW entry
-				// id = ?, start = ?
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_now->bind_int( 1, (*temp_node) );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_now->bind_int( 2, time_counter );
-				my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_now->execute( soar_module::op_reinit );
+				// Lookup the edge from edge_unique and store its information
+				my_agent->epmem_stmts_master->get_edge_unique->bind_int( 1, (*temp_node) );
+				if ( my_agent->epmem_stmts_master->get_edge_unique->execute() == soar_module::row ) {
+					episode->added_edges[cur_edge].id = (*temp_node);
+					episode->added_edges[cur_edge].parent_id = my_agent->epmem_stmts_master->get_edge_unique->column_int(0);
+					episode->added_edges[cur_edge].attribute = my_agent->epmem_stmts_master->get_edge_unique->column_int(1);
+					episode->added_edges[cur_edge].child_id = my_agent->epmem_stmts_master->get_edge_unique->column_int(2);
+				}
+				my_agent->epmem_stmts_master->get_edge_unique->reinitialize();
+				cur_edge++;
 
 				// update min
 				(*my_agent->epmem_edge_mins)[ (*temp_node) - 1 ] = time_counter;
-
-				my_agent->epmem_worker_p->epmem_stmts_graph->update_edge_unique_last->bind_int( 1, LLONG_MAX );
-				my_agent->epmem_worker_p->epmem_stmts_graph->update_edge_unique_last->bind_int( 2, *temp_node );
-				my_agent->epmem_worker_p->epmem_stmts_graph->update_edge_unique_last->execute( soar_module::op_reinit );
 
 				epmem_edge.pop();
 			}
@@ -2795,85 +2785,81 @@ void epmem_new_episode( agent *my_agent )
 			epmem_dc_interval_removes = 0;
 #endif
 
-			// nodes
-			r = my_agent->epmem_node_removals->begin();
-			while ( r != my_agent->epmem_node_removals->end() )
-			{
-				if ( r->second )
-				{
+			// Removing nodes, first count the number, then store them in the array
+			episode->num_removed_nodes = 0;
+			for(r = my_agent->epmem_node_removals->begin(); r != my_agent->epmem_node_removals->end(); r++){
+				if ( !r->second ){
+					continue;
+				}
+				episode->num_removed_nodes++;
+
 #ifdef EPMEM_EXPERIMENT
 					epmem_dc_interval_removes++;
 #endif
 
-					// remove NOW entry
-					// id = ?
-					my_agent->epmem_worker_p->epmem_stmts_graph->delete_node_now->bind_int( 1, r->first );
-					my_agent->epmem_worker_p->epmem_stmts_graph->delete_node_now->execute( soar_module::op_reinit );
-
-					range_start = (*my_agent->epmem_node_mins)[ r->first - 1 ];
-					range_end = ( time_counter - 1 );
-
-					// point (id, start)
-					if ( range_start == range_end )
-					{
-						my_agent->epmem_worker_p->epmem_stmts_graph->add_node_point->bind_int( 1, r->first );
-						my_agent->epmem_worker_p->epmem_stmts_graph->add_node_point->bind_int( 2, range_start );
-						my_agent->epmem_worker_p->epmem_stmts_graph->add_node_point->execute( soar_module::op_reinit );
-					}
-					// node
-					else
-					{
-						epmem_rit_insert_interval( my_agent, range_start, range_end, r->first, &( my_agent->epmem_rit_state_graph[ EPMEM_RIT_STATE_NODE ] ) );
-					}
-
-					// update max
-					(*my_agent->epmem_node_maxes)[ r->first - 1 ] = true;
-				}
-
-				r++;
+				// update max
+				(*my_agent->epmem_node_maxes)[ r->first - 1 ] = true;
 			}
+
+			episode->removed_nodes = new epmem_node_unique[episode->num_removed_nodes];
+
+			// Go through and add the removal information to the new_episode
+			int cur_node = 0;
+			for(r = my_agent->epmem_node_removals->begin(); r != my_agent->epmem_node_removals->end(); r++){
+				if ( !r->second ){
+					continue;
+				}				
+				
+				my_agent->epmem_stmts_master->get_node_unique->bind_int( 1, r->first );
+				if ( my_agent->epmem_stmts_master->get_node_unique->execute() == soar_module::row ) {
+					episode->removed_nodes[cur_node].id = r->first;
+					episode->removed_nodes[cur_node].parent_id = my_agent->epmem_stmts_master->get_node_unique->column_int(0);
+					episode->removed_nodes[cur_node].attribute = my_agent->epmem_stmts_master->get_node_unique->column_int(1);
+					episode->removed_nodes[cur_node].value = my_agent->epmem_stmts_master->get_node_unique->column_int(2);
+				}
+				my_agent->epmem_stmts_master->get_node_unique->reinitialize();
+				cur_node++;
+			}
+
 			my_agent->epmem_node_removals->clear();
 
-			// edges
-			r = my_agent->epmem_edge_removals->begin();
-			while ( r != my_agent->epmem_edge_removals->end() )
-			{
-				if ( r->second )
-				{
+
+			// Removing edges, first count the number, then store them in the array
+			episode->num_removed_edges = 0;
+			for(r = my_agent->epmem_edge_removals->begin(); r != my_agent->epmem_edge_removals->end(); r++){
+				if ( !r->second ){
+					continue;
+				}
+				episode->num_removed_edges++;
+
 #ifdef EPMEM_EXPERIMENT
 					epmem_dc_interval_removes++;
 #endif
 
-					// remove NOW entry
-					// id = ?
-					my_agent->epmem_worker_p->epmem_stmts_graph->delete_edge_now->bind_int( 1, r->first );
-					my_agent->epmem_worker_p->epmem_stmts_graph->delete_edge_now->execute( soar_module::op_reinit );
-
-					range_start = (*my_agent->epmem_edge_mins)[ r->first - 1 ];
-					range_end = ( time_counter - 1 );
-
-					my_agent->epmem_worker_p->epmem_stmts_graph->update_edge_unique_last->bind_int( 1, range_end );
-					my_agent->epmem_worker_p->epmem_stmts_graph->update_edge_unique_last->bind_int( 2, r->first );
-					my_agent->epmem_worker_p->epmem_stmts_graph->update_edge_unique_last->execute( soar_module::op_reinit );
-					// point (id, start)
-					if ( range_start == range_end )
-					{
-						my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_point->bind_int( 1, r->first );
-						my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_point->bind_int( 2, range_start );
-						my_agent->epmem_worker_p->epmem_stmts_graph->add_edge_point->execute( soar_module::op_reinit );
-					}
-					// node
-					else
-					{
-						epmem_rit_insert_interval( my_agent, range_start, range_end, r->first, &( my_agent->epmem_rit_state_graph[ EPMEM_RIT_STATE_EDGE ] ) );
-					}
-
-					// update max
-					(*my_agent->epmem_edge_maxes)[ r->first - 1 ] = true;
-				}
-
-				r++;
+				// update max
+				(*my_agent->epmem_edge_maxes)[ r->first - 1 ] = true;
 			}
+
+			episode->removed_edges = new epmem_edge_unique[episode->num_removed_edges];
+
+			// Go through and add the removal information to the new_episode
+			int cur_edge = 0;
+			for(r = my_agent->epmem_edge_removals->begin(); r != my_agent->epmem_edge_removals->end(); r++){
+				if ( !r->second ){
+					continue;
+				}				
+				
+				my_agent->epmem_stmts_master->get_edge_unique->bind_int( 1, r->first );
+				if ( my_agent->epmem_stmts_master->get_edge_unique->execute() == soar_module::row ) {
+					episode->removed_edges[cur_edge].id = r->first;
+					episode->removed_edges[cur_edge].parent_id = my_agent->epmem_stmts_master->get_edge_unique->column_int(0);
+					episode->removed_edges[cur_edge].attribute = my_agent->epmem_stmts_master->get_edge_unique->column_int(1);
+					episode->removed_edges[cur_edge].child_id = my_agent->epmem_stmts_master->get_edge_unique->column_int(2);
+				}
+				my_agent->epmem_stmts_master->get_edge_unique->reinitialize();
+				cur_edge++;
+			}
+
 			my_agent->epmem_edge_removals->clear();
 		}
 
@@ -2892,10 +2878,6 @@ void epmem_new_episode( agent *my_agent )
 		}
 
 		// add the time id to the times table
-		my_agent->epmem_worker_p->epmem_stmts_graph->add_time->bind_int( 1, time_counter );
-		my_agent->epmem_worker_p->epmem_stmts_graph->add_time->execute( soar_module::op_reinit );
-		
-		// XXX: Remove, add to worker
 		my_agent->epmem_stmts_master->add_time->bind_int( 1, time_counter );
 		my_agent->epmem_stmts_master->add_time->execute( soar_module::op_reinit );
 
@@ -2925,6 +2907,9 @@ void epmem_new_episode( agent *my_agent )
 		{
 			my_agent->epmem_wme_adds->clear();
 		}
+
+		my_agent->epmem_worker_p->add_new_episode(episode, my_agent);
+		delete episode;
 	}
 
 	////////////////////////////////////////////////////////////////////////////
