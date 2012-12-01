@@ -324,6 +324,10 @@ public:
 	soar_module::sqlite_statement *find_edge_unique;
 	soar_module::sqlite_statement *find_edge_unique_shared;
 	soar_module::sqlite_statement *get_edge_unique;
+	
+	// get descriptions by id
+	soar_module::sqlite_statement *get_node_desc;
+	soar_module::sqlite_statement *get_edge_desc;
 
 	// LTI and promotion management
 	soar_module::sqlite_statement *promote_id;
@@ -348,6 +352,7 @@ public:
 	soar_module::sqlite_statement *next_episode;
 	soar_module::sqlite_statement *prev_episode;
 
+
 	//
 	epmem_master_statement_container( agent *new_agent );
 };
@@ -364,8 +369,8 @@ class epmem_common_statement_container: public soar_module::sqlite_statement_con
 		soar_module::sqlite_statement *var_set;
 
 		// E587: AM: Get/Add Symbol Hash
-		soar_module::sqlite_statement *hash_get;
-		soar_module::sqlite_statement *hash_add;
+		//soar_module::sqlite_statement *hash_get;
+		//soar_module::sqlite_statement *hash_add;
 
 		// RIT stuff
 		soar_module::sqlite_statement *rit_add_left;
@@ -407,17 +412,17 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		soar_module::sqlite_statement *get_edge_unique;
 
 
-		soar_module::sqlite_statement *get_nodes;
-		soar_module::sqlite_statement *get_edges;
+		soar_module::sqlite_statement *get_node_ids;
+		soar_module::sqlite_statement *get_edge_ids;
 
 		//
 
 		soar_module::sqlite_statement *update_edge_unique_last;
 		
 	// LTI and promotion management
-	soar_module::sqlite_statement *promote_id;
-	soar_module::sqlite_statement *find_lti;
-	soar_module::sqlite_statement *find_lti_promotion_time;
+	//soar_module::sqlite_statement *promote_id;
+	//soar_module::sqlite_statement *find_lti;
+	//soar_module::sqlite_statement *find_lti_promotion_time;
 		//
 
 		soar_module::sqlite_statement_pool *pool_find_edge_queries[2][2];

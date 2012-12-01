@@ -625,6 +625,14 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 
 	//
 
+	get_node_desc = new soar_module::sqlite_statement(new_db, "SELECT f.child_id, f.parent_id, h1.sym_const, h2.sym_const, h1.sym_type, h2.sym_type FROM node_unique f, temporal_symbol_hash h1, temporal_symbol_hash h2 WHERE f.child_id=? AND f.attrib=h1.id AND f.value=h2.id");
+	add(get_node_desc);
+
+	get_edge_desc = new soar_module::sqlite_statement(new_db, "SELECT f.q0, h.sym_const, f.q1, h.sym_type, lti.letter, lti.num FROM edge_unique f INNER JOIN temporal_symbol_hash h ON f.w=h.id LEFT JOIN lti ON (f.q1=lti.parent_id AND lti.time_id <= ?) WHERE f.parent_id=?");
+	add(get_edge_desc);
+
+	//
+
 	promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
 	add( promote_id );
 
@@ -681,14 +689,14 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 
 	//
 
-	add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
-	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
+	//add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
+	//add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
 
-	// workaround for tree: type 1 = IDENTIFIER_SYMBOL_TYPE
-	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (0,NULL,1)" );
+	//// workaround for tree: type 1 = IDENTIFIER_SYMBOL_TYPE
+	//add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (0,NULL,1)" );
 
-	// workaround for acceptable preference wmes: id 1 = "operator+"
-	add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
+	//// workaround for acceptable preference wmes: id 1 = "operator+"
+	//add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
 	
 	// [TABLE] vars: (id, value)
 	add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
@@ -723,11 +731,11 @@ epmem_common_statement_container::epmem_common_statement_container( agent *new_a
 
 	//
 //	// E587: AM:
-	hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
-	add( hash_get );
+	//hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
+	//add( hash_get );
 
-	hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
-	add( hash_add );
+	//hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
+	//add( hash_add );
 }
 
 epmem_graph_statement_container::epmem_graph_statement_container( agent *new_agent ): soar_module::sqlite_statement_container( new_agent->epmem_worker_p->epmem_db )
@@ -776,21 +784,21 @@ epmem_graph_statement_container::epmem_graph_statement_container( agent *new_age
 	//
 
 	// [TABLE] lti: (parent_id, letter, num, time_id)
-	add_structure( "CREATE TABLE IF NOT EXISTS lti (parent_id INTEGER PRIMARY KEY, letter INTEGER, num INTEGER, time_id INTEGER)" );
-	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS lti_letter_num ON lti (letter,num)" );
+	//add_structure( "CREATE TABLE IF NOT EXISTS lti (parent_id INTEGER PRIMARY KEY, letter INTEGER, num INTEGER, time_id INTEGER)" );
+	//add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS lti_letter_num ON lti (letter,num)" );
 
 	add_time = new soar_module::sqlite_statement( new_db, "INSERT INTO times (id) VALUES (?)" );
 	add( add_time );
 
-	
-	promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
-	add( promote_id );
+	//
+	//promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
+	//add( promote_id );
 
-	find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id FROM lti WHERE letter=? AND num=?" );
-	add( find_lti );
+	//find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id FROM lti WHERE letter=? AND num=?" );
+	//add( find_lti );
 
-	find_lti_promotion_time = new soar_module::sqlite_statement( new_db, "SELECT time_id FROM lti WHERE parent_id=?" );
-	add( find_lti_promotion_time );
+	//find_lti_promotion_time = new soar_module::sqlite_statement( new_db, "SELECT time_id FROM lti WHERE parent_id=?" );
+	//add( find_lti_promotion_time );
 
 
 	//
@@ -854,14 +862,14 @@ epmem_graph_statement_container::epmem_graph_statement_container( agent *new_age
 	get_edge_unique = new soar_module::sqlite_statement(new_db, "SELECT q0,w,q1,last FROM edge_unique WHERE parent_id=?");
 	add(get_edge_unique);
 
+	
+
 	//
+	get_node_ids = new soar_module::sqlite_statement(new_db, "SELECT f.child_id FROM node_unique f WHERE f.child_id IN (SELECT n.id FROM node_now n WHERE n.start<= ? UNION ALL SELECT p.id FROM node_point p WHERE p.start=? UNION ALL SELECT e1.id FROM node_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? UNION ALL SELECT e2.id FROM node_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) ORDER BY f.child_id ASC", new_agent->epmem_timers->ncb_node );
+	add(get_node_ids);
 
-
-	get_nodes = new soar_module::sqlite_statement( new_db, "SELECT f.child_id, f.parent_id, h1.sym_const, h2.sym_const, h1.sym_type, h2.sym_type FROM node_unique f, temporal_symbol_hash h1, temporal_symbol_hash h2 WHERE f.child_id IN (SELECT n.id FROM node_now n WHERE n.start<= ? UNION ALL SELECT p.id FROM node_point p WHERE p.start=? UNION ALL SELECT e1.id FROM node_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? UNION ALL SELECT e2.id FROM node_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) AND f.attrib=h1.id AND f.value=h2.id ORDER BY f.child_id ASC", new_agent->epmem_timers->ncb_node );
-	add( get_nodes );
-
-	get_edges = new soar_module::sqlite_statement( new_db, "SELECT f.q0, h.sym_const, f.q1, h.sym_type, lti.letter, lti.num FROM edge_unique f INNER JOIN temporal_symbol_hash h ON f.w=h.id LEFT JOIN lti ON (f.q1=lti.parent_id AND lti.time_id <= ?) WHERE f.parent_id IN (SELECT n.id FROM edge_now n WHERE n.start<= ? UNION ALL SELECT p.id FROM edge_point p WHERE p.start = ? UNION ALL SELECT e1.id FROM edge_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? UNION ALL SELECT e2.id FROM edge_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) ORDER BY f.q0 ASC, f.q1 ASC", new_agent->epmem_timers->ncb_edge );
-	add( get_edges );
+	get_edge_ids = new soar_module::sqlite_statement(new_db, "SELECT f.parent_id FROM edge_unique f WHERE f.parent_id IN (SELECT n.id FROM edge_now n WHERE n.start<= ? UNION ALL SELECT p.id FROM edge_point p WHERE p.start = ? UNION ALL SELECT e1.id FROM edge_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? UNION ALL SELECT e2.id FROM edge_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) ORDER BY f.parent_id ASC", new_agent->epmem_timers->ncb_edge );
+	add(get_edge_ids);
 
 	//
 
@@ -2117,27 +2125,27 @@ epmem_hash_id epmem_temporal_hash( agent *my_agent, Symbol *sym, bool add_on_fai
 			{
 				// E587: AM:
 				my_agent->epmem_stmts_master->hash_add->bind_int( 1, sym->common.symbol_type );
-				my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int(1, sym->common.symbol_type);
+				//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int(1, sym->common.symbol_type);
 				switch ( sym->common.symbol_type )
 				{
 					case SYM_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_text( 2, static_cast<const char *>( sym->sc.name ) );
-						my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_text( 2, static_cast<const char *>( sym->sc.name ) );
+						//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_text( 2, static_cast<const char *>( sym->sc.name ) );
 						break;
 
 					case INT_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_int( 2, sym->ic.value );
-						my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int( 2, sym->ic.value );
+						//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int( 2, sym->ic.value );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_double( 2, sym->fc.value );
-						my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_double( 2, sym->fc.value );
+						//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_double( 2, sym->fc.value );
 						break;
 				}
 
 				my_agent->epmem_stmts_master->hash_add->execute( soar_module::op_reinit );
-				my_agent->epmem_worker_p->epmem_stmts_common->hash_add->execute( soar_module::op_reinit );
+				//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->execute( soar_module::op_reinit );
 				return_val = static_cast<epmem_hash_id>( my_agent->epmem_db->last_insert_rowid() );
 			}
 
@@ -2185,11 +2193,11 @@ inline void _epmem_promote_id( agent* my_agent, Symbol* id, epmem_time_id t )
 	my_agent->epmem_stmts_master->promote_id->bind_int( 4, t );
 	my_agent->epmem_stmts_master->promote_id->execute( soar_module::op_reinit );
 
-	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 1, id->id.epmem_id );
-	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 2, static_cast<uint64_t>( id->id.name_letter ) );
-	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 3, static_cast<uint64_t>( id->id.name_number ) );
-	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 4, t );
-	my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->execute( soar_module::op_reinit );
+	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 1, id->id.epmem_id );
+	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 2, static_cast<uint64_t>( id->id.name_letter ) );
+	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 3, static_cast<uint64_t>( id->id.name_number ) );
+	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 4, t );
+	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->execute( soar_module::op_reinit );
 }
 
 // three cases for sharing ids amongst identifiers in two passes:
@@ -3104,7 +3112,7 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 
 		// E587: AM:
 		// first identifiers (i.e. reconstruct)
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edges;
+		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edge_ids;
 		{
 			// relates to finite automata: q1 = d(q0, w)
 			epmem_node_id q0; // id
@@ -3129,35 +3137,42 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 			my_q->bind_int( 2, memory_id );
 			my_q->bind_int( 3, memory_id );
 			my_q->bind_int( 4, memory_id );
-			my_q->bind_int( 5, memory_id );
+
+			soar_module::sqlite_statement* get_edge_desc = my_agent->epmem_stmts_master->get_edge_desc;
 			while ( my_q->execute() == soar_module::row )
 			{
+				get_edge_desc->bind_int(1, memory_id);
+				get_edge_desc->bind_int(2, my_q->column_int(0));
+				if(get_edge_desc->execute() != soar_module::row){
+					get_edge_desc->reinitialize();
+					continue;
+				}
 				// q0, w, q1, w_type
-				q0 = my_q->column_int( 0 );
-				q1 = my_q->column_int( 2 );
-				w_type = my_q->column_int( 3 );
+				q0 = get_edge_desc->column_int( 0 );
+				q1 = get_edge_desc->column_int( 2 );
+				w_type = get_edge_desc->column_int( 3 );
 
 				switch ( w_type )
 				{
 					case INT_CONSTANT_SYMBOL_TYPE:
-						attr = make_int_constant( my_agent,my_q->column_int( 1 ) );
+						attr = make_int_constant( my_agent,get_edge_desc->column_int( 1 ) );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
-						attr = make_float_constant( my_agent, my_q->column_double( 1 ) );
+						attr = make_float_constant( my_agent, get_edge_desc->column_double( 1 ) );
 						break;
 
 					case SYM_CONSTANT_SYMBOL_TYPE:
-						attr = make_sym_constant( my_agent, const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 1 ) ) ) );
+						attr = make_sym_constant( my_agent, const_cast<char *>( reinterpret_cast<const char *>( get_edge_desc->column_text( 1 ) ) ) );
 						break;
 				}
 
 				// short vs. long-term
-				val_is_short_term = ( my_q->column_type( 4 ) == soar_module::null_t );
+				val_is_short_term = ( get_edge_desc->column_type( 4 ) == soar_module::null_t );
 				if ( !val_is_short_term )
 				{
-					val_letter = static_cast<char>( my_q->column_int( 4 ) );
-					val_num = static_cast<uint64_t>( my_q->column_int( 5 ) );
+					val_letter = static_cast<char>( get_edge_desc->column_int( 4 ) );
+					val_num = static_cast<uint64_t>( get_edge_desc->column_int( 5 ) );
 				}
 
 				// get a reference to the parent
@@ -3193,6 +3208,7 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 
 					orphans.push( orphan );
 				}
+				get_edge_desc->reinitialize();
 			}
 			my_q->reinitialize();
 			epmem_rit_clear_left_right( my_agent );
@@ -3254,7 +3270,7 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 
 		// E587: AM:
 		// then node_unique
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_nodes;
+		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_node_ids;
 		{
 			epmem_node_id child_id;
 			epmem_node_id parent_id;
@@ -3270,13 +3286,21 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 			my_q->bind_int( 2, memory_id );
 			my_q->bind_int( 3, memory_id );
 			my_q->bind_int( 4, memory_id );
+			soar_module::sqlite_statement* get_node_desc = my_agent->epmem_stmts_master->get_node_desc;
 			while ( my_q->execute() == soar_module::row )
 			{
+				child_id = my_q->column_int(0);
+				get_node_desc->bind_int(1, child_id);
+				if(get_node_desc->execute() != soar_module::row){
+					get_node_desc->reinitialize();
+					continue;
+				}
+
+
 				// f.child_id, f.parent_id, f.name, f.value, f.attr_type, f.value_type
-				child_id = my_q->column_int( 0 );
-				parent_id = my_q->column_int( 1 );
-				attr_type = my_q->column_int( 4 );
-				value_type = my_q->column_int( 5 );
+				parent_id = get_node_desc->column_int( 1 );
+				attr_type = get_node_desc->column_int( 4 );
+				value_type = get_node_desc->column_int( 5 );
 
 				// get a reference to the parent
 				parent = ids[ parent_id ];
@@ -3287,15 +3311,15 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 					switch ( attr_type )
 					{
 						case INT_CONSTANT_SYMBOL_TYPE:
-							attr = make_int_constant( my_agent, my_q->column_int( 2 ) );
+							attr = make_int_constant( my_agent, get_node_desc->column_int( 2 ) );
 							break;
 
 						case FLOAT_CONSTANT_SYMBOL_TYPE:
-							attr = make_float_constant( my_agent, my_q->column_double( 2 ) );
+							attr = make_float_constant( my_agent, get_node_desc->column_double( 2 ) );
 							break;
 
 						case SYM_CONSTANT_SYMBOL_TYPE:
-							attr = make_sym_constant( my_agent, const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 2 ) ) ) );
+							attr = make_sym_constant( my_agent, const_cast<char *>( reinterpret_cast<const char *>( get_node_desc->column_text( 2 ) ) ) );
 							break;
 					}
 
@@ -3303,15 +3327,15 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 					switch ( value_type )
 					{
 						case INT_CONSTANT_SYMBOL_TYPE:
-							value = make_int_constant( my_agent,my_q->column_int( 3 ) );
+							value = make_int_constant( my_agent, get_node_desc->column_int( 3 ) );
 							break;
 
 						case FLOAT_CONSTANT_SYMBOL_TYPE:
-							value = make_float_constant( my_agent, my_q->column_double( 3 ) );
+							value = make_float_constant( my_agent, get_node_desc->column_double( 3 ) );
 							break;
 
 						case SYM_CONSTANT_SYMBOL_TYPE:
-							value = make_sym_constant( my_agent, const_cast<char *>( (const char *) my_q->column_text( 3 ) ) );
+							value = make_sym_constant( my_agent, const_cast<char *>( (const char *) get_node_desc->column_text( 3 ) ) );
 							break;
 					}
 
@@ -3321,6 +3345,7 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 					symbol_remove_ref( my_agent, attr );
 					symbol_remove_ref( my_agent, value );
 				}
+				get_node_desc->reinitialize();
 			}
 			my_q->reinitialize();
 			epmem_rit_clear_left_right( my_agent );
@@ -4722,7 +4747,7 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 		int64_t temp_i;
 
 		// E587: AM:
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edges;
+		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edge_ids;
 		{
 			epmem_node_id q0;
 			epmem_node_id q1;
@@ -4736,28 +4761,35 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 			my_q->bind_int( 2, memory_id );
 			my_q->bind_int( 3, memory_id );
 			my_q->bind_int( 4, memory_id );
-			my_q->bind_int( 5, memory_id );
+			
+			soar_module::sqlite_statement* get_edge_desc = my_agent->epmem_stmts_master->get_edge_desc;
 			while ( my_q->execute() == soar_module::row )
 			{
-				q0 = my_q->column_int( 0 );
-				q1 = my_q->column_int( 2 );
-				w_type = my_q->column_int( 3 );
-				val_is_short_term = ( my_q->column_type( 4 ) == soar_module::null_t );
+				get_edge_desc->bind_int(1, memory_id);
+				get_edge_desc->bind_int(2, my_q->column_int(0));
+				if(get_edge_desc->execute() != soar_module::row){
+					get_edge_desc->reinitialize();
+					continue;
+				}
+				q0 = get_edge_desc->column_int( 0 );
+				q1 = get_edge_desc->column_int( 2 );
+				w_type = get_edge_desc->column_int( 3 );
+				val_is_short_term = ( get_edge_desc->column_type( 4 ) == soar_module::null_t );
 
 				switch ( w_type )
 				{
 					case INT_CONSTANT_SYMBOL_TYPE:
-						temp_i = static_cast<int64_t>( my_q->column_int( 1 ) );
+						temp_i = static_cast<int64_t>( get_edge_desc->column_int( 1 ) );
 						to_string( temp_i, temp_s );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
-						temp_d = my_q->column_double( 1 );
+						temp_d = get_edge_desc->column_double( 1 );
 						to_string( temp_d, temp_s );
 						break;
 
 					case SYM_CONSTANT_SYMBOL_TYPE:
-						temp_s.assign( const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 1 ) ) ) );
+						temp_s.assign( const_cast<char *>( reinterpret_cast<const char *>( get_edge_desc->column_text( 1 ) ) ) );
 						break;
 				}
 
@@ -4768,9 +4800,9 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 				else
 				{
 					temp_s2.assign( "@" );
-					temp_s2.push_back( static_cast< char >( my_q->column_int( 4 ) ) );
+					temp_s2.push_back( static_cast< char >( get_edge_desc->column_int( 4 ) ) );
 
-					temp_i = static_cast< uint64_t >( my_q->column_int( 5 ) );
+					temp_i = static_cast< uint64_t >( get_edge_desc->column_int( 5 ) );
 					to_string( temp_i, temp_s3 );
 					temp_s2.append( temp_s3 );
 
@@ -4778,13 +4810,14 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 				}
 
 				ep[ q0 ][ temp_s ].push_back( temp_s2 );
+				get_edge_desc->reinitialize();
 			}
 			my_q->reinitialize();
 			epmem_rit_clear_left_right( my_agent );
 		}
 
 		// E587: AM:
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_nodes;
+		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_node_ids;
 		{
 			epmem_node_id parent_id;
 			int64_t attr_type, value_type;
@@ -4795,47 +4828,55 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 			my_q->bind_int( 2, memory_id );
 			my_q->bind_int( 3, memory_id );
 			my_q->bind_int( 4, memory_id );
+
+			soar_module::sqlite_statement* get_node_desc = my_agent->epmem_stmts_master->get_node_desc;
 			while ( my_q->execute() == soar_module::row )
 			{
-				parent_id = my_q->column_int( 1 );
-				attr_type = my_q->column_int( 4 );
-				value_type = my_q->column_int( 5 );
+				get_node_desc->bind_int(1, my_q->column_int(0));
+				if(get_node_desc->execute() != soar_module::row){
+					get_node_desc->reinitialize();
+					continue;
+				}
+				parent_id = get_node_desc->column_int( 1 );
+				attr_type = get_node_desc->column_int( 4 );
+				value_type = get_node_desc->column_int( 5 );
 
 				switch ( attr_type )
 				{
 					case INT_CONSTANT_SYMBOL_TYPE:
-						temp_i = static_cast<int64_t>( my_q->column_int( 2 ) );
+						temp_i = static_cast<int64_t>( get_node_desc->column_int( 2 ) );
 						to_string( temp_i, temp_s );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
-						temp_d = my_q->column_double( 2 );
+						temp_d = get_node_desc->column_double( 2 );
 						to_string( temp_d, temp_s );
 						break;
 
 					case SYM_CONSTANT_SYMBOL_TYPE:
-						temp_s.assign( const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 2 ) ) ) );
+						temp_s.assign( const_cast<char *>( reinterpret_cast<const char *>( get_node_desc->column_text( 2 ) ) ) );
 						break;
 				}
 
 				switch ( value_type )
 				{
 					case INT_CONSTANT_SYMBOL_TYPE:
-						temp_i = static_cast<int64_t>( my_q->column_int( 3 ) );
+						temp_i = static_cast<int64_t>( get_node_desc->column_int( 3 ) );
 						to_string( temp_i, temp_s2 );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
-						temp_d = my_q->column_double( 3 );
+						temp_d = get_node_desc->column_double( 3 );
 						to_string( temp_d, temp_s2 );
 						break;
 
 					case SYM_CONSTANT_SYMBOL_TYPE:
-						temp_s2.assign( const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 3 ) ) ) );
+						temp_s2.assign( const_cast<char *>( reinterpret_cast<const char *>( get_node_desc->column_text( 3 ) ) ) );
 						break;
 				}
 
 				ep[ parent_id ][ temp_s ].push_back( temp_s2 );
+				get_node_desc->reinitialize();
 			}
 			my_q->reinitialize();
 			epmem_rit_clear_left_right( my_agent );
@@ -4909,7 +4950,7 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 
 		// E587: AM:
 		// first identifiers (i.e. reconstruct)
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edges;
+		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edge_ids;
 		{
 			// for printing
 			std::map< epmem_node_id, std::string > stis;
@@ -4942,13 +4983,20 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 			my_q->bind_int( 2, memory_id );
 			my_q->bind_int( 3, memory_id );
 			my_q->bind_int( 4, memory_id );
-			my_q->bind_int( 5, memory_id );
+			
+			soar_module::sqlite_statement* get_edge_desc = my_agent->epmem_stmts_master->get_edge_desc;
 			while ( my_q->execute() == soar_module::row )
 			{
+				get_edge_desc->bind_int(1, memory_id);
+				get_edge_desc->bind_int(2, my_q->column_int(0));
+				if(get_edge_desc->execute() != soar_module::row){
+					get_edge_desc->reinitialize();
+					continue;
+				}
 				// q0, w, q1, w_type, letter, num
-				q0 = my_q->column_int( 0 );
-				q1 = my_q->column_int( 2 );
-				w_type = my_q->column_int( 3 );
+				q0 = get_edge_desc->column_int( 0 );
+				q1 = get_edge_desc->column_int( 2 );
+				w_type = get_edge_desc->column_int( 3 );
 
 				// "ID_Q0"
 				temp.assign( "ID_" );
@@ -4960,7 +5008,7 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 				to_string( q1, temp2 );
 				temp3.append( temp2 );
 
-				val_is_short_term = ( my_q->column_type( 4 ) == soar_module::null_t );
+				val_is_short_term = ( get_edge_desc->column_type( 4 ) == soar_module::null_t );
 				if ( val_is_short_term )
 				{
 					sti_p = stis.find( q1 );
@@ -4976,9 +5024,9 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 					if ( lti_p == ltis.end() )
 					{
 						// "L#"
-						val_letter = static_cast<char>( my_q->column_int( 4 ) );
+						val_letter = static_cast<char>( get_edge_desc->column_int( 4 ) );
 						to_string( val_letter, temp4 );
-						val_num = static_cast<uint64_t>( my_q->column_int( 5 ) );
+						val_num = static_cast<uint64_t>( get_edge_desc->column_int( 5 ) );
 						to_string( val_num, temp2 );
 						temp4.append( temp2 );
 
@@ -4995,23 +5043,24 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 				switch ( w_type )
 				{
 					case INT_CONSTANT_SYMBOL_TYPE:
-						temp_i = static_cast<int64_t>( my_q->column_int( 1 ) );
+						temp_i = static_cast<int64_t>( get_edge_desc->column_int( 1 ) );
 						to_string( temp_i, temp2 );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
-						temp_d = my_q->column_double( 1 );
+						temp_d = get_edge_desc->column_double( 1 );
 						to_string( temp_d, temp2 );
 						break;
 
 					case SYM_CONSTANT_SYMBOL_TYPE:
-						temp2.assign( const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 1 ) ) ) );
+						temp2.assign( const_cast<char *>( reinterpret_cast<const char *>( get_edge_desc->column_text( 1 ) ) ) );
 						break;
 				}
 				temp.append( temp2 );
 				temp.append( "\" ];\n" );
 
 				edges.push_back( temp );
+				get_edge_desc->reinitialize();
 			}
 			my_q->reinitialize();
 			epmem_rit_clear_left_right( my_agent );
@@ -5060,7 +5109,7 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 
 		// E587: AM:
 		// then node_unique
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_nodes;
+		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_node_ids;
 		{
 			epmem_node_id child_id;
 			epmem_node_id parent_id;
@@ -5080,13 +5129,19 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 			my_q->bind_int( 2, memory_id );
 			my_q->bind_int( 3, memory_id );
 			my_q->bind_int( 4, memory_id );
+			soar_module::sqlite_statement* get_node_desc = my_agent->epmem_stmts_master->get_node_desc;
 			while ( my_q->execute() == soar_module::row )
 			{
+				get_node_desc->bind_int(1, my_q->column_int(0));
+				if(get_node_desc->execute() != soar_module::row){
+					get_node_desc->reinitialize();
+					continue;
+				}
 				// f.child_id, f.parent_id, f.name, f.value, f.attr_type, f.value_type
-				child_id = my_q->column_int( 0 );
-				parent_id = my_q->column_int( 1 );
-				attr_type = my_q->column_int( 4 );
-				value_type = my_q->column_int( 5 );
+				child_id = get_node_desc->column_int( 0 );
+				parent_id = get_node_desc->column_int( 1 );
+				attr_type = get_node_desc->column_int( 4 );
+				value_type = get_node_desc->column_int( 5 );
 
 				temp.assign( "ID_" );
 				to_string( parent_id, temp2 );
@@ -5100,17 +5155,17 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 				switch ( attr_type )
 				{
 					case INT_CONSTANT_SYMBOL_TYPE:
-						temp_i = static_cast<int64_t>( my_q->column_int( 2 ) );
+						temp_i = static_cast<int64_t>( get_node_desc->column_int( 2 ) );
 						to_string( temp_i, temp2 );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
-						temp_d = my_q->column_double( 2 );
+						temp_d = get_node_desc->column_double( 2 );
 						to_string( temp_d, temp2 );
 						break;
 
 					case SYM_CONSTANT_SYMBOL_TYPE:
-						temp2.assign( const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 2 ) ) ) );
+						temp2.assign( const_cast<char *>( reinterpret_cast<const char *>( get_node_desc->column_text( 2 ) ) ) );
 						break;
 				}
 
@@ -5127,17 +5182,17 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 				switch ( value_type )
 				{
 					case INT_CONSTANT_SYMBOL_TYPE:
-						temp_i = static_cast<int64_t>( my_q->column_int( 3 ) );
+						temp_i = static_cast<int64_t>( get_node_desc->column_int( 3 ) );
 						to_string( temp_i, temp2 );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
-						temp_d = my_q->column_double( 3 );
+						temp_d = get_node_desc->column_double( 3 );
 						to_string( temp_d, temp2 );
 						break;
 
 					case SYM_CONSTANT_SYMBOL_TYPE:
-						temp2.assign( const_cast<char *>( reinterpret_cast<const char *>( my_q->column_text( 3 ) ) ) );
+						temp2.assign( const_cast<char *>( reinterpret_cast<const char *>( get_node_desc->column_text( 3 ) ) ) );
 						break;
 				}
 
@@ -5145,7 +5200,7 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 				temp.append( "\" ];\n" );
 
 				consts.push_back( temp );
-
+				get_node_desc->reinitialize();
 			}
 			my_q->reinitialize();
 			epmem_rit_clear_left_right( my_agent );

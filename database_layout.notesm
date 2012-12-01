@@ -1,0 +1,136 @@
+Database Setup:
+> ascii
+	# full set of ascii characters intialized at creation
+	{ascii_num}: ascii value of the given char
+	{ascii_chr}: the character
+	master: entirety
+	worker: entirety
+<
+> lti
+	# When identifiers were promoted to lti's
+	{parent_id}: epmem_id of the identifier
+	{letter}: letter of the identifier (index into ascii)
+	{num}: number of the identifier
+	{time_id}: episode the identifier was promoted
+	master: entirety
+	worker: not needed (master can change id's into lti's)
+<
+> times
+	# Stores the number of every episode in the database
+	{id}: lists every episode number in the database
+	master: entirety
+	worker: local episode numbers only
+<
+> temporal_symbol_hash
+	# Stores a hash for constant values
+	{id}: unique identifier for the entry
+	{sym_const}: constant value of the symbol
+	{sym_type}: type information (INT, FLOAT, STRING)
+	master: in its entirety
+<
+> node_unique
+	# Stores a WME with a constant value (<a> ^att val)
+	{child_id}: unique identifier for the node
+	{parent_id}: The epmem_id of the first identifier
+	{attrib}: Index into the symbol table for the attribute
+	{value}: Index into the symbol table for the value
+	master: stored in its entirety
+	worker: only need those actually active in the segment
+<
+> edge_unique
+	# Stores an WME with an identifier value (<a> ^att <b>)
+	{parent_id}: unique identifier for the edge
+	{q0}: The epmem_id of the first identifier
+	{w}: The index into the symbol table for the attribute
+	{q1}: The epmem_id of the second identifier
+	{last}: The most recent time the edge was removed (if applicable)
+	master: stored in its entirety
+	worker: only need those actually active in the segment
+<
+> node_point
+	# Stores when nodes were present at one time step
+	{id}: index into node_unique table
+	{start}: episode the node was present
+	master: not stored
+	worker: stored only those within its segment
+<
+> edge_point
+	# Stores when edges were present at one time step only
+	{id}: index into the edge_unique table
+	{start}: episode the node was present
+	master: not stored
+	worker: stored only those within its segment
+<
+> node_now
+	# Stores the nodes that still exist in the present episode
+	{id}: Index into the node_unique table
+	{start}: epsiode the node was last created
+	master: not stored
+	worker: stored only those within its segment
+<
+> edge_now
+	# Stores the edges that still exist in the present episode
+	{id}: Index into the edge_unique table
+	{start}: epsiode the edge was last created
+	master: not stored
+	worker: stored only those within its segment
+<
+> node_range
+	# Stores the intervals that nodes existed
+	{rit_node}: not sure
+	{start}: episode the node appeared
+	{end}: episode the node was last present
+	{id}: Index into the node_unique table
+	master: not stored
+	worker: stored only those within its segment
+<
+> edge_range
+	# Stores the intervals that edges existed
+	{rit_node}: not sure
+	{start}: episode the edge appeared
+	{end}: episode the edge was last present
+	{id}: Index into the edge_unique table
+	master: not stored
+	worker: stored only those within its segment
+<
+> rit_left_nodes
+	# Used for reconstruction of an episode
+	{min}: 
+	{max}:
+	I think these are only needed on the workers
+<
+> rit_right_nodes
+	# Used for reconstruction of an episode
+	{min}: 
+	{max}:
+	I think these are only needed on the workers
+<
+
+
+
+SELECT f.child_id 
+FROM node_unique f 
+WHERE f.child_id IN 
+	(SELECT n.id FROM node_now n WHERE n.start<= ? 
+	UNION ALL SELECT p.id FROM node_point p WHERE p.start=? 
+	UNION ALL SELECT e1.id FROM node_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? 
+	UNION ALL SELECT e2.id FROM node_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) 
+ORDER BY f.child_id ASC
+
+SELECT f.parent_id 
+FROM edge_unique f 
+WHERE f.parent_id IN 
+	(SELECT n.id FROM edge_now n WHERE n.start<= ? 
+	UNION ALL SELECT p.id FROM edge_point p WHERE p.start = ? 
+	UNION ALL SELECT e1.id FROM edge_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? 
+	UNION ALL SELECT e2.id FROM edge_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) 
+ORDER BY f.parent_id ASC
+
+SELECT f.child_id, f.parent_id, h1.sym_const, h2.sym_const, h1.sym_type, h2.sym_type 
+FROM node_unique f, temporal_symbol_hash h1, temporal_symbol_hash h2 
+WHERE f.child_id=? 
+	AND f.attrib=h1.id AND f.value=h2.id
+
+SELECT f.q0, h.sym_const, f.q1, h.sym_type, lti.letter, lti.num 
+FROM edge_unique f INNER JOIN temporal_symbol_hash h ON f.w=h.id LEFT JOIN lti ON (f.q1=lti.parent_id AND lti.time_id <= ?) 
+WHERE f.parent_id=?
