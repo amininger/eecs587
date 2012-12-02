@@ -317,26 +317,41 @@ public:
 	// node_unique management
 	soar_module::sqlite_statement *add_node_unique;
 	soar_module::sqlite_statement *find_node_unique;
+	soar_module::sqlite_statement *get_node_unique;
 
 	// edge_unique management
 	soar_module::sqlite_statement *add_edge_unique;
 	soar_module::sqlite_statement *find_edge_unique;
 	soar_module::sqlite_statement *find_edge_unique_shared;
+	soar_module::sqlite_statement *get_edge_unique;
+	
+	// get descriptions by id
+	soar_module::sqlite_statement *get_node_desc;
+	soar_module::sqlite_statement *get_edge_desc;
 
 	// LTI and promotion management
 	soar_module::sqlite_statement *promote_id;
 	soar_module::sqlite_statement *find_lti;
 	soar_module::sqlite_statement *find_lti_promotion_time;
 
+	// Hash get/set
 	soar_module::sqlite_statement *hash_get;
 	soar_module::sqlite_statement *hash_add;
-
+	
+	// Variables get/set
 	soar_module::sqlite_statement *var_get;
 	soar_module::sqlite_statement *var_set;
 
+	// Database management
 	soar_module::sqlite_statement *begin;
 	soar_module::sqlite_statement *commit;
 	soar_module::sqlite_statement *rollback;
+
+	// Go between episodes
+	soar_module::sqlite_statement *valid_episode;
+	soar_module::sqlite_statement *next_episode;
+	soar_module::sqlite_statement *prev_episode;
+
 
 	//
 	epmem_master_statement_container( agent *new_agent );
@@ -349,18 +364,20 @@ class epmem_common_statement_container: public soar_module::sqlite_statement_con
 //		soar_module::sqlite_statement *commit;
 //		soar_module::sqlite_statement *rollback;
 
-		// E587: AM:
-//		soar_module::sqlite_statement *var_get;
-//		soar_module::sqlite_statement *var_set;
+		// E587: AM: Get/Set Variables
+		soar_module::sqlite_statement *var_get;
+		soar_module::sqlite_statement *var_set;
 
+		// E587: AM: Get/Add Symbol Hash
+		//soar_module::sqlite_statement *hash_get;
+		//soar_module::sqlite_statement *hash_add;
+
+		// RIT stuff
 		soar_module::sqlite_statement *rit_add_left;
 		soar_module::sqlite_statement *rit_truncate_left;
 		soar_module::sqlite_statement *rit_add_right;
 		soar_module::sqlite_statement *rit_truncate_right;
 
-		// E587: AM:
-//		soar_module::sqlite_statement *hash_get;
-//		soar_module::sqlite_statement *hash_add;
 
 		epmem_common_statement_container( agent *new_agent );
 };
@@ -369,7 +386,6 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 {
 	public:
 		soar_module::sqlite_statement *add_time;
-
 		//
 
 		soar_module::sqlite_statement *add_node_now;
@@ -378,7 +394,9 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		soar_module::sqlite_statement *add_node_range;
 
 		soar_module::sqlite_statement *add_node_unique;
+		soar_module::sqlite_statement *add_node_unique_with_id;
 		soar_module::sqlite_statement *find_node_unique;
+		soar_module::sqlite_statement *get_node_unique;
 
 		//
 
@@ -388,28 +406,23 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		soar_module::sqlite_statement *add_edge_range;
 
 		soar_module::sqlite_statement *add_edge_unique;
+		soar_module::sqlite_statement *add_edge_unique_with_id;
 		soar_module::sqlite_statement *find_edge_unique;
 		soar_module::sqlite_statement *find_edge_unique_shared;
+		soar_module::sqlite_statement *get_edge_unique;
 
-		//
 
-		soar_module::sqlite_statement *valid_episode;
-		soar_module::sqlite_statement *next_episode;
-		soar_module::sqlite_statement *prev_episode;
-
-		soar_module::sqlite_statement *get_nodes;
-		soar_module::sqlite_statement *get_edges;
-
-		//
-
-		soar_module::sqlite_statement *promote_id;
-		soar_module::sqlite_statement *find_lti;
-		soar_module::sqlite_statement *find_lti_promotion_time;
+		soar_module::sqlite_statement *get_node_ids;
+		soar_module::sqlite_statement *get_edge_ids;
 
 		//
 
 		soar_module::sqlite_statement *update_edge_unique_last;
-
+		
+	// LTI and promotion management
+	//soar_module::sqlite_statement *promote_id;
+	//soar_module::sqlite_statement *find_lti;
+	//soar_module::sqlite_statement *find_lti_promotion_time;
 		//
 
 		soar_module::sqlite_statement_pool *pool_find_edge_queries[2][2];
@@ -553,6 +566,23 @@ extern void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::
 //////////////////////////////////////////////////////////
 // Episodic Memory Search
 //////////////////////////////////////////////////////////
+
+// E587: AM: XXX: temporary hack until this function is moved elsewhere
+void epmem_rit_insert_interval( agent *my_agent, int64_t lower, int64_t upper, epmem_node_id id, epmem_rit_state *rit_state );
+
+struct epmem_node_unique{
+	long id;
+	long parent_id;
+	long attribute;
+	long value;
+};
+
+struct epmem_edge_unique{
+	long id;
+	long parent_id;
+	long attribute;
+	long child_id;
+};
 
 // defined below
 typedef struct epmem_triple_struct epmem_triple;

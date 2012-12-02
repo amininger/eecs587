@@ -8,11 +8,27 @@
 #ifndef NEW_EPISODE_H_
 #define NEW_EPISODE_H_
 
+struct new_episode;
+
 #include "../episodic_memory.h"
 #include "../agent.h"
 
-class new_episode{
 
+
+struct new_episode{
+	long time;
+
+	epmem_node_unique* added_nodes;
+	int num_added_nodes;
+
+	epmem_edge_unique* added_edges;
+	int num_added_edges;
+
+	epmem_node_unique* removed_nodes;
+	int num_removed_nodes;
+
+	epmem_edge_unique* removed_edges;
+	int num_removed_edges;
 
 };
 
