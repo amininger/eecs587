@@ -37,5 +37,6 @@
 // E587: AM: Include
 #include "src/extension/new_episode.cpp"
 #include "src/extension/epmem_worker.cpp"
-// E587: JK: Inlcude
-#include "src/extension/epmem_manager.cpp"
+#include "src/extension/epmem_sql_containers.cpp"
+// E587: JK: Include
+//#include "src/extension/epmem_manager.cpp"

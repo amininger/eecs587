@@ -29,7 +29,6 @@ struct new_episode{
 
 	epmem_edge_unique* removed_edges;
 	int num_removed_edges;
-
 };
 
 // ADDING NODES/EDGES
