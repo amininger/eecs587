@@ -37,31 +37,41 @@ typedef struct epmem_rit_state_struct
 
 class epmem_worker{
 public:
-	soar_module::sqlite_database *epmem_db;
-	epmem_common_statement_container *epmem_stmts_common;
 	epmem_graph_statement_container *epmem_stmts_graph;
 
+	// Constructor
 	epmem_worker();
 
+	// Initialize the worker (create database, etc.)
 	void initialize(epmem_param_container* epmem_params);
 
+	// Add a new episode to the collection of episodes the worker currently has
 	void add_new_episode(new_episode* episode);
 
+	// Removes the oldest episode the agent has and returned a new_episode diff structure for use elsewhere
 	new_episode* remove_oldest_episode();
 
+	// Fills the given vector with all node_unique id's active at the given episode time
 	void get_nodes_at_episode(epmem_time_id time, std::vector<epmem_node_id>* node_ids);
 
+	// Fills the given vector with all edge_unique id's active at the given episode time
 	void get_edges_at_episode(epmem_time_id time, std::vector<epmem_node_id>* edge_ids);
 
-
-
+	// Closes the worker and removes the database
 	void close();
 
-	void prep_rit(epmem_time_id time1, epmem_time_id time2, int structure_type);
-
-	void clear_rit();
-
 private:
+	soar_module::sqlite_database *epmem_db;
+
+	epmem_common_statement_container *epmem_stmts_common;
+
+	std::map<long, int> node_now_start_times;
+
+	std::map<long, int> edge_now_start_times;
+
+  epmem_rit_state epmem_rit_state_graph[2];
+
+
 	void add_new_nodes(new_episode* episode);
 
 	void add_new_edges(new_episode* episode);
@@ -69,12 +79,6 @@ private:
 	void remove_old_nodes(new_episode* episode);
 
 	void remove_old_edges(new_episode* episode);
-
-	std::map<long, int> node_now_start_times;
-
-	std::map<long, int> edge_now_start_times;
-
-  epmem_rit_state epmem_rit_state_graph[2];
 
 	int64_t epmem_rit_fork_node( int64_t lower, int64_t upper, int64_t *step_return, epmem_rit_state *rit_state );
 

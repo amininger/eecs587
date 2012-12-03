@@ -2038,6 +2038,10 @@ void epmem_new_episode( agent *my_agent )
 		}
 
 		my_agent->epmem_worker_p->add_new_episode(episode);
+		delete [] episode->added_nodes;
+		delete [] episode->added_edges;
+		delete [] episode->removed_edges;
+		delete [] episode->removed_nodes;
 		delete episode;
 	}
 
@@ -2231,9 +2235,10 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 		// initialize the lookup table
 		ids[ EPMEM_NODEID_ROOT ] = std::make_pair< Symbol*, bool >( retrieved_header, true );
 
+
+
 		// E587: AM:
 		// first identifiers (i.e. reconstruct)
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edge_ids;
 		{
 			// relates to finite automata: q1 = d(q0, w)
 			epmem_node_id q0; // id
@@ -2251,19 +2256,15 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 			// orphaned children
 			std::queue< epmem_edge* > orphans;
 			epmem_edge *orphan;
-			
-			my_agent->epmem_worker_p->prep_rit(memory_id, memory_id, EPMEM_RIT_STATE_EDGE);
-
-			my_q->bind_int( 1, memory_id );
-			my_q->bind_int( 2, memory_id );
-			my_q->bind_int( 3, memory_id );
-			my_q->bind_int( 4, memory_id );
 
 			soar_module::sqlite_statement* get_edge_desc = my_agent->epmem_stmts_master->get_edge_desc;
-			while ( my_q->execute() == soar_module::row )
-			{
+
+			std::vector<epmem_node_id> edge_ids;
+			my_agent->epmem_worker_p->get_edges_at_episode(memory_id, &edge_ids);
+
+			for(int i = 0; i < edge_ids.size(); i++){
 				get_edge_desc->bind_int(1, memory_id);
-				get_edge_desc->bind_int(2, my_q->column_int(0));
+				get_edge_desc->bind_int(2, edge_ids[i]);
 				if(get_edge_desc->execute() != soar_module::row){
 					get_edge_desc->reinitialize();
 					continue;
@@ -2331,8 +2332,6 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 				}
 				get_edge_desc->reinitialize();
 			}
-			my_q->reinitialize();
-			my_agent->epmem_worker_p->clear_rit();
 
 			// take care of any orphans
 			if ( !orphans.empty() )
@@ -2391,7 +2390,6 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 
 		// E587: AM:
 		// then node_unique
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_node_ids;
 		{
 			epmem_node_id child_id;
 			epmem_node_id parent_id;
@@ -2400,17 +2398,14 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 
 			std::pair< Symbol*, bool > parent;
 			Symbol *value = NULL;
-
-			my_agent->epmem_worker_p->prep_rit(memory_id, memory_id, EPMEM_RIT_STATE_NODE);
-
-			my_q->bind_int( 1, memory_id );
-			my_q->bind_int( 2, memory_id );
-			my_q->bind_int( 3, memory_id );
-			my_q->bind_int( 4, memory_id );
+			
 			soar_module::sqlite_statement* get_node_desc = my_agent->epmem_stmts_master->get_node_desc;
-			while ( my_q->execute() == soar_module::row )
-			{
-				child_id = my_q->column_int(0);
+
+			std::vector<epmem_node_id> node_ids;
+			my_agent->epmem_worker_p->get_nodes_at_episode(memory_id, &node_ids);
+
+			for(int i = 0; i < node_ids.size(); i++){
+				child_id = node_ids[i];
 				get_node_desc->bind_int(1, child_id);
 				if(get_node_desc->execute() != soar_module::row){
 					get_node_desc->reinitialize();
@@ -2469,7 +2464,6 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 				get_node_desc->reinitialize();
 			}
 			my_q->reinitialize();
-			my_agent->epmem_worker_p->clear_rit();
 		}
 	}
 
@@ -2884,7 +2878,7 @@ bool epmem_register_pedges(epmem_node_id parent, epmem_literal* literal, epmem_p
 	}
 	if (pedge_iter == pedge_cache->end() || (*pedge_iter).second == NULL) {
 		int has_value = (literal->q1 != EPMEM_NODEID_BAD ? 1 : 0);
-		// E587: AM:
+		// E587: AM: XXX: Need to remove this link
 		soar_module::pooled_sqlite_statement* pedge_sql = my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_edge_queries[is_edge][has_value]->request(my_agent->epmem_timers->query_sql_edge);
 		int bind_pos = 1;
 		if (!is_edge) {
@@ -3356,7 +3350,7 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 			root_pedge->has_noncurrent = false;
 			new(&(root_pedge->literals)) epmem_literal_set();
 			root_pedge->literals.insert(root_literal);
-			// E587: AM:
+			// E587: AM: XXX: Need to remove this dependency
 			root_pedge->sql = my_agent->epmem_worker_p->epmem_stmts_graph->pool_dummy->request();
 			root_pedge->sql->prepare();
 			root_pedge->sql->bind_int(1, LLONG_MAX);
@@ -3380,7 +3374,7 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 			allocate_with_pool(my_agent, &(my_agent->epmem_interval_pool), &root_interval);
 			root_interval->uedge = root_uedge;
 			root_interval->is_end_point = true;
-			// E587: AM:
+			// E587: AM: XXX: Need to remove this dependency
 			root_interval->sql = my_agent->epmem_worker_p->epmem_stmts_graph->pool_dummy->request();
 			root_interval->sql->prepare();
 			root_interval->sql->bind_int(1, before);
@@ -3491,7 +3485,7 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 							// create the SQL query and bind it
 							// try to find an existing query first; if none exist, allocate a new one from the memory pools
 							soar_module::pooled_sqlite_statement* interval_sql = NULL;
-							// E587: AM:
+							// E587: AM: XXX: Need to remove these dependencies
 							if (is_lti) {
 								interval_sql = my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_lti_queries[point_type][interval_type]->request(sql_timer);
 							} else {
@@ -3868,26 +3862,20 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 		int64_t temp_i;
 
 		// E587: AM:
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edge_ids;
 		{
 			epmem_node_id q0;
 			epmem_node_id q1;
 			int64_t w_type;
 			bool val_is_short_term;
 
-			my_agent->epmem_worker_p->prep_rit(memory_id, memory_id, EPMEM_RIT_STATE_EDGE);
-
-			// query for edges
-			my_q->bind_int( 1, memory_id );
-			my_q->bind_int( 2, memory_id );
-			my_q->bind_int( 3, memory_id );
-			my_q->bind_int( 4, memory_id );
-			
 			soar_module::sqlite_statement* get_edge_desc = my_agent->epmem_stmts_master->get_edge_desc;
-			while ( my_q->execute() == soar_module::row )
-			{
+
+			std::vector<epmem_node_id> edge_ids;
+			my_agent->epmem_worker_p->get_edges_at_episode(memory_id, &edge_ids);
+
+			for(int i = 0; i < edge_ids.size(); i++){
 				get_edge_desc->bind_int(1, memory_id);
-				get_edge_desc->bind_int(2, my_q->column_int(0));
+				get_edge_desc->bind_int(2, edge_ids[i]);
 				if(get_edge_desc->execute() != soar_module::row){
 					get_edge_desc->reinitialize();
 					continue;
@@ -3934,26 +3922,20 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 				get_edge_desc->reinitialize();
 			}
 			my_q->reinitialize();
-			my_agent->epmem_worker_p->clear_rit();
 		}
 
 		// E587: AM:
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_node_ids;
 		{
 			epmem_node_id parent_id;
 			int64_t attr_type, value_type;
 			
-			my_agent->epmem_worker_p->prep_rit(memory_id, memory_id, EPMEM_RIT_STATE_NODE);
-
-			my_q->bind_int( 1, memory_id );
-			my_q->bind_int( 2, memory_id );
-			my_q->bind_int( 3, memory_id );
-			my_q->bind_int( 4, memory_id );
-
 			soar_module::sqlite_statement* get_node_desc = my_agent->epmem_stmts_master->get_node_desc;
-			while ( my_q->execute() == soar_module::row )
-			{
-				get_node_desc->bind_int(1, my_q->column_int(0));
+
+			std::vector<epmem_node_id> node_ids;
+			my_agent->epmem_worker_p->get_nodes_at_episode(memory_id, &node_ids);
+
+			for(int i = 0; i < node_ids.size(); i++){
+				get_node_desc->bind_int(1, node_ids[i]);
 				if(get_node_desc->execute() != soar_module::row){
 					get_node_desc->reinitialize();
 					continue;
@@ -4000,7 +3982,6 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 				get_node_desc->reinitialize();
 			}
 			my_q->reinitialize();
-			my_agent->epmem_worker_p->clear_rit();
 		}
 	}
 
@@ -4071,7 +4052,6 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 
 		// E587: AM:
 		// first identifiers (i.e. reconstruct)
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_edge_ids;
 		{
 			// for printing
 			std::map< epmem_node_id, std::string > stis;
@@ -4096,20 +4076,14 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 			temp.assign( "ID_0" );
 			stis.insert( std::make_pair< epmem_node_id, std::string >( 0, temp ) );
 
-			// prep rit
-			my_agent->epmem_worker_p->prep_rit(memory_id, memory_id, EPMEM_RIT_STATE_EDGE);
-
-			// query for edges
-			my_q->bind_int( 1, memory_id );
-			my_q->bind_int( 2, memory_id );
-			my_q->bind_int( 3, memory_id );
-			my_q->bind_int( 4, memory_id );
-			
 			soar_module::sqlite_statement* get_edge_desc = my_agent->epmem_stmts_master->get_edge_desc;
-			while ( my_q->execute() == soar_module::row )
-			{
+
+			std::vector<epmem_node_id> edge_ids;
+			my_agent->epmem_worker_p->get_edges_at_episode(memory_id, &edge_ids);
+
+			for(int i = 0; i < edge_ids.size(); i++){
 				get_edge_desc->bind_int(1, memory_id);
-				get_edge_desc->bind_int(2, my_q->column_int(0));
+				get_edge_desc->bind_int(2, edge_ids[i]);
 				if(get_edge_desc->execute() != soar_module::row){
 					get_edge_desc->reinitialize();
 					continue;
@@ -4184,7 +4158,6 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 				get_edge_desc->reinitialize();
 			}
 			my_q->reinitialize();
-			my_agent->epmem_worker_p->clear_rit();
 
 			// identifiers
 			{
@@ -4230,7 +4203,6 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 
 		// E587: AM:
 		// then node_unique
-		my_q = my_agent->epmem_worker_p->epmem_stmts_graph->get_node_ids;
 		{
 			epmem_node_id child_id;
 			epmem_node_id parent_id;
@@ -4244,16 +4216,13 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 			double temp_d;
 			int64_t temp_i;
 
-			my_agent->epmem_worker_p->prep_rit(memory_id, memory_id, EPMEM_RIT_STATE_NODE);
-
-			my_q->bind_int( 1, memory_id );
-			my_q->bind_int( 2, memory_id );
-			my_q->bind_int( 3, memory_id );
-			my_q->bind_int( 4, memory_id );
 			soar_module::sqlite_statement* get_node_desc = my_agent->epmem_stmts_master->get_node_desc;
-			while ( my_q->execute() == soar_module::row )
-			{
-				get_node_desc->bind_int(1, my_q->column_int(0));
+
+			std::vector<epmem_node_id> node_ids;
+			my_agent->epmem_worker_p->get_nodes_at_episode(memory_id, &node_ids);
+
+			for(int i = 0; i < node_ids.size(); i++){
+				get_node_desc->bind_int(1, node_ids[i]);
 				if(get_node_desc->execute() != soar_module::row){
 					get_node_desc->reinitialize();
 					continue;
@@ -4324,7 +4293,6 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 				get_node_desc->reinitialize();
 			}
 			my_q->reinitialize();
-			my_agent->epmem_worker_p->clear_rit();
 
 			// constant nodes
 			{

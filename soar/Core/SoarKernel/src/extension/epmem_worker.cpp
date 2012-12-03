@@ -332,14 +332,6 @@ void epmem_worker::epmem_set_variable( epmem_variable_key variable_id, int64_t v
 	var_set->execute( soar_module::op_reinit );
 }
 
-void epmem_worker::prep_rit(epmem_time_id time1, epmem_time_id time2, int structure_type){
-	epmem_rit_prep_left_right(time1, time2, &epmem_rit_state_graph[structure_type]);
-}
-
-void epmem_worker::clear_rit(){
-	epmem_rit_clear_left_right();
-}
-
 void epmem_worker::initialize(epmem_param_container* epmem_params){
 	{
 
@@ -764,3 +756,35 @@ void epmem_worker::remove_old_edges(new_episode* episode){
 	}
 }
 
+
+void epmem_worker::get_nodes_at_episode(epmem_time_id time, std::vector<epmem_node_id>* node_ids){
+	epmem_rit_prep_left_right(time, time, &epmem_rit_state_graph[EPMEM_RIT_STATE_NODE]);
+
+	epmem_stmts_graph->get_node_ids->bind_int(1, time);
+	epmem_stmts_graph->get_node_ids->bind_int(2, time);
+	epmem_stmts_graph->get_node_ids->bind_int(3, time);
+	epmem_stmts_graph->get_node_ids->bind_int(4, time);
+
+	while(epmem_stmts_graph->get_node_ids->execute() == soar_module::row){
+		node_ids->push_back(epmem_stmts_graph->get_node_ids->column_int(0));
+	}
+	epmem_stmts_graph->get_node_ids->reinitialize();
+
+	epmem_rit_clear_left_right();
+}
+
+void epmem_worker::get_edges_at_episode(epmem_time_id time, std::vector<epmem_node_id>* edge_ids){
+	epmem_rit_prep_left_right(time, time, &epmem_rit_state_graph[EPMEM_RIT_STATE_EDGE]);
+
+	epmem_stmts_graph->get_edge_ids->bind_int(1, time);
+	epmem_stmts_graph->get_edge_ids->bind_int(2, time);
+	epmem_stmts_graph->get_edge_ids->bind_int(3, time);
+	epmem_stmts_graph->get_edge_ids->bind_int(4, time);
+
+	while(epmem_stmts_graph->get_edge_ids->execute() == soar_module::row){
+		edge_ids->push_back(epmem_stmts_graph->get_edge_ids->column_int(0));
+	}
+	epmem_stmts_graph->get_edge_ids->reinitialize();
+
+	epmem_rit_clear_left_right();
+}
