@@ -1007,7 +1007,7 @@ void epmem_init_db( agent *my_agent, bool readonly = false )
 
 		// E587: AM:
 		my_agent->epmem_worker_p = new epmem_worker();
-		my_agent->epmem_worker_p->initialize(my_agent->epmem_params, my_agent);
+		my_agent->epmem_worker_p->initialize(my_agent->epmem_params);
 
 		my_agent->epmem_stmts_master = new epmem_master_statement_container(my_agent);
 		my_agent->epmem_stmts_master->structure();
@@ -2085,7 +2085,7 @@ void epmem_new_episode( agent *my_agent )
 			my_agent->epmem_wme_adds->clear();
 		}
 
-		my_agent->epmem_worker_p->add_new_episode(episode, my_agent);
+		my_agent->epmem_worker_p->add_new_episode(episode);
 		delete episode;
 	}
 

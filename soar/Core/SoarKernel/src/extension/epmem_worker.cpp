@@ -340,7 +340,7 @@ void epmem_worker::clear_rit(){
 	epmem_rit_clear_left_right();
 }
 
-void epmem_worker::initialize(epmem_param_container* epmem_params, agent* my_agent){
+void epmem_worker::initialize(epmem_param_container* epmem_params){
 	{
 
 		
@@ -581,7 +581,7 @@ void epmem_worker::initialize(epmem_param_container* epmem_params, agent* my_age
 	}
 }
 
-void epmem_worker::add_new_episode(new_episode* episode, agent* my_agent){
+void epmem_worker::add_new_episode(new_episode* episode){
 	// Add the time to the database
 	epmem_stmts_graph->add_time->bind_int(1, episode->time);
 	epmem_stmts_graph->add_time->execute(soar_module::op_reinit);
@@ -591,8 +591,8 @@ void epmem_worker::add_new_episode(new_episode* episode, agent* my_agent){
 	add_new_edges(episode);
 	
 	// Remove old nodes/edges
-	remove_old_nodes(episode, my_agent);
-	remove_old_edges(episode, my_agent);
+	remove_old_nodes(episode);
+	remove_old_edges(episode);
 }
 
 void epmem_worker::add_new_nodes(new_episode* episode){
@@ -653,7 +653,7 @@ void epmem_worker::add_new_edges(new_episode* episode){
 	}
 }
 
-void epmem_worker::remove_old_nodes(new_episode* episode, agent* my_agent){
+void epmem_worker::remove_old_nodes(new_episode* episode){
 	// Remove nodes from the current episode
 	for(int i = 0; i < episode->num_removed_nodes; i++){
 		epmem_node_unique* node = &episode->removed_nodes[i];
@@ -686,7 +686,7 @@ void epmem_worker::remove_old_nodes(new_episode* episode, agent* my_agent){
 	}
 }
 
-void epmem_worker::remove_old_edges(new_episode* episode, agent* my_agent){
+void epmem_worker::remove_old_edges(new_episode* episode){
 		// Remove episodes from the current episode
 	for(int i = 0; i < episode->num_removed_edges; i++){
 		epmem_edge_unique* edge = &episode->removed_edges[i];
