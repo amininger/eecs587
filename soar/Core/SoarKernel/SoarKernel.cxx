@@ -37,3 +37,4 @@
 // E587: AM: Include
 #include "src/extension/new_episode.cpp"
 #include "src/extension/epmem_worker.cpp"
+#include "src/extension/epmem_sql_containers.cpp"

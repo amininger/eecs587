@@ -37,13 +37,13 @@
 
 //#define EPMEM_EXPERIMENT
 
-
 //////////////////////////////////////////////////////////
 // EpMem Constants
 //////////////////////////////////////////////////////////
 
 enum epmem_variable_key
 {
+	// E583: AM: only on worker
 	var_rit_offset_1, var_rit_leftroot_1, var_rit_rightroot_1, var_rit_minstep_1,
 	var_rit_offset_2, var_rit_leftroot_2, var_rit_rightroot_2, var_rit_minstep_2,
 	var_next_id
@@ -63,14 +63,10 @@ enum epmem_variable_key
 #define EPMEM_RANGE_NOW								1
 #define EPMEM_RANGE_POINT							2
 
-#define EPMEM_RIT_ROOT								0
-#define EPMEM_RIT_OFFSET_INIT						-1
 #define EPMEM_LN_2									0.693147180559945
 
 #define EPMEM_DNF									2
 
-#define EPMEM_RIT_STATE_NODE						0
-#define EPMEM_RIT_STATE_EDGE						1
 
 
 //////////////////////////////////////////////////////////
@@ -303,137 +299,7 @@ class epmem_timer: public soar_module::timer
 };
 
 
-//////////////////////////////////////////////////////////
-// EpMem Statements
-//////////////////////////////////////////////////////////
 
-
-// E587: AM: Statement container for the master processors (keeps the working memory graph)
-class epmem_master_statement_container: public soar_module::sqlite_statement_container
-{
-public:
-	soar_module::sqlite_statement *add_time;
-
-	// node_unique management
-	soar_module::sqlite_statement *add_node_unique;
-	soar_module::sqlite_statement *find_node_unique;
-	soar_module::sqlite_statement *get_node_unique;
-
-	// edge_unique management
-	soar_module::sqlite_statement *add_edge_unique;
-	soar_module::sqlite_statement *find_edge_unique;
-	soar_module::sqlite_statement *find_edge_unique_shared;
-	soar_module::sqlite_statement *get_edge_unique;
-	
-	// get descriptions by id
-	soar_module::sqlite_statement *get_node_desc;
-	soar_module::sqlite_statement *get_edge_desc;
-
-	// LTI and promotion management
-	soar_module::sqlite_statement *promote_id;
-	soar_module::sqlite_statement *find_lti;
-	soar_module::sqlite_statement *find_lti_promotion_time;
-
-	// Hash get/set
-	soar_module::sqlite_statement *hash_get;
-	soar_module::sqlite_statement *hash_add;
-	
-	// Variables get/set
-	soar_module::sqlite_statement *var_get;
-	soar_module::sqlite_statement *var_set;
-
-	// Database management
-	soar_module::sqlite_statement *begin;
-	soar_module::sqlite_statement *commit;
-	soar_module::sqlite_statement *rollback;
-
-	// Go between episodes
-	soar_module::sqlite_statement *valid_episode;
-	soar_module::sqlite_statement *next_episode;
-	soar_module::sqlite_statement *prev_episode;
-
-
-	//
-	epmem_master_statement_container( agent *new_agent );
-};
-
-class epmem_common_statement_container: public soar_module::sqlite_statement_container
-{
-	public:
-//		soar_module::sqlite_statement *begin;
-//		soar_module::sqlite_statement *commit;
-//		soar_module::sqlite_statement *rollback;
-
-		// E587: AM: Get/Set Variables
-		soar_module::sqlite_statement *var_get;
-		soar_module::sqlite_statement *var_set;
-
-		// E587: AM: Get/Add Symbol Hash
-		//soar_module::sqlite_statement *hash_get;
-		//soar_module::sqlite_statement *hash_add;
-
-		// RIT stuff
-		soar_module::sqlite_statement *rit_add_left;
-		soar_module::sqlite_statement *rit_truncate_left;
-		soar_module::sqlite_statement *rit_add_right;
-		soar_module::sqlite_statement *rit_truncate_right;
-
-
-		epmem_common_statement_container( agent *new_agent );
-};
-
-class epmem_graph_statement_container: public soar_module::sqlite_statement_container
-{
-	public:
-		soar_module::sqlite_statement *add_time;
-		//
-
-		soar_module::sqlite_statement *add_node_now;
-		soar_module::sqlite_statement *delete_node_now;
-		soar_module::sqlite_statement *add_node_point;
-		soar_module::sqlite_statement *add_node_range;
-
-		soar_module::sqlite_statement *add_node_unique;
-		soar_module::sqlite_statement *add_node_unique_with_id;
-		soar_module::sqlite_statement *find_node_unique;
-		soar_module::sqlite_statement *get_node_unique;
-
-		//
-
-		soar_module::sqlite_statement *add_edge_now;
-		soar_module::sqlite_statement *delete_edge_now;
-		soar_module::sqlite_statement *add_edge_point;
-		soar_module::sqlite_statement *add_edge_range;
-
-		soar_module::sqlite_statement *add_edge_unique;
-		soar_module::sqlite_statement *add_edge_unique_with_id;
-		soar_module::sqlite_statement *find_edge_unique;
-		soar_module::sqlite_statement *find_edge_unique_shared;
-		soar_module::sqlite_statement *get_edge_unique;
-
-
-		soar_module::sqlite_statement *get_node_ids;
-		soar_module::sqlite_statement *get_edge_ids;
-
-		//
-
-		soar_module::sqlite_statement *update_edge_unique_last;
-		
-	// LTI and promotion management
-	//soar_module::sqlite_statement *promote_id;
-	//soar_module::sqlite_statement *find_lti;
-	//soar_module::sqlite_statement *find_lti_promotion_time;
-		//
-
-		soar_module::sqlite_statement_pool *pool_find_edge_queries[2][2];
-		soar_module::sqlite_statement_pool *pool_find_interval_queries[2][2][3];
-		soar_module::sqlite_statement_pool *pool_find_lti_queries[2][3];
-		soar_module::sqlite_statement_pool *pool_dummy;
-
-		//
-		
-		epmem_graph_statement_container( agent *new_agent );
-};
 
 
 //////////////////////////////////////////////////////////
@@ -446,23 +312,7 @@ typedef std::vector<epmem_time_id> epmem_time_list;
 // represents a list of wmes
 typedef std::list<wme *> epmem_wme_list;
 
-// keeping state for multiple RIT's
-typedef struct epmem_rit_state_param_struct
-{
-	soar_module::integer_stat *stat;
-	epmem_variable_key var_key;
-} epmem_rit_state_param;
 
-typedef struct epmem_rit_state_struct
-{
-	epmem_rit_state_param offset;
-	epmem_rit_state_param leftroot;
-	epmem_rit_state_param rightroot;
-	epmem_rit_state_param minstep;
-
-	soar_module::timer *timer;
-	soar_module::sqlite_statement *add_query;	
-} epmem_rit_state;
 
 //////////////////////////////////////////////////////////
 // Soar Integration Types
@@ -566,9 +416,6 @@ extern void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::
 //////////////////////////////////////////////////////////
 // Episodic Memory Search
 //////////////////////////////////////////////////////////
-
-// E587: AM: XXX: temporary hack until this function is moved elsewhere
-void epmem_rit_insert_interval( agent *my_agent, int64_t lower, int64_t upper, epmem_node_id id, epmem_rit_state *rit_state );
 
 struct epmem_node_unique{
 	long id;

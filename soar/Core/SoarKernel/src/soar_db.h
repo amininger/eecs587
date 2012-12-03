@@ -544,14 +544,11 @@ namespace soar_module
 			}
 	};
 
+	// E587: AM: Removed need for the agent so the workers can use it
 	class sqlite_statement_pool
 	{
 		protected:
-			#ifdef USE_MEM_POOL_ALLOCATORS
-			typedef std::list< pooled_sqlite_statement*, soar_memory_pool_allocator< pooled_sqlite_statement* > > sqlite_statement_pool_pool;
-			#else
 			typedef std::list< pooled_sqlite_statement* > sqlite_statement_pool_pool;
-			#endif
 
 			sqlite_statement_pool_pool* statements;
 
@@ -561,12 +558,12 @@ namespace soar_module
 		public:
 			sqlite_statement_pool( agent* my_agent, sqlite_database* new_db, const char* new_sql ): my_db( new_db ), my_sql( new_sql )
 			{
-				#ifdef USE_MEM_POOL_ALLOCATORS
-				statements = new sqlite_statement_pool_pool( my_agent );
-				#else
-				my_agent;
 				statements = new sqlite_statement_pool_pool();
-				#endif
+			}
+
+			sqlite_statement_pool( sqlite_database* new_db, const char* new_sql ): my_db( new_db ), my_sql( new_sql )
+			{
+				statements = new sqlite_statement_pool_pool();
 			}
 
 			~sqlite_statement_pool()
@@ -609,6 +606,73 @@ namespace soar_module
 				return return_val;
 			}
 	};
+
+	// E587: AM: XXX: Original version
+	//class sqlite_statement_pool
+	//{
+	//	protected:
+	//		#ifdef USE_MEM_POOL_ALLOCATORS
+	//		typedef std::list< pooled_sqlite_statement*, soar_memory_pool_allocator< pooled_sqlite_statement* > > sqlite_statement_pool_pool;
+	//		#else
+	//		typedef std::list< pooled_sqlite_statement* > sqlite_statement_pool_pool;
+	//		#endif
+
+	//		sqlite_statement_pool_pool* statements;
+
+	//		sqlite_database* my_db;
+	//		const char* my_sql;
+
+	//	public:
+	//		sqlite_statement_pool( agent* my_agent, sqlite_database* new_db, const char* new_sql ): my_db( new_db ), my_sql( new_sql )
+	//		{
+	//			#ifdef USE_MEM_POOL_ALLOCATORS
+	//			statements = new sqlite_statement_pool_pool( my_agent );
+	//			#else
+	//			my_agent;
+	//			statements = new sqlite_statement_pool_pool();
+	//			#endif
+	//		}
+
+	//		~sqlite_statement_pool()
+	//		{
+	//			for ( sqlite_statement_pool_pool::iterator it=statements->begin(); it!=statements->end(); it++ )
+	//			{
+	//				delete (*it);
+	//			}
+
+	//			delete statements;
+	//		}
+
+	//		void release( pooled_sqlite_statement* stmt )
+	//		{
+	//			stmt->reinitialize();
+	//			statements->push_front( stmt );
+	//		}
+
+	//		pooled_sqlite_statement* request( timer* query_timer = NULL )
+	//		{
+	//			pooled_sqlite_statement* return_val = NULL;
+
+	//			if ( statements->empty() )
+	//			{
+	//				// make new (assigns timer)
+	//				return_val = new pooled_sqlite_statement( this, my_db, my_sql, query_timer );
+
+	//				// ready to use
+	//				return_val->prepare();
+	//			}
+	//			else
+	//			{
+	//				return_val = statements->front();
+	//				statements->pop_front();
+
+	//				// assign timer
+	//				return_val->set_timer( query_timer );
+	//			}
+
+	//			return return_val;
+	//		}
+	//};
 }
 
 #endif
