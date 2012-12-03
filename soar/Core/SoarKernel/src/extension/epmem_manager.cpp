@@ -33,6 +33,12 @@ void epmem_manager::initialize(int argc, char *argv[],
 
 
 //where to add new episode
+
+int epmem_manager::calc_ep_size(new_episode* episode)
+{
+    
+}
+
 void epmem_manager::add_new_episode(new_episode* episode, agent *my_agent)
 {
     if (id == FIRST_NODE)
@@ -113,6 +119,8 @@ void epmem_manager::respond_to_cmd(agent *my_agent)
     epmem_respond_to_cmd(my_agent); //todo replace
 }
 
+
+void
 
 
 
