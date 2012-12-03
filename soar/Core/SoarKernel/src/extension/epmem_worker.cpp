@@ -595,6 +595,51 @@ void epmem_worker::add_new_episode(new_episode* episode){
 	remove_old_edges(episode);
 }
 
+void epmem_worker::close(){
+		// de-allocate statement pools
+		{
+			int j, k, m;
+
+			for ( j=EPMEM_RIT_STATE_NODE; j<=EPMEM_RIT_STATE_EDGE; j++ )
+			{
+				for ( k=0; k<=1; k++ )
+				{
+					// E587: AM:
+					delete epmem_stmts_graph->pool_find_edge_queries[ j ][ k ];
+				}
+			}
+
+			for ( j=EPMEM_RIT_STATE_NODE; j<=EPMEM_RIT_STATE_EDGE; j++ )
+			{
+				for ( k=EPMEM_RANGE_START; k<=EPMEM_RANGE_END; k++ )
+				{
+					for( m=EPMEM_RANGE_EP; m<=EPMEM_RANGE_POINT; m++ )
+					{
+						// E587: AM:
+						delete epmem_stmts_graph->pool_find_interval_queries[ j ][ k ][ m ];
+					}
+				}
+			}
+
+			for ( k=EPMEM_RANGE_START; k<=EPMEM_RANGE_END; k++ )
+			{
+				for( m=EPMEM_RANGE_EP; m<=EPMEM_RANGE_POINT; m++ )
+				{
+					delete epmem_stmts_graph->pool_find_lti_queries[ k ][ m ];
+				}
+			}
+			delete epmem_stmts_graph->pool_dummy;
+		}
+
+
+		delete epmem_stmts_common;
+		delete epmem_stmts_graph;
+
+		if(epmem_db->get_status() == soar_module::connected){
+			epmem_db->disconnect();
+		}
+}
+
 void epmem_worker::add_new_nodes(new_episode* episode){
 	// Add all the new nodes to the database
 	for(int i = 0; i < episode->num_added_nodes; i++){

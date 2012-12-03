@@ -49,6 +49,14 @@ public:
 
 	new_episode* remove_oldest_episode();
 
+	void get_nodes_at_episode(epmem_time_id time, std::vector<epmem_node_id>* node_ids);
+
+	void get_edges_at_episode(epmem_time_id time, std::vector<epmem_node_id>* edge_ids);
+
+
+
+	void close();
+
 	void prep_rit(epmem_time_id time1, epmem_time_id time2, int structure_type);
 
 	void clear_rit();

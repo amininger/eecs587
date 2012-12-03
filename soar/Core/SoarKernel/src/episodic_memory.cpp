@@ -705,53 +705,18 @@ void epmem_set_variable( agent *my_agent, epmem_variable_key variable_id, int64_
  **************************************************************************/
 void epmem_close( agent *my_agent )
 {
+
 	// E587: AM:
-	if ( my_agent->epmem_worker_p->epmem_db->get_status() == soar_module::connected )
+	if ( my_agent->epmem_db->get_status() == soar_module::connected )
 	{
+		my_agent->epmem_worker_p->close();
+		delete my_agent->epmem_worker_p;
+
 		// if lazy, commit
 		if ( my_agent->epmem_params->lazy_commit->get_value() == soar_module::on )
 		{
 			my_agent->epmem_stmts_master->commit->execute( soar_module::op_reinit );
 		}
-
-		// de-allocate statement pools
-		{
-			int j, k, m;
-
-			for ( j=EPMEM_RIT_STATE_NODE; j<=EPMEM_RIT_STATE_EDGE; j++ )
-			{
-				for ( k=0; k<=1; k++ )
-				{
-					// E587: AM:
-					delete my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_edge_queries[ j ][ k ];
-				}
-			}
-
-			for ( j=EPMEM_RIT_STATE_NODE; j<=EPMEM_RIT_STATE_EDGE; j++ )
-			{
-				for ( k=EPMEM_RANGE_START; k<=EPMEM_RANGE_END; k++ )
-				{
-					for( m=EPMEM_RANGE_EP; m<=EPMEM_RANGE_POINT; m++ )
-					{
-						// E587: AM:
-						delete my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_interval_queries[ j ][ k ][ m ];
-					}
-				}
-			}
-
-			for ( k=EPMEM_RANGE_START; k<=EPMEM_RANGE_END; k++ )
-			{
-				for( m=EPMEM_RANGE_EP; m<=EPMEM_RANGE_POINT; m++ )
-				{
-					delete my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_lti_queries[ k ][ m ];
-				}
-			}
-
-			delete my_agent->epmem_worker_p->epmem_stmts_graph->pool_dummy;
-		}
-
-		// de-allocate statements
-		delete my_agent->epmem_worker_p;
 
 		// de-allocate local data structures
 		{
@@ -786,9 +751,7 @@ void epmem_close( agent *my_agent )
 		}
 
 		delete my_agent->epmem_stmts_master;
-		if(my_agent->epmem_db->get_status() == soar_module::connected){
-			my_agent->epmem_db->disconnect();
-		}
+		my_agent->epmem_db->disconnect();
 	}
 
 #ifdef EPMEM_EXPERIMENT
@@ -1294,27 +1257,22 @@ epmem_hash_id epmem_temporal_hash( agent *my_agent, Symbol *sym, bool add_on_fai
 			{
 				// E587: AM:
 				my_agent->epmem_stmts_master->hash_add->bind_int( 1, sym->common.symbol_type );
-				//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int(1, sym->common.symbol_type);
 				switch ( sym->common.symbol_type )
 				{
 					case SYM_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_text( 2, static_cast<const char *>( sym->sc.name ) );
-						//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_text( 2, static_cast<const char *>( sym->sc.name ) );
 						break;
 
 					case INT_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_int( 2, sym->ic.value );
-						//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_int( 2, sym->ic.value );
 						break;
 
 					case FLOAT_CONSTANT_SYMBOL_TYPE:
 						my_agent->epmem_stmts_master->hash_add->bind_double( 2, sym->fc.value );
-						//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->bind_double( 2, sym->fc.value );
 						break;
 				}
 
 				my_agent->epmem_stmts_master->hash_add->execute( soar_module::op_reinit );
-				//my_agent->epmem_worker_p->epmem_stmts_common->hash_add->execute( soar_module::op_reinit );
 				return_val = static_cast<epmem_hash_id>( my_agent->epmem_db->last_insert_rowid() );
 			}
 
@@ -1361,12 +1319,6 @@ inline void _epmem_promote_id( agent* my_agent, Symbol* id, epmem_time_id t )
 	my_agent->epmem_stmts_master->promote_id->bind_int( 3, static_cast<uint64_t>( id->id.name_number ) );
 	my_agent->epmem_stmts_master->promote_id->bind_int( 4, t );
 	my_agent->epmem_stmts_master->promote_id->execute( soar_module::op_reinit );
-
-	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 1, id->id.epmem_id );
-	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 2, static_cast<uint64_t>( id->id.name_letter ) );
-	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 3, static_cast<uint64_t>( id->id.name_number ) );
-	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->bind_int( 4, t );
-	//my_agent->epmem_worker_p->epmem_stmts_graph->promote_id->execute( soar_module::op_reinit );
 }
 
 // three cases for sharing ids amongst identifiers in two passes:
