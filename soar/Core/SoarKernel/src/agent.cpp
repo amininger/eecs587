@@ -65,7 +65,8 @@
 =================================================================== */
 
 void init_soar_agent(agent* thisAgent) {
-
+    
+    
   /* JC ADDED: initialize the rhs function linked list */
   thisAgent->rhs_functions = NIL;
 
@@ -138,8 +139,37 @@ void init_soar_agent(agent* thisAgent) {
 
   /* RDF: For gSKI */
   init_agent_memory(thisAgent);
+
+  //E587: JK: May belong better somewhere else
+  /*
+  int argc = 3;
+  char **argv; //fill with params
+  MPI::Init(argc, argv);
+  int id = MPI::COMM_WORLD.Get_rank();
+  if (id != 0)
+  {
+      epmem_manager* ep_man = new epmem_manager();
+      //initialize will also send processor into message handling loop
+      ep_man->initialize(thisAgent->epmem_params);
+  }
+  */
   /* END */
 
+}
+
+// E587: JK: general message send to manager
+void send_epmem_msg(char * data, agent* my_agent, int size, EPMEM_MSG_TYPE type)
+{
+    //add header lengths
+    int msg_size = size + sizeof(int)*2 + sizeof sizeof(EPMEM_MSG_TYPE);
+    epmem_msg *msg = (epmem_msg*)malloc(size);
+    msg->source = 0;
+    msg->size = msg_size;
+    msg->type = type;
+    memcpy(msg->data, data, size);
+    MPI::COMM_WORLD.Send(msg, msg_size, MPI::CHAR, 1, 1);
+
+    delete msg;
 }
 
 agent * create_soar_agent (char * agent_name) {                                          /* loop index */

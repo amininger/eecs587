@@ -30,6 +30,9 @@
 #include "thread_Event.h"
 #include "ElementXML.h"
 
+//E587: JK:
+//#include "mpi.h"
+
 void PrintCallbackHandler(sml::smlPrintEventId, void*, sml::Agent*, char const*);
 void XMLCallbackHandler(sml::smlXMLEventId, void*, sml::Agent*, sml::ClientXML*);
 void InterruptCallbackHandler(sml::smlSystemEventId, void*, sml::Kernel*);
