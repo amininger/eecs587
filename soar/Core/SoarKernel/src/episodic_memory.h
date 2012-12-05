@@ -419,10 +419,10 @@ extern void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::
 
 struct epmem_node_unique{
 	static const int NUM_LONGS = 4;
-	long id;
-	long parent_id;
-	long attribute;
-	long value;
+	int64_t id;
+	int64_t parent_id;
+	int64_t attribute;
+	int64_t value;
 	epmem_node_unique(){}
 	epmem_node_unique(soar_module::sqlite_statement* stmt)
 		:	id(stmt->column_int(0)), parent_id(stmt->column_int(1)), 
@@ -431,10 +431,10 @@ struct epmem_node_unique{
 
 struct epmem_edge_unique{
 	static const int NUM_LONGS = 4;
-	long id;
-	long parent_id;
-	long attribute;
-	long child_id;
+	int64_t id;
+	int64_t parent_id;
+	int64_t attribute;
+	int64_t child_id;
 	epmem_edge_unique(){}
 	epmem_edge_unique(soar_module::sqlite_statement* stmt)
 		:	id(stmt->column_int(0)), parent_id(stmt->column_int(1)), 

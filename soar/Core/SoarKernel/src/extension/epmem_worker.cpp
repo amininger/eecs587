@@ -572,7 +572,7 @@ void epmem_worker::initialize(epmem_param_container* epmem_params){
 	}
 }
 
-void epmem_worker::add_new_episode(new_episode* episode){
+void epmem_worker::add_epmem_episode_diff(epmem_episode_diff* episode){
 	// Add the time to the database
 	epmem_stmts_graph->add_time->bind_int(1, episode->time);
 	epmem_stmts_graph->add_time->execute(soar_module::op_reinit);
@@ -632,7 +632,7 @@ void epmem_worker::close(){
 		}
 }
 
-void epmem_worker::add_new_nodes(new_episode* episode){
+void epmem_worker::add_new_nodes(epmem_episode_diff* episode){
 	// Add all the new nodes to the database
 	for(int i = 0; i < episode->num_added_nodes; i++){
 		epmem_node_unique* node = &episode->added_nodes[i];
@@ -658,7 +658,7 @@ void epmem_worker::add_new_nodes(new_episode* episode){
 	}
 }
 
-void epmem_worker::add_new_edges(new_episode* episode){
+void epmem_worker::add_new_edges(epmem_episode_diff* episode){
 	// Add all the new edges to the database
 	for(int i = 0; i < episode->num_added_edges; i++){
 		epmem_edge_unique* edge = &episode->added_edges[i];
@@ -690,7 +690,7 @@ void epmem_worker::add_new_edges(new_episode* episode){
 	}
 }
 
-void epmem_worker::remove_old_nodes(new_episode* episode){
+void epmem_worker::remove_old_nodes(epmem_episode_diff* episode){
 	// Remove nodes from the current episode
 	for(int i = 0; i < episode->num_removed_nodes; i++){
 		epmem_node_unique* node = &episode->removed_nodes[i];
@@ -723,7 +723,7 @@ void epmem_worker::remove_old_nodes(new_episode* episode){
 	}
 }
 
-void epmem_worker::remove_old_edges(new_episode* episode){
+void epmem_worker::remove_old_edges(epmem_episode_diff* episode){
 		// Remove episodes from the current episode
 	for(int i = 0; i < episode->num_removed_edges; i++){
 		epmem_edge_unique* edge = &episode->removed_edges[i];
@@ -756,7 +756,7 @@ void epmem_worker::remove_old_edges(new_episode* episode){
 	}
 }
 
-new_episode* epmem_worker::remove_oldest_episode(){
+epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 	soar_module::sqlite_statement get_min_time(epmem_db, "SELECT MIN(id) FROM times");
 	soar_module::sqlite_statement get_max_time(epmem_db, "SELECT MAX(id) FROM times");
 
@@ -930,7 +930,7 @@ new_episode* epmem_worker::remove_oldest_episode(){
 		update_edge_range_start.execute();
 	}
 
-	new_episode* episode = new new_episode(min_time, nodes_to_add.size(), nodes_to_remove.size(), edges_to_add.size(), edges_to_remove.size());
+	epmem_episode_diff* episode = new epmem_episode_diff(min_time, nodes_to_add.size(), nodes_to_remove.size(), edges_to_add.size(), edges_to_remove.size());
 
 	// nodes_to_add
 	{
@@ -971,6 +971,19 @@ new_episode* epmem_worker::remove_oldest_episode(){
 	return episode;
 }
 
+epmem_episode* epmem_worker::get_episode(epmem_time_id time){
+	std::vector<epmem_node_id> node_ids;
+	std::vector<epmem_node_id> edge_ids;
+
+	get_nodes_at_episode(time, &node_ids);
+	get_edges_at_episode(time, &edge_ids);
+
+	epmem_episode* episode = new epmem_episode(time, node_ids.size(), edge_ids.size());
+	std::copy(node_ids.begin(), node_ids.end(), episode->nodes);
+	std::copy(edge_ids.begin(), edge_ids.end(), episode->edges);
+
+	return episode;
+}
 
 void epmem_worker::get_nodes_at_episode(epmem_time_id time, std::vector<epmem_node_id>* node_ids){
 	epmem_rit_prep_left_right(time, time, &epmem_rit_state_graph[EPMEM_RIT_STATE_NODE]);

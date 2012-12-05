@@ -167,7 +167,8 @@ void send_epmem_msg(char * data, agent* my_agent, int size, EPMEM_MSG_TYPE type)
     msg->size = msg_size;
     msg->type = type;
     memcpy(msg->data, data, size);
-    MPI::COMM_WORLD.Send(msg, msg_size, MPI::CHAR, 1, 1);
+
+     MPI::COMM_WORLD.Send(msg, msg_size, MPI::CHAR, 1, 1);
 
     delete msg;
 }

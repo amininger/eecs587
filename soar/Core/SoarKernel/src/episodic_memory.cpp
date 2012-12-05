@@ -1757,7 +1757,7 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 	}
 }
 
-void epmem_new_episode( agent *my_agent )
+void epmem_epmem_episode_diff( agent *my_agent )
 {
 	// if this is the first episode, initialize db components
 	if ( my_agent->epmem_db->get_status() == soar_module::disconnected )
@@ -1882,7 +1882,7 @@ void epmem_new_episode( agent *my_agent )
 		}
 		
 		// Allocate space for the new episode
-		new_episode* episode = new new_episode(time_counter, epmem_node.size(), num_node_removals, epmem_edge.size(), num_edge_removals);
+		epmem_episode_diff* episode = new epmem_episode_diff(time_counter, epmem_node.size(), num_node_removals, epmem_edge.size(), num_edge_removals);
 
 		// all inserts
 		{
@@ -1945,7 +1945,7 @@ void epmem_new_episode( agent *my_agent )
 		// Add the removed nodes to the episode
 		{
 			epmem_id_removal_map::iterator r;
-			// Go through and add the removal information to the new_episode
+			// Go through and add the removal information to the epmem_episode_diff
 			int cur_node = 0;
 			for(r = my_agent->epmem_node_removals->begin(); r != my_agent->epmem_node_removals->end(); r++){
 				if ( !r->second ){
@@ -1965,7 +1965,7 @@ void epmem_new_episode( agent *my_agent )
 
 			my_agent->epmem_node_removals->clear();
 
-			// Go through and add the removal information to the new_episode
+			// Go through and add the removal information to the epmem_episode_diff
 			int cur_edge = 0;
 			for(r = my_agent->epmem_edge_removals->begin(); r != my_agent->epmem_edge_removals->end(); r++){
 				if ( !r->second ){
@@ -2031,7 +2031,7 @@ void epmem_new_episode( agent *my_agent )
 			my_agent->epmem_wme_adds->clear();
 		}
 
-		my_agent->epmem_worker_p->add_new_episode(episode);
+		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
 		delete episode;
 	}
 
@@ -4321,12 +4321,12 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 //////////////////////////////////////////////////////////
 
 /***************************************************************************
- * Function     : epmem_consider_new_episode
+ * Function     : epmem_consider_epmem_episode_diff
  * Author		: Nate Derbinsky
  * Notes		: Based upon trigger/force parameter settings, potentially
  * 				  records a new episode
  **************************************************************************/
-bool epmem_consider_new_episode( agent *my_agent )
+bool epmem_consider_epmem_episode_diff( agent *my_agent )
 {
 	////////////////////////////////////////////////////////////////////////////
 	my_agent->epmem_timers->trigger->start();
@@ -4381,7 +4381,7 @@ bool epmem_consider_new_episode( agent *my_agent )
 
 	if ( new_memory )
 	{
-		epmem_new_episode( my_agent );
+		epmem_epmem_episode_diff( my_agent );
 	}
 
 	return new_memory;
@@ -4837,11 +4837,11 @@ void inline _epmem_exp( agent* my_agent )
 	epmem_exp_timer->reset();
 	epmem_exp_timer->start();
 	epmem_dc_wme_adds = -1;
-	bool new_episode = epmem_consider_new_episode( my_agent );
+	bool epmem_episode_diff = epmem_consider_epmem_episode_diff( my_agent );
 	epmem_exp_timer->stop();
 	c1 = epmem_exp_timer->value();
 
-	if ( new_episode )
+	if ( epmem_episode_diff )
 	{
 		Symbol* queries = make_sym_constant( my_agent, "queries" );
 		Symbol* reps = make_sym_constant( my_agent, "reps" );
@@ -5209,7 +5209,7 @@ void epmem_go( agent *my_agent, bool allow_store )
 
 	if ( allow_store )
 	{
-		epmem_consider_new_episode( my_agent );
+		epmem_consider_epmem_episode_diff( my_agent );
 	}
 	epmem_respond_to_cmd( my_agent );
 	//E587: backup

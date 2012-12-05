@@ -27,7 +27,7 @@ class epmem_manager {
 public:
     epmem_manager();
     void initialize();//epmem_param_container* epmem_params);
-    //void add_new_episode(new_episode* episode, agent* my_agent);
+    //void add_epmem_episode_diff(epmem_episode_diff* episode, agent* my_agent);
     //void finalize();
     //void respond_to_cmd(agent *my_agent);
    
@@ -40,11 +40,11 @@ private:
     epmem_worker *epmem_worker_p;
     
     void update_windowSize(int newSize);
-    int calc_ep_size(new_episode* episode);
+    int calc_ep_size(epmem_episode_diff* episode);
     void manager_message_handler();
     void epmem_worker_message_handler();
-    void pass_episode(new_episode *episode); 
-    void received_episode(new_episode *episode);
+    void pass_episode(epmem_episode_diff *episode); 
+    void received_episode(epmem_episode_diff *episode);
     
 };
 
@@ -67,7 +67,7 @@ typedef enum
     resize_request,
     search,
     search_result,
-    terminate
+    terminate_search
 } EPMEM_MSG_TYPE;
 
 //message structure

@@ -1,14 +1,14 @@
 /*
- * new_episode.cpp
+ * epmem_episode_diff.cpp
  *
  *  Created on: Nov 28, 2012
  *      Author: aaron
  */
 
-#include "new_episode.h"
+#include "epmem_episode_diff.h"
 
 
-new_episode::new_episode(long time, int num_nodes_add, int num_nodes_remove, int num_edges_add, int num_edges_remove)
+epmem_episode_diff::epmem_episode_diff(int64_t time, int num_nodes_add, int num_nodes_remove, int num_edges_add, int num_edges_remove)
 : time(time), 
 	num_added_nodes(num_nodes_add), 
 	num_removed_nodes(num_nodes_remove),
@@ -18,9 +18,9 @@ new_episode::new_episode(long time, int num_nodes_add, int num_nodes_remove, int
 		buffer_size = 5 + epmem_node_unique::NUM_LONGS*(num_nodes_add + num_nodes_remove) + 
 			epmem_edge_unique::NUM_LONGS*(num_edges_add + num_edges_remove);
 
-	buffer = new long[buffer_size];
+	buffer = new int64_t[buffer_size];
 
-	long* addr = buffer;
+	int64_t* addr = buffer;
 
 	// Time information
 	*addr = time;
@@ -51,8 +51,8 @@ new_episode::new_episode(long time, int num_nodes_add, int num_nodes_remove, int
 	addr += epmem_edge_unique::NUM_LONGS * num_removed_edges;
 }
 
-new_episode::new_episode(long* buffer):buffer(buffer){
-	long* addr = buffer;
+epmem_episode_diff::epmem_episode_diff(int64_t* buffer):buffer(buffer){
+	int64_t* addr = buffer;
 
 	// Time information
 	time = *addr;
