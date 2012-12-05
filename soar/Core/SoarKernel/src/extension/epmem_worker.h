@@ -71,6 +71,8 @@ private:
 
   epmem_rit_state epmem_rit_state_graph[2];
 
+	epmem_time_id last_removal;
+
 
 	void add_new_nodes(new_episode* episode);
 

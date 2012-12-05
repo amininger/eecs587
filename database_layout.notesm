@@ -4,7 +4,7 @@ Database Setup:
 	{ascii_num}: ascii value of the given char
 	{ascii_chr}: the character
 	master: entirety
-	worker: entirety
+	worker: not on this
 <
 > lti
 	# When identifiers were promoted to lti's
@@ -27,6 +27,7 @@ Database Setup:
 	{sym_const}: constant value of the symbol
 	{sym_type}: type information (INT, FLOAT, STRING)
 	master: in its entirety
+	worker: not needed
 <
 > node_unique
 	# Stores a WME with a constant value (<a> ^att val)
@@ -134,3 +135,10 @@ WHERE f.child_id=?
 SELECT f.q0, h.sym_const, f.q1, h.sym_type, lti.letter, lti.num 
 FROM edge_unique f INNER JOIN temporal_symbol_hash h ON f.w=h.id LEFT JOIN lti ON (f.q1=lti.parent_id AND lti.time_id <= ?) 
 WHERE f.parent_id=?
+
+DELETE FROM node_unique WHERE child_id NOT IN (SELECT id FROM node_now UNION SELECT id FROM node_range UNION SELECT id FROM node_point)
+
+
+SELECT child_id FROM node_unique WHERE child_id NOT IN (SELECT id FROM node_now UNION SELECT id FROM node_range UNION SELECT id FROM node_point)
+
+select child_id id from node_unique where node_unique.child_id NOT IN (select id from node_now UNION select id from node_range UNION select id from node_point)

@@ -1836,9 +1836,53 @@ void epmem_new_episode( agent *my_agent )
 				}
 			}
 		}
+
+		int num_node_removals = 0;
+		int num_edge_removals = 0;
 		
-		new_episode* episode = new new_episode();
-		episode->time = time_counter;
+		// First calculate how many nodes/edges will be removed
+		{
+			epmem_id_removal_map::iterator r;
+			epmem_time_id range_start;
+			epmem_time_id range_end;
+
+#ifdef EPMEM_EXPERIMENT
+			epmem_dc_interval_removes = 0;
+#endif
+			
+			// Removing edges, first count the number, then store them in the array
+			for(r = my_agent->epmem_edge_removals->begin(); r != my_agent->epmem_edge_removals->end(); r++){
+				if ( !r->second ){
+					continue;
+				}
+				num_edge_removals++;
+
+#ifdef EPMEM_EXPERIMENT
+					epmem_dc_interval_removes++;
+#endif
+
+				// update max
+				(*my_agent->epmem_edge_maxes)[ r->first - 1 ] = true;
+			}
+
+			// Removing nodes, first count the number, then store them in the array
+			for(r = my_agent->epmem_node_removals->begin(); r != my_agent->epmem_node_removals->end(); r++){
+				if ( !r->second ){
+					continue;
+				}
+				num_node_removals++;
+
+#ifdef EPMEM_EXPERIMENT
+					epmem_dc_interval_removes++;
+#endif
+
+				// update max
+				(*my_agent->epmem_node_maxes)[ r->first - 1 ] = true;
+			}
+		}
+		
+		// Allocate space for the new episode
+		new_episode* episode = new new_episode(time_counter, epmem_node.size(), num_node_removals, epmem_edge.size(), num_edge_removals);
 
 		// all inserts
 		{
@@ -1848,13 +1892,10 @@ void epmem_new_episode( agent *my_agent )
 			epmem_dc_interval_inserts = epmem_node.size() + epmem_edge.size();
 #endif
 
-			
-			episode->num_added_nodes = epmem_node.size();
-			episode->added_nodes = new epmem_node_unique[episode->num_added_nodes];
 
 			int cur_node = 0;
 
-			// nodes
+			// Add the added nodes to the episode
 			while ( !epmem_node.empty() )
 			{
 				temp_node =& epmem_node.front();
@@ -1875,9 +1916,6 @@ void epmem_new_episode( agent *my_agent )
 
 				epmem_node.pop();
 			}
-			
-			episode->num_added_edges = epmem_edge.size();
-			episode->added_edges = new epmem_edge_unique[episode->num_added_edges];
 
 			int cur_edge = 0;
 
@@ -1904,34 +1942,9 @@ void epmem_new_episode( agent *my_agent )
 			}
 		}
 
-		// all removals
+		// Add the removed nodes to the episode
 		{
 			epmem_id_removal_map::iterator r;
-			epmem_time_id range_start;
-			epmem_time_id range_end;
-
-#ifdef EPMEM_EXPERIMENT
-			epmem_dc_interval_removes = 0;
-#endif
-
-			// Removing nodes, first count the number, then store them in the array
-			episode->num_removed_nodes = 0;
-			for(r = my_agent->epmem_node_removals->begin(); r != my_agent->epmem_node_removals->end(); r++){
-				if ( !r->second ){
-					continue;
-				}
-				episode->num_removed_nodes++;
-
-#ifdef EPMEM_EXPERIMENT
-					epmem_dc_interval_removes++;
-#endif
-
-				// update max
-				(*my_agent->epmem_node_maxes)[ r->first - 1 ] = true;
-			}
-
-			episode->removed_nodes = new epmem_node_unique[episode->num_removed_nodes];
-
 			// Go through and add the removal information to the new_episode
 			int cur_node = 0;
 			for(r = my_agent->epmem_node_removals->begin(); r != my_agent->epmem_node_removals->end(); r++){
@@ -1951,25 +1964,6 @@ void epmem_new_episode( agent *my_agent )
 			}
 
 			my_agent->epmem_node_removals->clear();
-
-
-			// Removing edges, first count the number, then store them in the array
-			episode->num_removed_edges = 0;
-			for(r = my_agent->epmem_edge_removals->begin(); r != my_agent->epmem_edge_removals->end(); r++){
-				if ( !r->second ){
-					continue;
-				}
-				episode->num_removed_edges++;
-
-#ifdef EPMEM_EXPERIMENT
-					epmem_dc_interval_removes++;
-#endif
-
-				// update max
-				(*my_agent->epmem_edge_maxes)[ r->first - 1 ] = true;
-			}
-
-			episode->removed_edges = new epmem_edge_unique[episode->num_removed_edges];
 
 			// Go through and add the removal information to the new_episode
 			int cur_edge = 0;
@@ -2038,10 +2032,6 @@ void epmem_new_episode( agent *my_agent )
 		}
 
 		my_agent->epmem_worker_p->add_new_episode(episode);
-		delete [] episode->added_nodes;
-		delete [] episode->added_edges;
-		delete [] episode->removed_edges;
-		delete [] episode->removed_nodes;
 		delete episode;
 	}
 
