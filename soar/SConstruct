@@ -120,14 +120,14 @@ print "Building intermediates to", env['BUILD_DIR']
 print "Installing targets to", env['OUT_DIR']
 
 config = Configure(env)
-
+#E587 : JK compile mpi
 if 'g++' in env['CXX']:
 	compiler = 'g++'
 elif env['CXX'].endswith('cl') or (env['CXX'] == '$CC' and env['CC'].endswith('cl')):
 	compiler = 'msvc'
 else:
 	compiler = os.path.split(env['CXX'])[1]
-
+#compiler = 'mpic++'
 Export('compiler')
 
 cflags = []

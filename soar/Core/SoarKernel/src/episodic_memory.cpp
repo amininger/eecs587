@@ -4693,6 +4693,7 @@ void epmem_respond_to_cmd( agent *my_agent )
 			meta_wmes.clear();
 
 			// process command
+//E587: JK: now we know cue is good can have commands sent to epmem_manager
 			if ( good_cue )
 			{
 				// retrieve
@@ -4793,7 +4794,7 @@ void epmem_respond_to_cmd( agent *my_agent )
 		{
 			delete cmds;
 		}
-
+		
 		state = state->id.higher_goal;
 	}
 
