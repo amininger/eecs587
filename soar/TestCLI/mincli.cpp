@@ -8,6 +8,8 @@
 #include <sstream>
 #include <fstream>
 #include "sml_Client.h"
+#include "mpi.h"
+//#include "../Core/SoarKernel/src/extension/emp_mpi.h"
 
 using namespace std;
 using namespace sml;
@@ -197,6 +199,23 @@ string log_handler(smlRhsEventId id, void *userdata, Agent *agent, char const *f
 }
 
 int main(int argc, char *argv[]) {
+    // E587 JK parallelize!!
+    MPI::Init(argc, argv); //move
+    int id = MPI::COMM_WORLD.Get_rank();
+    if (id > 0)//AGENT_ID)
+    {
+	//emp_mpi* em = new emp_mpi();
+	//em->init();
+	//epmem_manager * ep_man = new epmem_manager();
+	//start processing
+	//ep_man->initialize(); 
+	cout << "Processor " << id << " online" << endl;
+	while(1){}
+	//must have terminated
+	//delete epman;
+    }
+    if (id == 0){//AGENT_ID){
+	cout << "Agent Processor " << id << " online" << endl;
 	int i, port = 0;
 	bool listen = false, parse_error = false, interactive = true;
 	const char *agentname = "soar";
@@ -276,5 +295,7 @@ int main(int argc, char *argv[]) {
 	}
 	kernel->Shutdown();
 	delete kernel;
-	return 0;
+    }
+    MPI::Finalize();
+    return 0;
 }

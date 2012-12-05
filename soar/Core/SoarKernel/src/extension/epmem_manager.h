@@ -26,7 +26,7 @@ class epmem_manager;
 class epmem_manager {
 public:
     epmem_manager();
-    void initialize(epmem_param_container* epmem_params);
+    void initialize();//epmem_param_container* epmem_params);
     //void add_new_episode(new_episode* episode, agent* my_agent);
     //void finalize();
     //void respond_to_cmd(agent *my_agent);

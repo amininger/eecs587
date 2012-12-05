@@ -40,3 +40,4 @@
 #include "src/extension/epmem_sql_containers.cpp"
 // E587: JK: Include
 #include "src/extension/epmem_manager.cpp"
+#include "src/extension/emp_mpi.cpp"

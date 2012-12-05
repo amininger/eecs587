@@ -40,7 +40,7 @@ epmem_manager::epmem_manager()
  * @Notes    : initialize id, numProcs, windowSize, and worker
  *             call appropriate handler functions for processor
  **************************************************************************/
-void epmem_manager::initialize(epmem_param_container* epmem_params)
+void epmem_manager::initialize()//epmem_param_container* epmem_params)
 {
     //this should be initialized early by agent
     //MPI::Init(argc, argv); //move
@@ -72,7 +72,8 @@ void epmem_manager::initialize(epmem_param_container* epmem_params)
 	    return;
 	}
 	// initalize epmem_worker
-	epmem_worker_p->initialize(epmem_params);
+	// JK COMMENT OUT FOR NOW
+	//epmem_worker_p->initialize(epmem_params); 
 	//handle all messages/commands to this worker processor
 	epmem_worker_message_handler();
 	break;
@@ -181,7 +182,7 @@ void epmem_manager::finalize()
  /*
 void epmem_manager::respond_to_cmd(agent *my_agent)
 {
-    //epmem_respond_to_cmd(my_agent); //todo replace
+    //epmem_respond_to_cmd(my_agent); 
 }
  */
 
@@ -219,10 +220,10 @@ void epmem_manager::manager_message_handler()
 	
 	//switch on message type can be :
 	//      new_ep: need to add new episode
-	//      resize_window: need to adjust window size
+	//      resize_request: need to adjust window size
 	//      search:  handle epmem search command
-
-	//TODO handle correctly
+	//      search_result:  get results from workers processors
+	
 	switch(msg->type)
 	{
 	case new_ep:
