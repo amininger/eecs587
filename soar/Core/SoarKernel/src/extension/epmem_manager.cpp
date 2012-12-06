@@ -112,7 +112,7 @@ void epmem_manager::pass_episode(new_episode *episode)
     epmem_msg *msg = (epmem_msg*)malloc(size);
     msg->source = id;
     msg->size = size;
-    msg->type = new_ep;
+    msg->type = NEW_EP;
     memcpy(msg->data, episode, ep_size);
     MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, id+1, 1);
     
@@ -226,7 +226,7 @@ void epmem_manager::manager_message_handler()
 	
 	switch(msg->type)
 	{
-	case new_ep:
+	case NEW_EP:
 	{
 	    new_episode *episode = (new_episode*)msg->data;
 	    if (dataSize != calc_ep_size(episode))
@@ -239,22 +239,89 @@ void epmem_manager::manager_message_handler()
 	    
 	    break;
 	}
-	case resize_request:
+	case RESIZE_REQUEST:
 	{
 	    //TODO
 	    
 	    break;
 	}
-	case search:
+	case SEARCH:
 	{
 	    // Broadcast search request to all workers
+	    // dont send to agent!
 	    MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
 	    
 	    break;
 	}
-	case search_result:
+	case SEARCH_RESULT:
 	{
-	    // TODO
+	    //first search results, set as temporary best
+	    query_rsp_data *rsp = (query_rsp_data*)msg->data;
+	    
+	    /*
+	    epmem_time_id best_episode = rsp->best_episode;
+	    double best_score =rsp->best_score;
+	    bool best_graph_matched =rsp->best_graph_matched;
+	    long int best_cardinality =rsp->best_cardinality;
+	    double perfect_score =rsp->perfect_score;
+	    bool do_graph_match =rsp->do_graph_match;
+	    */
+	    int best_size = buffSize;
+	    epmem_msg *best_msg = (epmem_msg*) malloc(MAX_EPMEM_MSG_SIZE);
+	    query_rsp_data *best_rsp = (query_rsp_data*)best_msg->data;
+	    memcpy(best_msg, msg, best_size);
+	    bool best_found = false;
+	    int current_best = id;
+	    int received = 1;
+	    //if graph match found by first worker, this is best
+	    /* for now just wait for all responses 
+	    if (best_msg->source == 2 && 
+		best_rsp->best_graph_matched && 
+		best_rsp->do_graph_match)
+		best_found = true;
+	    */
+	    while(!best_found && (received < (numProcs-2)))
+	    {
+		//blocking probe call (unknown message size)
+		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
+		
+		//get source and size of incoming message
+		buffSize = status.Get_count(MPI::CHAR);
+		src = status.Get_source();
+		MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 1, status);
+		received++;
+		//only handle search results now
+		if (msg->type != SEARCH_RESULT)
+		    continue;
+		rsp = (query_rsp_data*)msg->data;
+		// result is better if:
+		//     first to find episode
+		//     score is better
+		//     score is same but lower id
+		//     graph match on lower id
+		//     first graph match
+		if (rsp->best_episode == EPMEM_MEMID_NONE &&
+		     best_rsp->best_episode != EPMEM_MEMID_NONE)
+		    continue;
+		if ((rsp->best_episode != EPMEM_MEMID_NONE &&
+		     best_rsp->best_episode == EPMEM_MEMID_NONE) ||
+		    (rsp->best_score > best_rsp->best_score) ||
+		    (rsp->best_score == best_rsp->best_score &&
+		     id < current_best) ||
+		    (rsp->do_graph_match && id < current_best
+		     && rsp->best_graph_matched) ||
+		    (rsp->do_graph_match && 
+		     !best_rsp->best_graph_matched &&
+		     rsp->best_graph_matched))
+		{
+		    best_size = buffSize;
+		    memcpy(best_msg, msg, best_size);
+		    current_best = id;
+		}
+	    }
+            //respond with data to agent
+	    MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, 0, 1);
+	    delete best_msg;
 	    break;
 	}
 	
@@ -307,7 +374,7 @@ void epmem_manager::epmem_worker_message_handler()
 	//      search:  handle epmem search command
 	switch(msg->type)
 	{
-	case new_ep:
+	case NEW_EP:
 	{
 	    new_episode *episode = (new_episode*)msg->data;
 	    if (dataSize != calc_ep_size(episode))
@@ -321,7 +388,7 @@ void epmem_manager::epmem_worker_message_handler()
 	    
 	    break;
 	}
-	case resize_window:
+	case RESIZE_WINDOW:
 	{
 	    if (dataSize != sizeof(int))
 	    {
@@ -339,9 +406,21 @@ void epmem_manager::epmem_worker_message_handler()
 	    
 	    break;
 	}
-	case search:
+	case SEARCH:
 	{
+	    if (currentSize == 0)// no episodes on worker
+	    {
+		int bSize = sizeof(query_rsp_data) + sizeof(int)*2 + 
+		    sizeof(EPMEM_MSG_TYPE);
+		epmem_msg * rspMsg = (epmem_msg*) malloc(bSize);
+		query_rsp_data* rsp = (query_rsp_data*)msg->data;
+		rsp->best_episode = EPMEM_MEMID_NONE;
+		MPI::COMM_WORLD.Send(rspMsg, buffSize, MPI::CHAR, 1, 1);
+		delete rspMsg;
+	    }
 	    //TODO call search routine on epmem_worker
+	    query_data * data = (query_data*)msg->data;
+	    epmem_worker_p->epmem_process_query(data);
 	    break;
 	}
 	default:

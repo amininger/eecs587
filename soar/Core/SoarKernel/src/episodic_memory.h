@@ -554,4 +554,6 @@ struct epmem_interval_comparator {
 };
 typedef std::priority_queue<epmem_interval*, std::vector<epmem_interval*>, epmem_interval_comparator> epmem_interval_pq;
 
+// E587 JK send message structure
+
 #endif

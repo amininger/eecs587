@@ -62,12 +62,12 @@ private:
 //possible message types
 typedef enum
 {
-    new_ep = 0,
-    resize_window,
-    resize_request,
-    search,
-    search_result,
-    terminate
+    NEW_EP = 0,
+    RESIZE_WINDOW,
+    RESIZE_REQUEST,
+    SEARCH,
+    SEARCH_RESULT,
+    TERMINATE
 } EPMEM_MSG_TYPE;
 
 //message structure
@@ -77,6 +77,42 @@ struct epmem_msg
     int size;
     int source;
     char * data;
+} __attribute__((packed));
+
+
+
+typedef struct query_data
+{
+    bool graph_match;
+    epmem_param_container::gm_ordering_choices gm_order;
+    epmem_time_id before_time;
+    double balance;
+    Symbol pos_query;
+    Symbol neg_query;
+    epmem_time_id before;
+    epmem_time_id after;
+    //TODO serialize
+    //epmem_time_list  prohibits;
+    //epmem_symbol_set  currents;
+    //soar_module::wme_set  cue_wmes;
+} __attribute__((packed));
+
+
+typedef struct query_rsp_data
+{
+    epmem_time_id best_episode;
+    Symbol pos_query;
+    Symbol neg_query;
+    int leaf_literals_size;
+    double best_score;
+    bool best_graph_matched;
+    long int best_cardinality;
+    double perfect_score;
+    bool do_graph_match;
+    //TODO serialize
+    epmem_literal_node_pair_map best_bindings;
+    soar_module::symbol_triple_list meta_wmes;
+    soar_module::symbol_triple_list retrieval_wmes;
 } __attribute__((packed));
 
 #endif

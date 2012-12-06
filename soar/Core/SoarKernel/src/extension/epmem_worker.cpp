@@ -789,7 +789,7 @@ void epmem_worker::get_edges_at_episode(epmem_time_id time, std::vector<epmem_no
 	epmem_rit_clear_left_right();
 }
 
-#ifdef E587JK
+//#ifdef E587JK
 // E587 JK initializes epmem pools
 /*
 void epmem_worker::initialize_epmem_pools()
@@ -808,12 +808,24 @@ void epmem_worker::initialize_epmem_pools()
 // qqqq
 // E587: JK: epmem_worker should process queries
 
-void epmem_worker::epmem_process_query(
-    Symbol *pos_query, Symbol *neg_query, epmem_time_list& prohibits, 
-    epmem_time_id before, epmem_time_id after, epmem_symbol_set& currents, 
-    soar_module::wme_set& cue_wmes, soar_module::symbol_triple_list& meta_wmes, 
-    soar_module::symbol_triple_list& retrieval_wmes, int level=3) 
+void epmem_worker::epmem_process_query(query_data* data)
 {
+    Symbol *pos_query = &data->pos_query;
+    Symbol *neg_query  = &data->neg_query;
+    epmem_time_list prohibits; 
+    epmem_time_id before = data->before;
+    epmem_time_id after = data->after;
+    epmem_symbol_set currents; 
+    soar_module::wme_set cue_wmes;
+    
+    bool do_graph_match = data->graph_match;
+    bool before_time = data->before_time;
+    epmem_param_container::gm_ordering_choices gm_order = data->gm_order;
+    
+    soar_module::symbol_triple_list meta_wmes; 
+    soar_module::symbol_triple_list retrieval_wmes;
+    int level=3; 
+    
     // a query must contain a positive cue
     if (pos_query == NULL) {
 	/*TODO error
@@ -842,9 +854,9 @@ void epmem_worker::epmem_process_query(
     }
 
     // epmem options
-    //E587 TODO get vals
-    bool do_graph_match = (my_agent->epmem_params->graph_match->get_value() == soar_module::on);
-    epmem_param_container::gm_ordering_choices gm_order = my_agent->epmem_params->gm_ordering->get_value();
+    //E587 JK
+    //bool do_graph_match = (my_agent->epmem_params->graph_match->get_value() == soar_module::on);
+    //epmem_param_container::gm_ordering_choices gm_order = my_agent->epmem_params->gm_ordering->get_value();
 
     // variables needed for cleanup
     epmem_wme_literal_map literal_cache;
@@ -930,7 +942,7 @@ void epmem_worker::epmem_process_query(
 		if (!query_root) {
 		    continue;
 		}
-		epmem_wme_list* children = epmem_get_augs_of_id(query_root, get_new_tc_number(my_agent));
+		epmem_wme_list* children = epmem_get_augs_of_id(query_root, get_new_tc_number());//my_agent)); E587 JK
 		// for each first level WME, build up a DNF
 		for (epmem_wme_list::iterator wme_iter = children->begin(); wme_iter != children->end(); wme_iter++) {
 		    epmem_literal* child = epmem_build_dnf(*wme_iter, literal_cache, leaf_literals, symbol_num_incoming, gm_ordering, currents, query_type, visiting, cue_wmes);
@@ -958,7 +970,8 @@ void epmem_worker::epmem_process_query(
 
 	// set default values for before and after
 	if (before == EPMEM_MEMID_NONE) {
-	    before = my_agent->epmem_stats->time->get_value() - 1; 
+	    // E587 JK
+	    before = before_time;//my_agent->epmem_stats->time->get_value() - 1; 
 	} else {
 	    before = before - 1; // since before's are strict
 	}
@@ -1083,20 +1096,21 @@ void epmem_worker::epmem_process_query(
 		    int64_t edge_id = pedge->sql->column_int(0);
 		    epmem_time_id promo_time = EPMEM_MEMID_NONE;
 		    bool is_lti = (pedge->value_is_id && pedge->triple.q1 != EPMEM_NODEID_BAD && pedge->triple.q1 != EPMEM_NODEID_ROOT);
+		    /* E587 JK ignoring LTI 
 		    if (is_lti) {
 			// find the promotion time of the LTI
 			// E587: AM:
-			// E587 JK can ignore for workers?
-			/*
 			my_agent->epmem_stmts_master->find_lti_promotion_time->bind_int(1, triple.q1);
 			my_agent->epmem_stmts_master->find_lti_promotion_time->execute();
 			promo_time = my_agent->epmem_stmts_master->find_lti_promotion_time->column_int(0);
 			my_agent->epmem_stmts_master->find_lti_promotion_time->reinitialize();
-			*/
+			
 		    }
+		    */
 		    for (int interval_type = EPMEM_RANGE_EP; interval_type <= EPMEM_RANGE_POINT; interval_type++) {
 			for (int point_type = EPMEM_RANGE_START; point_type <= EPMEM_RANGE_END; point_type++) {
 			    // pick a timer (any timer)
+			    /* E587 JK do not need sql_timer
 			    soar_module::timer* sql_timer = NULL;
 			    switch (interval_type) {
 			    case EPMEM_RANGE_EP:
@@ -1121,6 +1135,7 @@ void epmem_worker::epmem_process_query(
 				}
 				break;
 			    }
+			    */
 			    // create the SQL query and bind it
 			    // try to find an existing query first; if none exist, allocate a new one from the memory pools
 			    soar_module::pooled_sqlite_statement* interval_sql = NULL;
@@ -1128,10 +1143,12 @@ void epmem_worker::epmem_process_query(
 			    // E587 JK now direct access to stmts graph
 			    if (is_lti) {				
 				//interval_sql = my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_lti_queries[point_type][interval_type]->request(sql_timer);
-				interval_sql = epmem_stmts_graph->pool_find_lti_queries[point_type][interval_type]->request(sql_timer);
+				// E587 JK do not need sql_timer
+				interval_sql = epmem_stmts_graph->pool_find_lti_queries[point_type][interval_type]->request();//sql_timer);
 			    } else {
 				//interval_sql = my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_interval_queries[pedge->value_is_id][point_type][interval_type]->request(sql_timer);
-				interval_sql = epmem_stmts_graph->pool_find_interval_queries[pedge->value_is_id][point_type][interval_type]->request(sql_timer);
+				// E587 JK do not need sql_timer
+				interval_sql = epmem_stmts_graph->pool_find_interval_queries[pedge->value_is_id][point_type][interval_type]->request();//sql_timer);
 			    }
 			    int bind_pos = 1;
 			    if (point_type == EPMEM_RANGE_END && interval_type == EPMEM_RANGE_NOW) {
@@ -1351,8 +1368,31 @@ void epmem_worker::epmem_process_query(
 
 	// if the best episode is the default, fail
 	// otherwise, put the episode in working memory
-
+	// ggggg
 	// E587 JK at this point have found best episode and should message manager
+
+
+	int buffSize = sizeof(query_rsp_data) + sizeof(int)*2 + 
+	    sizeof(EPMEM_MSG_TYPE);
+	epmem_msg * msg = (epmem_msg*) malloc(buffSize);
+	query_rsp_data* rsp = (query_rsp_data*)msg->data;
+	rsp->best_episode = best_episode;
+	memcpy(&rsp->pos_query, pos_query, sizeof(Symbol));
+	memcpy(&rsp->neg_query, neg_query, sizeof(Symbol));
+	rsp->leaf_literals_size = (int) leaf_literals.size();
+	rsp->best_score = best_score;
+	rsp->best_graph_matched = best_graph_matched;
+	rsp->best_cardinality = best_cardinality;
+	rsp->perfect_score = perfect_score;
+	rsp->do_graph_match = do_graph_match;
+
+	msg->type = SEARCH_RESULT;
+	msg->size = buffSize;
+	msg->source = MPI::COMM_WORLD.Get_rank();
+	//TODO serialize maps
+	//msg master
+	MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, 1, 1);
+       
 	/*
 	if (best_episode == EPMEM_MEMID_NONE) {
 	    epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_failure, pos_query);
@@ -1429,8 +1469,9 @@ void epmem_worker::epmem_process_query(
 	    }
 	    my_agent->epmem_timers->query_result->stop();
 	}
-    }
 	*/
+    }
+// EEEEE	
     // cleanup
     //my_agent->epmem_timers->query_cleanup->start(); //E587 JK no timer
     for (epmem_interval_set::iterator iter = interval_cleanup.begin(); iter != interval_cleanup.end(); iter++) {
@@ -1485,7 +1526,7 @@ epmem_literal* epmem_worker::epmem_build_dnf(
     wme* cue_wme, epmem_wme_literal_map& literal_cache, 
     epmem_literal_set& leaf_literals, epmem_symbol_int_map& symbol_num_incoming, 
     epmem_literal_deque& gm_ordering, epmem_symbol_set& currents, int query_type, 
-    std::set<Symbol*>& visiting, soar_module::wme_set& cue_wmes) {
+    std::set<Symbol*>& visiting, soar_module::wme_set& cue_wmes, double balance) {
     // if the value is being visited, this is part of a loop; return NULL
     // remove this check (and in fact, the entire visiting parameter) if cyclic cues are allowed
     if (visiting.count(cue_wme->value)) {
@@ -1506,12 +1547,13 @@ epmem_literal* epmem_worker::epmem_build_dnf(
     if (value->common.symbol_type != IDENTIFIER_SYMBOL_TYPE) { // WME is a value
 	literal->value_is_id = EPMEM_RIT_STATE_NODE;
 	literal->is_leaf = true;
-	literal->q1 = epmem_temporal_hash(my_agent, value); //E587 fix
+	// E587 JK TODO need to get temporal_hash
+	//literal->q1 = epmem_temporal_hash(my_agent, value); //E587 fix
 	leaf_literals.insert(literal);
+    /* E587 JK ignoring LTI 
     } else if (value->id.smem_lti) { // WME is an LTI
 	// E587: AM:
 	// if we can find the LTI node id, cache it; otherwise, return failure
-	// E587 JK think this can be removed (lti not needed for dnf on worker?)
 	my_agent->epmem_stmts_master->find_lti->bind_int(1, static_cast<uint64_t>(value->id.name_letter));
 	my_agent->epmem_stmts_master->find_lti->bind_int(2, static_cast<uint64_t>(value->id.name_number));
 	if (my_agent->epmem_stmts_master->find_lti->execute() == soar_module::row) {
@@ -1529,9 +1571,10 @@ epmem_literal* epmem_worker::epmem_build_dnf(
 	    //free_with_pool(&(my_agent->epmem_literal_pool), literal);
 	    return NULL;
 	}
+    */
     } else { // WME is a normal identifier
 	// we determine whether it is a leaf by checking for children
-	epmem_wme_list* children = epmem_get_augs_of_id(value, get_new_tc_number(my_agent));
+	epmem_wme_list* children = epmem_get_augs_of_id(value, get_new_tc_number());//my_agent)); //E587 JK
 	literal->value_is_id = EPMEM_RIT_STATE_EDGE;
 	literal->q1 = EPMEM_NODEID_BAD;
 
@@ -1547,7 +1590,7 @@ epmem_literal* epmem_worker::epmem_build_dnf(
 	    for (epmem_wme_list::iterator wme_iter = children->begin(); wme_iter != children->end(); wme_iter++) {
 		// check to see if this child forms a cycle
 		// if it does, we skip over it
-		epmem_literal* child = epmem_build_dnf(*wme_iter, literal_cache, leaf_literals, symbol_num_incoming, gm_ordering, currents, query_type, visiting, cue_wmes);
+		epmem_literal* child = epmem_build_dnf(*wme_iter, literal_cache, leaf_literals, symbol_num_incoming, gm_ordering, currents, query_type, visiting, cue_wmes, balance);
 		if (child) {
 		    child->parents.insert(literal);
 		    literal->children.insert(child);
@@ -1585,9 +1628,12 @@ epmem_literal* epmem_worker::epmem_build_dnf(
     literal->id_sym = cue_wme->id;
     literal->value_sym = cue_wme->value;
     literal->is_current = (currents.count(value) > 0);
-    literal->w = epmem_temporal_hash(my_agent, cue_wme->attr); // E587 JK fix
+    // E587 JK TODO need to get temporal_hash
+    //literal->w = epmem_temporal_hash(my_agent, cue_wme->attr); // E587 JK fix
     literal->is_neg_q = query_type;
-    literal->weight = (literal->is_neg_q ? -1 : 1) * (my_agent->epmem_params->balance->get_value() >= 1.0 - 1.0e-8 ? 1.0 : wma_get_wme_activation(my_agent, cue_wme, true));
+    // E587 JK TODO need wme_activation
+    //literal->weight = (literal->is_neg_q ? -1 : 1) * (balance >= 1.0 - 1.0e-8 ? 1.0 : wma_get_wme_activation(my_agent, cue_wme, true));
+    //literal->weight = (literal->is_neg_q ? -1 : 1) * (my_agent->epmem_params->balance->get_value() >= 1.0 - 1.0e-8 ? 1.0 : wma_get_wme_activation(my_agent, cue_wme, true));
 #ifdef USE_MEM_POOL_ALLOCATORS
     new(&(literal->matches)) epmem_node_pair_set(std::less<epmem_node_pair>(), soar_module::soar_memory_pool_allocator<epmem_node_pair>(my_agent));
 #else
@@ -1625,7 +1671,9 @@ bool epmem_register_pedges(
 	// E587: AM: XXX: Need to remove this link
 	// E587 direct access?
 	//soar_module::pooled_sqlite_statement* pedge_sql = my_agent->epmem_worker_p->epmem_stmts_graph->pool_find_edge_queries[is_edge][has_value]->request(my_agent->epmem_timers->query_sql_edge);
-	soar_module::pooled_sqlite_statement* pedge_sql = epmem_stmts_graph->pool_find_edge_queries[is_edge][has_value]->request(my_agent->epmem_timers->query_sql_edge); //E587 todo epmem_timers
+
+	// E587 JK TODO need query_sql_edge?
+	soar_module::pooled_sqlite_statement* pedge_sql = NULL;//epmem_stmts_graph->pool_find_edge_queries[is_edge][has_value]->request(my_agent->epmem_timers->query_sql_edge); //E587 todo epmem_timers
 	int bind_pos = 1;
 	if (!is_edge) {
 	    pedge_sql->bind_int(bind_pos++, LLONG_MAX);
@@ -1802,4 +1850,4 @@ bool epmem_worker::epmem_graph_match(
     }
     return false;
 }
-#endif
+//#endif

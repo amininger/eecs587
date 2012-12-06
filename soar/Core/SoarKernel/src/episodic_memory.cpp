@@ -34,6 +34,9 @@
 #include "instantiations.h"
 #include "decide.h"
 
+// E587
+#include "epmem_manager.h"
+
 #ifdef EPMEM_EXPERIMENT
 
 uint64_t epmem_episodes_searched = 0;
@@ -4741,7 +4744,9 @@ void epmem_respond_to_cmd( agent *my_agent )
 				// query
 				else if ( path == 3 )
 				{
-					epmem_process_query( my_agent, state, query, neg_query, prohibit, before, after, currents, cue_wmes, meta_wmes, retrieval_wmes );
+				    //E587 create and send message to epmem_manager to handle query
+				    epmem_handle_query(my_agent, state, query, neg_query, prohibit, before, after, currents, cue_wmes);//, meta_wmes, retrieval_wmes );
+				    //epmem_process_query( my_agent, state, query, neg_query, prohibit, before, after, currents, cue_wmes, meta_wmes, retrieval_wmes );
 
 					// add one to the cbr stat
 					my_agent->epmem_stats->cbr->set_value( my_agent->epmem_stats->cbr->get_value() + 1 );
@@ -5261,4 +5266,150 @@ bool epmem_backup_db( agent* my_agent, const char* file_name, std::string *err )
 	}
 
 	return return_val;
+}
+
+// E587 JK create message, send to manager master, wait for response and handle
+
+void epmem_handle_query(
+    agent *my_agent, Symbol *state, Symbol *pos_query, Symbol *neg_query, 
+    epmem_time_list& prohibits, epmem_time_id before, epmem_time_id after, 
+    epmem_symbol_set& currents, soar_module::wme_set& cue_wmes) 
+    //,soar_module::symbol_triple_list& meta_wmes, soar_module::symbol_triple_list& retrieval_wmes) 
+{
+    int size = sizeof(int)*2+sizeof(EPMEM_MSG_TYPE)+sizeof(query_data);
+    epmem_msg * msg = (epmem_msg*) malloc(size);
+    query_data * data = (query_data*)msg->data;
+    // needed data
+    bool graph_match = (my_agent->epmem_params->graph_match->get_value() == soar_module::on);
+    epmem_param_container::gm_ordering_choices gm_order = my_agent->epmem_params->gm_ordering->get_value();
+    epmem_time_id before_time = my_agent->epmem_stats->time->get_value() - 1;
+    double balance = my_agent->epmem_params->balance->get_value();
+    
+    data->graph_match = graph_match;
+    data->gm_order = gm_order;
+    data->before_time = before_time;
+    data->balance = balance;
+    memcpy(&data->pos_query, pos_query, sizeof(Symbol));
+    memcpy(&data->neg_query, neg_query, sizeof(Symbol));
+    data->before = before;
+    data->after = after;
+    msg->size = size;
+    msg->type = SEARCH;
+    msg->source = 0;
+    //TODO serialize currents and cue_wmes
+    
+    //send msg
+    MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, 1, 1);
+    delete msg;
+    // get response
+    //blocking probe call (unknown message size)
+    MPI::COMM_WORLD.Probe(1, 1, status);
+    
+    //get source and size of incoming message
+    int buffSize = status.Get_count(MPI::CHAR);
+    MPI::Status status;
+    epmem_msg * recMsg = (epmem_msg*) malloc(buffSize);
+    MPI::COMM_WORLD.Recv(recMsg, buffSize, MPI::CHAR, 1, 1, status);
+    // handle 
+    query_rsp_data *rsp = (query_rsp_data*)recMsg->data;
+    epmem_handle_search_result(state, my_agent, rsp);
+    
+}
+
+//zzzz
+void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* rsp)
+{
+// E587 JK at this point have found best episode and should message manager
+    
+    epmem_time_id best_episode = rsp->best_episode;    
+    Symbol *pos_query =&rsp->pos_query;
+    Symbol *neg_query =&rsp->neg_query;
+    epmem_literal_set leaf_literals_size = rsp->leaf_literals_size;
+    double best_score =rsp->best_score;
+    bool best_graph_matched =rsp->best_graph_matched;
+    long int best_cardinality =rsp->best_cardinality;
+    double perfect_score =rsp->perfect_score;
+    bool do_graph_match =rsp->do_graph_match;
+    
+    //TODO serialize!
+    epmem_literal_node_pair_map best_bindings;
+    soar_module::symbol_triple_list meta_wmes;
+    soar_module::symbol_triple_list retrieval_wmes;
+    
+    
+    if (best_episode == EPMEM_MEMID_NONE) {
+	epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_failure, pos_query);
+	if (neg_query) {
+	    epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_failure, neg_query);
+	}
+    } else {
+	my_agent->epmem_timers->query_result->start();
+	Symbol* temp_sym;
+	epmem_id_mapping node_map_map;
+	epmem_id_mapping node_mem_map;
+	// cue size
+	temp_sym = make_int_constant(my_agent, leaf_literals_size);//E587 JK
+	epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_cue_size, temp_sym);
+	symbol_remove_ref(my_agent, temp_sym);
+	// match cardinality
+	temp_sym = make_int_constant(my_agent, best_cardinality);
+	epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_match_cardinality, temp_sym);
+	symbol_remove_ref(my_agent, temp_sym);
+	// match score
+	temp_sym = make_float_constant(my_agent, best_score);
+	epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_match_score, temp_sym);
+	symbol_remove_ref(my_agent, temp_sym);
+	// normalized match score
+	temp_sym = make_float_constant(my_agent, best_score / perfect_score);
+	epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_normalized_match_score, temp_sym);
+	symbol_remove_ref(my_agent, temp_sym);
+	// status
+	epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_success, pos_query);
+	if (neg_query) {
+	    epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_success, neg_query);
+	}
+	// give more metadata if graph match is turned on
+	if (do_graph_match) {
+	    // graph match
+	    temp_sym = make_int_constant(my_agent, (best_graph_matched ? 1 : 0));
+	    epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_graph_match, temp_sym);
+	    symbol_remove_ref(my_agent, temp_sym);
+
+	    // mapping
+	    if (best_graph_matched) {
+		goal_stack_level level = state->id.epmem_result_header->id.level;
+		// mapping identifier
+		Symbol* mapping = make_new_identifier(my_agent, 'M', level);
+		epmem_buffer_add_wme(meta_wmes, state->id.epmem_result_header, my_agent->epmem_sym_graph_match_mapping, mapping);
+		symbol_remove_ref(my_agent, mapping);
+
+		for (epmem_literal_node_pair_map::iterator iter = best_bindings.begin(); iter != best_bindings.end(); iter++) {
+		    if ((*iter).first->value_is_id) {
+			// create the node
+			temp_sym = make_new_identifier(my_agent, 'N', level);
+			epmem_buffer_add_wme(meta_wmes, mapping, my_agent->epmem_sym_graph_match_mapping_node, temp_sym);
+			symbol_remove_ref(my_agent, temp_sym);
+			// point to the cue identifier
+			epmem_buffer_add_wme(meta_wmes, temp_sym, my_agent->epmem_sym_graph_match_mapping_cue, (*iter).first->value_sym);
+			// save the mapping point for the episode
+			node_map_map[(*iter).second.second] = temp_sym;
+			node_mem_map[(*iter).second.second] = NULL;
+		    }
+		}
+	    }
+	}
+	// reconstruct the actual episode
+	if (level > 2) {
+	    epmem_install_memory(my_agent, state, best_episode, meta_wmes, retrieval_wmes, &node_mem_map);
+	}
+	if (best_graph_matched) {
+	    for (epmem_id_mapping::iterator iter = node_mem_map.begin(); iter != node_mem_map.end(); iter++) {
+		epmem_id_mapping::iterator map_iter = node_map_map.find((*iter).first);
+		if (map_iter != node_map_map.end() && (*iter).second) {
+		    epmem_buffer_add_wme(meta_wmes, (*map_iter).second, my_agent->epmem_sym_retrieved, (*iter).second);
+		}
+	    }
+	}
+	my_agent->epmem_timers->query_result->stop();
+    }
 }
