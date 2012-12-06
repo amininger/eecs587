@@ -7,8 +7,9 @@ class epmem_worker;
 
 #include "../soar_module.h"
 #include "../episodic_memory.h"
-#include "new_episode.h"
+#include "epmem_episode_diff.h"
 #include "epmem_sql_containers.h"
+#include "epmem_episode.h"
 
 #define EPMEM_RIT_ROOT								0
 #define EPMEM_RIT_OFFSET_INIT						-1
@@ -35,6 +36,8 @@ typedef struct epmem_rit_state_struct
 	soar_module::sqlite_statement *add_query;	
 } epmem_rit_state;
 
+
+
 class epmem_worker{
 public:
 	epmem_graph_statement_container *epmem_stmts_graph;
@@ -46,16 +49,18 @@ public:
 	void initialize(epmem_param_container* epmem_params);
 
 	// Add a new episode to the collection of episodes the worker currently has
-	void add_new_episode(new_episode* episode);
+	void add_epmem_episode_diff(epmem_episode_diff* episode);
 
-	// Removes the oldest episode the agent has and returned a new_episode diff structure for use elsewhere
-	new_episode* remove_oldest_episode();
+	// Removes the oldest episode the agent has and returned a epmem_episode_diff diff structure for use elsewhere
+	epmem_episode_diff* remove_oldest_episode();
 
 	// Fills the given vector with all node_unique id's active at the given episode time
 	void get_nodes_at_episode(epmem_time_id time, std::vector<epmem_node_id>* node_ids);
 
 	// Fills the given vector with all edge_unique id's active at the given episode time
 	void get_edges_at_episode(epmem_time_id time, std::vector<epmem_node_id>* edge_ids);
+
+	epmem_episode* get_episode(epmem_time_id);
 
 	// Closes the worker and removes the database
 	void close();
@@ -71,14 +76,16 @@ private:
 
   epmem_rit_state epmem_rit_state_graph[2];
 
+	epmem_time_id last_removal;
 
-	void add_new_nodes(new_episode* episode);
 
-	void add_new_edges(new_episode* episode);
+	void add_new_nodes(epmem_episode_diff* episode);
 
-	void remove_old_nodes(new_episode* episode);
+	void add_new_edges(epmem_episode_diff* episode);
 
-	void remove_old_edges(new_episode* episode);
+	void remove_old_nodes(epmem_episode_diff* episode);
+
+	void remove_old_edges(epmem_episode_diff* episode);
 
 	int64_t epmem_rit_fork_node( int64_t lower, int64_t upper, int64_t *step_return, epmem_rit_state *rit_state );
 
