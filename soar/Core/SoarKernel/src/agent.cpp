@@ -158,6 +158,7 @@ void init_soar_agent(agent* thisAgent) {
 }
 
 // E587: JK: general message send to manager
+/*
 void send_epmem_msg(char * data, agent* my_agent, int size, EPMEM_MSG_TYPE type)
 {
     //add header lengths
@@ -168,11 +169,11 @@ void send_epmem_msg(char * data, agent* my_agent, int size, EPMEM_MSG_TYPE type)
     msg->type = type;
     memcpy(msg->data, data, size);
 
-     MPI::COMM_WORLD.Send(msg, msg_size, MPI::CHAR, 1, 1);
+    MPI::COMM_WORLD.Send(msg, msg_size, MPI::CHAR, 1, 1);
 
     delete msg;
 }
-
+*/
 agent * create_soar_agent (char * agent_name) {                                          /* loop index */
   char cur_path[MAXPATHLEN];   /* AGR 536 */
 

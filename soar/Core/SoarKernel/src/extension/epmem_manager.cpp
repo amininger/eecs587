@@ -87,8 +87,10 @@ void epmem_manager::initialize()//epmem_param_container* epmem_params)
  * @Author   : 
  * @Notes    : calculates sizeof new_episode struct
  **************************************************************************/
-int epmem_manager::calc_ep_size(new_episode* episode)
+int epmem_manager::calc_ep_size(epmem_episode_diff* episode)
 {
+    return episode->buffer_size;
+    /*
     int size = 0;
     size += sizeof(long);
     size+= sizeof(epmem_node_unique)*episode->num_added_nodes;
@@ -96,6 +98,7 @@ int epmem_manager::calc_ep_size(new_episode* episode)
     size+= sizeof(epmem_edge_unique)*episode->num_added_edges;
     size+= sizeof(epmem_edge_unique)*episode->num_removed_edges;
     return size;
+    */
 }
 
 
@@ -105,7 +108,7 @@ int epmem_manager::calc_ep_size(new_episode* episode)
  * @Author   : 
  * @Notes    : Send popped episode to next processor -uses blocking send
  **************************************************************************/
-void epmem_manager::pass_episode(new_episode *episode)
+void epmem_manager::pass_episode(epmem_episode_diff *episode)
 {
     int ep_size = calc_ep_size(episode);
     int size =  ep_size + sizeof(int)*2 + sizeof(EPMEM_MSG_TYPE);
@@ -113,7 +116,7 @@ void epmem_manager::pass_episode(new_episode *episode)
     msg->source = id;
     msg->size = size;
     msg->type = NEW_EP;
-    memcpy(msg->data, episode, ep_size);
+    memcpy(msg->data, episode->buffer, ep_size);
     MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, id+1, 1);
     
     delete msg;
@@ -127,9 +130,9 @@ void epmem_manager::pass_episode(new_episode *episode)
  * @Notes    : Received message with new ep, add to worker, and shift eps
  *             if needed
  **************************************************************************/
-void epmem_manager::received_episode(new_episode *episode)
+void epmem_manager::received_episode(epmem_episode_diff *episode)
 {
-    epmem_worker_p->add_new_episode(episode);
+    epmem_worker_p->add_epmem_episode_diff(episode);
     currentSize++;
     
     // if last processor keep hold of all episodes regardless of windowsize
@@ -141,7 +144,7 @@ void epmem_manager::received_episode(new_episode *episode)
     
     if (currentSize >= windowSize)
     {
-	new_episode *to_send = epmem_worker_p->remove_oldest_episode();
+	epmem_episode_diff *to_send = epmem_worker_p->remove_oldest_episode();
 	currentSize--;
 	pass_episode(to_send);
     }
@@ -228,7 +231,8 @@ void epmem_manager::manager_message_handler()
 	{
 	case NEW_EP:
 	{
-	    new_episode *episode = (new_episode*)msg->data;
+	    int64_t* ep_buffer = (int64_t*) msg->data;
+	    epmem_episode_diff *episode = new epmem_episode_diff(ep_buffer);
 	    if (dataSize != calc_ep_size(episode))
 	    {
 		ERROR("Msg data size for new episode incorrect");
@@ -236,7 +240,7 @@ void epmem_manager::manager_message_handler()
 	    }
 	    //send new episode to first worker processor
 	    pass_episode(episode);
-	    
+	    delete episode;
 	    break;
 	}
 	case RESIZE_REQUEST:
@@ -280,7 +284,7 @@ void epmem_manager::manager_message_handler()
 		best_rsp->do_graph_match)
 		best_found = true;
 	    */
-	    while(!best_found && (received < (numProcs-2)))
+	    while(!best_found && (received < (numProc-2)))
 	    {
 		//blocking probe call (unknown message size)
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
@@ -376,7 +380,8 @@ void epmem_manager::epmem_worker_message_handler()
 	{
 	case NEW_EP:
 	{
-	    new_episode *episode = (new_episode*)msg->data;
+	    int64_t* ep_buffer = (int64_t*) msg->data;
+	    epmem_episode_diff *episode = new epmem_episode_diff(ep_buffer);
 	    if (dataSize != calc_ep_size(episode))
 	    {
 		ERROR("Msg data size for new episode incorrect");
@@ -385,7 +390,7 @@ void epmem_manager::epmem_worker_message_handler()
 
 	    //handle adding episode and shift last episode if needed
 	    received_episode(episode);
-	    
+	    delete episode;
 	    break;
 	}
 	case RESIZE_WINDOW:
@@ -420,7 +425,7 @@ void epmem_manager::epmem_worker_message_handler()
 	    }
 	    //TODO call search routine on epmem_worker
 	    query_data * data = (query_data*)msg->data;
-	    epmem_worker_p->epmem_process_query(data);
+	    epmem_worker_p->epmem_process_query((int64_t*)data);
 	    break;
 	}
 	default:

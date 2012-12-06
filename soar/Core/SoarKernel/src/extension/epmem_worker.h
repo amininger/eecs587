@@ -65,6 +65,9 @@ public:
 	// Closes the worker and removes the database
 	void close();
 
+	// E587 JK
+	void epmem_process_query(int64_t* data);
+
 private:
 	soar_module::sqlite_database *epmem_db;
 
@@ -115,12 +118,15 @@ private:
 	tc_number tc;
 	tc_number get_new_tc_number(){tc++;return tc;}
 	
-	void epmem_process_query(query_data* data);
-	epmem_literal* epmem_worker::epmem_build_dnf(
+	
+	epmem_literal* epmem_build_dnf(
 	    wme* cue_wme, epmem_wme_literal_map& literal_cache, 
-	    epmem_literal_set& leaf_literals, epmem_symbol_int_map& symbol_num_incoming, 
-	    epmem_literal_deque& gm_ordering, epmem_symbol_set& currents, int query_type, 
-	    std::set<Symbol*>& visiting, soar_module::wme_set& cue_wmes);
+	    epmem_literal_set& leaf_literals, 
+	    epmem_symbol_int_map& symbol_num_incoming, 
+	    epmem_literal_deque& gm_ordering, epmem_symbol_set& currents, 
+	    int query_type, 
+	    std::set<Symbol*>& visiting, soar_module::wme_set& cue_wmes,
+	    double balance);
 	bool epmem_register_pedges(
 	    epmem_node_id parent, epmem_literal* literal, epmem_pedge_pq& pedge_pq, 
 	    epmem_time_id after, epmem_triple_pedge_map pedge_caches[], 
@@ -128,8 +134,7 @@ private:
 	bool epmem_graph_match(
 	    epmem_literal_deque::iterator& dnf_iter, 
 	    epmem_literal_deque::iterator& iter_end, 
-	    epmem_literal_node_pair_map& bindings, epmem_node_symbol_map bound_nodes[], 
-	    int depth = 0);
+	    epmem_literal_node_pair_map& bindings, epmem_node_symbol_map bound_nodes[], int depth);
 	//#endif
 };
 

@@ -81,7 +81,7 @@ struct epmem_msg
 
 
 
-typedef struct query_data
+typedef struct query_data_struct
 {
     bool graph_match;
     epmem_param_container::gm_ordering_choices gm_order;
@@ -95,10 +95,10 @@ typedef struct query_data
     //epmem_time_list  prohibits;
     //epmem_symbol_set  currents;
     //soar_module::wme_set  cue_wmes;
-} __attribute__((packed));
+} query_data;
 
 
-typedef struct query_rsp_data
+typedef struct query_rsp_data_struct
 {
     epmem_time_id best_episode;
     Symbol pos_query;
@@ -110,9 +110,9 @@ typedef struct query_rsp_data
     double perfect_score;
     bool do_graph_match;
     //TODO serialize
-    epmem_literal_node_pair_map best_bindings;
-    soar_module::symbol_triple_list meta_wmes;
-    soar_module::symbol_triple_list retrieval_wmes;
-} __attribute__((packed));
+    //epmem_literal_node_pair_map best_bindings;
+    //soar_module::symbol_triple_list meta_wmes;
+    //soar_module::symbol_triple_list retrieval_wmes;
+} query_rsp_data;
 
 #endif

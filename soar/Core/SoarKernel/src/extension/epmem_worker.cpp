@@ -1,9 +1,10 @@
 #include "epmem_worker.h"
-
-
+#include "epmem_manager.h"
+//#include "../instantiations.h"
+//#include "../symtab.h"
 epmem_worker::epmem_worker(){
-	 epmem_db = new soar_module::sqlite_database();
-	 epmem_stmts_common = NIL;
+	epmem_db = new soar_module::sqlite_database();
+	epmem_stmts_common = NIL;
 	 epmem_stmts_graph = NIL;
 	 last_removal = 0;
 }
@@ -75,7 +76,7 @@ int64_t epmem_worker::epmem_rit_fork_node( int64_t lower, int64_t upper, int64_t
 void epmem_worker::epmem_rit_clear_left_right()
 {
 	// E587: AM:
-	epmem_stmts_common->rit_truncate_left->execute( soar_module::op_reinit );
+    epmem_stmts_common->rit_truncate_left->execute( soar_module::op_reinit );
 	epmem_stmts_common->rit_truncate_right->execute( soar_module::op_reinit );
 }
 
@@ -113,7 +114,7 @@ void epmem_worker::epmem_rit_add_right( epmem_time_id id )
 void epmem_worker::epmem_rit_prep_left_right( int64_t lower, int64_t upper, epmem_rit_state *rit_state )
 {
 
-	int64_t offset = rit_state->offset.stat->get_value();
+    int64_t offset = rit_state->offset.stat->get_value();
 	int64_t node, step;
 	int64_t left_node, left_step;
 	int64_t right_node, right_step;
@@ -1036,13 +1037,15 @@ void epmem_worker::initialize_epmem_pools()
 // qqqq
 // E587: JK: epmem_worker should process queries
 
-void epmem_worker::epmem_process_query(query_data* data)
+void epmem_worker::epmem_process_query(int64_t* datac)
 {
+    query_data* data = (query_data*) datac;
     Symbol *pos_query = &data->pos_query;
     Symbol *neg_query  = &data->neg_query;
     epmem_time_list prohibits; 
     epmem_time_id before = data->before;
     epmem_time_id after = data->after;
+    double balance = data->balance;
     epmem_symbol_set currents; 
     soar_module::wme_set cue_wmes;
     
@@ -1052,7 +1055,7 @@ void epmem_worker::epmem_process_query(query_data* data)
     
     soar_module::symbol_triple_list meta_wmes; 
     soar_module::symbol_triple_list retrieval_wmes;
-    int level=3; 
+    int level=3;
     
     // a query must contain a positive cue
     if (pos_query == NULL) {
@@ -1090,7 +1093,7 @@ void epmem_worker::epmem_process_query(query_data* data)
     epmem_wme_literal_map literal_cache;
     epmem_triple_pedge_map pedge_caches[2];
 // E587 JK try not using mem_pools here
-#ifdef E587JK //USE_MEM_POOL_ALLOCATORS
+#ifdef USE_MEM_POOL_ALLOCATORS
     epmem_triple_uedge_map uedge_caches[2] = {
 	epmem_triple_uedge_map(std::less<epmem_triple>(), soar_module::soar_memory_pool_allocator<std::pair<const epmem_triple, epmem_uedge*> >(my_agent)),
 	epmem_triple_uedge_map(std::less<epmem_triple>(), soar_module::soar_memory_pool_allocator<std::pair<const epmem_triple, epmem_uedge*> >(my_agent))
@@ -1145,7 +1148,7 @@ void epmem_worker::epmem_process_query(query_data* data)
 	    new(&(root_literal->parents)) epmem_literal_set();
 	    new(&(root_literal->children)) epmem_literal_set();
 // E587 JK don't use mem_pool_allocators ?
-#ifdef E587JK//USE_MEM_POOL_ALLOCATORS
+#ifdef USE_MEM_POOL_ALLOCATORS
 	    new(&(root_literal->matches)) epmem_node_pair_set(std::less<epmem_node_pair>(), soar_module::soar_memory_pool_allocator<epmem_node_pair>(my_agent));
 #else
 	    new(&(root_literal->matches)) epmem_node_pair_set();
@@ -1173,7 +1176,7 @@ void epmem_worker::epmem_process_query(query_data* data)
 		epmem_wme_list* children = epmem_get_augs_of_id(query_root, get_new_tc_number());//my_agent)); E587 JK
 		// for each first level WME, build up a DNF
 		for (epmem_wme_list::iterator wme_iter = children->begin(); wme_iter != children->end(); wme_iter++) {
-		    epmem_literal* child = epmem_build_dnf(*wme_iter, literal_cache, leaf_literals, symbol_num_incoming, gm_ordering, currents, query_type, visiting, cue_wmes);
+		    epmem_literal* child = epmem_build_dnf(*wme_iter, literal_cache, leaf_literals, symbol_num_incoming, gm_ordering, currents, query_type, visiting, cue_wmes,balance);
 		    if (child) {
 			// force all first level literals to have the same id symbol
 			child->id_sym = pos_query;
@@ -1884,7 +1887,7 @@ bool epmem_register_pedges(
     epmem_triple triple = {parent, literal->w, literal->q1};
     int is_edge = literal->value_is_id;
     if (QUERY_DEBUG >= 1) {
-	std::cout << "		RECURSING ON " << parent << " " << literal << std::endl;
+		std::cout << "		RECURSING ON " << parent << " " << literal << std::endl;
     }
     // if the unique edge does not exist, create a new unique edge query
     // otherwse, if the pedge has not been registered with this literal
@@ -1892,7 +1895,7 @@ bool epmem_register_pedges(
     epmem_triple_pedge_map::iterator pedge_iter = pedge_cache->find(triple);
     epmem_pedge* child_pedge = NULL;
     if(pedge_iter != pedge_cache->end()){
-	child_pedge = (*pedge_iter).second;
+		child_pedge = (*pedge_iter).second;
     }
     if (pedge_iter == pedge_cache->end() || (*pedge_iter).second == NULL) {
 	int has_value = (literal->q1 != EPMEM_NODEID_BAD ? 1 : 0);
@@ -1976,7 +1979,7 @@ bool epmem_worker::epmem_graph_match(
     epmem_literal_deque::iterator next_iter = dnf_iter;
     next_iter++;
 // E587 JK try without mem pool allocators?
-#ifdef E587JK //USE_MEM_POOL_ALLOCATORS
+#ifdef USE_MEM_POOL_ALLOCATORS
     epmem_node_set failed_parents = epmem_node_set(std::less<epmem_node_id>(), soar_module::soar_memory_pool_allocator<epmem_node_id>(my_agent));
     epmem_node_set failed_children = epmem_node_set(std::less<epmem_node_id>(), soar_module::soar_memory_pool_allocator<epmem_node_id>(my_agent));
 #else

@@ -1,5 +1,5 @@
 #include <portability.h>
-
+#include "mpi.h"
 /*************************************************************************
  * PLEASE SEE THE FILE "COPYING" (INCLUDED WITH THIS SOFTWARE PACKAGE)
  * FOR LICENSE AND COPYRIGHT INFORMATION.
@@ -35,7 +35,7 @@
 #include "decide.h"
 
 // E587
-#include "epmem_manager.h"
+#include "extension/epmem_manager.h"
 
 #ifdef EPMEM_EXPERIMENT
 
@@ -88,6 +88,14 @@ soar_module::timer* epmem_exp_timer = NULL;
 
 // high-level api				epmem::api
 
+
+
+//E587 JK functions
+void epmem_handle_query(
+    agent *my_agent, Symbol *state, Symbol *pos_query, Symbol *neg_query, 
+    epmem_time_list& prohibits, epmem_time_id before, epmem_time_id after, 
+    epmem_symbol_set& currents, soar_module::wme_set& cue_wmes);
+void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* rsp);
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -5266,6 +5274,7 @@ void epmem_handle_query(
     epmem_symbol_set& currents, soar_module::wme_set& cue_wmes) 
     //,soar_module::symbol_triple_list& meta_wmes, soar_module::symbol_triple_list& retrieval_wmes) 
 {
+    MPI::Status status;
     int size = sizeof(int)*2+sizeof(EPMEM_MSG_TYPE)+sizeof(query_data);
     epmem_msg * msg = (epmem_msg*) malloc(size);
     query_data * data = (query_data*)msg->data;
@@ -5297,7 +5306,7 @@ void epmem_handle_query(
     
     //get source and size of incoming message
     int buffSize = status.Get_count(MPI::CHAR);
-    MPI::Status status;
+    
     epmem_msg * recMsg = (epmem_msg*) malloc(buffSize);
     MPI::COMM_WORLD.Recv(recMsg, buffSize, MPI::CHAR, 1, 1, status);
     // handle 
@@ -5314,12 +5323,13 @@ void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* 
     epmem_time_id best_episode = rsp->best_episode;    
     Symbol *pos_query =&rsp->pos_query;
     Symbol *neg_query =&rsp->neg_query;
-    epmem_literal_set leaf_literals_size = rsp->leaf_literals_size;
+    int leaf_literals_size = rsp->leaf_literals_size;
     double best_score =rsp->best_score;
     bool best_graph_matched =rsp->best_graph_matched;
     long int best_cardinality =rsp->best_cardinality;
     double perfect_score =rsp->perfect_score;
     bool do_graph_match =rsp->do_graph_match;
+    int level = 3;
     
     //TODO serialize!
     epmem_literal_node_pair_map best_bindings;
