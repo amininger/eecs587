@@ -183,9 +183,9 @@ void query_rsp_data::unpack(epmem_msg* msg){
     epmem_msg_packer unpacker(msg);
 
     best_episode = unpacker.unpack<double>();
-    best_score = unpacker.pack<double>();
-    perfect_score = unpacker.pack<double>();
-    best_graph_matched = unpacker.pack<bool>();
-    best_cardinality = unpacker.pack<long>();
-    leaf_literals_size = unpacker.pack<int>();
+    best_score = unpacker.unpack<double>();
+    perfect_score = unpacker.unpack<double>();
+    best_graph_matched = unpacker.unpack<bool>();
+    best_cardinality = unpacker.unpack<long>();
+    leaf_literals_size = unpacker.unpack<int>();
 }
