@@ -2023,14 +2023,14 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 			}
 		}
 
-        response->best_bindings = best_bindings;
+        //response->best_bindings = best_bindings;
         response->best_cardinality = best_cardinality;
         response->best_episode = best_episode;
         response->best_graph_matched = best_graph_matched;
         response->best_score = best_score;
         response->leaf_literals_size = leaf_literals.size();
         response->perfect_score = perfect_score;
-        
+		
 	    // cleanup
 	    for (epmem_interval_set::iterator iter = interval_cleanup.begin(); iter != interval_cleanup.end(); iter++) {
 		    epmem_interval* interval = *iter;

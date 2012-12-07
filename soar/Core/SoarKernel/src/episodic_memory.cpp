@@ -98,6 +98,7 @@ void epmem_handle_query(
     epmem_symbol_set& currents, soar_module::wme_set& cue_wmes);
 void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* rsp);
 void send_epmem_worker_init_data(epmem_param_container* epmem_params);
+query_rsp_data* send_epmem_query_message(epmem_query* query);
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -1773,6 +1774,30 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 	}
 }
 
+query_rsp_data* send_epmem_query_message(epmem_query* query)
+{
+	epmem_msg *msg = query->pack();
+	MPI::Status status;
+	msg->source = AGENT_ID;
+	MPI::COMM_WORLD.Send(msg, msg->size, MPI::CHAR, MANAGER_ID, 1);
+	delete msg;
+	
+	// get response
+    //blocking probe call (unknown message size)
+    MPI::COMM_WORLD.Probe(MANAGER_ID, 1, status);
+    
+    //get source and size of incoming message
+    int buffSize = status.Get_count(MPI::CHAR);
+    
+    epmem_msg * recMsg = (epmem_msg*) malloc(buffSize);
+    MPI::COMM_WORLD.Recv(recMsg, buffSize, MPI::CHAR, MANAGER_ID, 1, status);
+    // handle
+	query_rsp_data* rsp = new query_rsp_data();
+	rsp->unpack(recMsg);
+	delete recMsg;
+
+	return rsp;
+}
 
 void send_epmem_worker_init_data(epmem_param_container* epmem_params)
 {
@@ -2778,8 +2803,8 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
     epmem_query* query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
 	
 	// E587 JK MESSAGE HERE
-	//query_rsp_data* response = send_query_message(query);
-    query_rsp_data* response = my_agent->epmem_worker_p->epmem_perform_query(query);
+	query_rsp_data* response = send_epmem_query_message(query);
+    //query_rsp_data* response = my_agent->epmem_worker_p->epmem_perform_query(query);
 
 	my_agent->epmem_timers->query->start();
 

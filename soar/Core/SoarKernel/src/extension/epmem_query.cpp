@@ -1,7 +1,7 @@
 #include "epmem_query.h"
 #include "wma.h"
 #include "soar_module.h"
-
+#include <vector>
 
 epmem_cue_wme_struct::epmem_cue_wme_struct(epmem_packed_cue_wme* packed_wme, epmem_query* query){
     activation = packed_wme->activation;
@@ -78,7 +78,7 @@ struct epmem_msg_packer{
     
     // Copies a whole vector to the message buffer (by-value copy)
     template <class T>
-    void pack_vector(vector<T>& v){
+    void pack_vector(std::vector<T>& v){
         int size = v.size();
         pack(size);
         for(int i = 0; i < size; i++){
@@ -88,7 +88,7 @@ struct epmem_msg_packer{
 
     // Reads a vector from the buffer (fills in the one given)
     template <class T>
-    void unpack_vector(vector<T>& v){
+    void unpack_vector(std::vector<T>& v){
         int size = unpack<int>();
         for(int i = 0; i < size; i++){
             v.push_back(unpack<T>());
@@ -177,12 +177,12 @@ epmem_msg* query_rsp_data::pack(){
     packer.pack<long>(best_cardinality);
     packer.pack<int>(leaf_literals_size);
 
-    return NIL;
+    return msg;
 }
 void query_rsp_data::unpack(epmem_msg* msg){
     epmem_msg_packer unpacker(msg);
 
-    best_episode = unpacker.unpack<double>();
+    best_episode = unpacker.unpack<epmem_time_id>();
     best_score = unpacker.unpack<double>();
     perfect_score = unpacker.unpack<double>();
     best_graph_matched = unpacker.unpack<bool>();
