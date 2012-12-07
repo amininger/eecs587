@@ -5,6 +5,7 @@
 
 #include "../episodic_memory.h"
 #include "soar_module.h"
+#include "epmem_manager.h"
 
 //////////////////////////////////////////////////////////
 // cue structures - used as substitutions on the worker processors
@@ -164,8 +165,6 @@ typedef std::priority_queue<epmem_interval*, std::vector<epmem_interval*>, epmem
 // Defines structures sent back and forth as messages
 
 typedef struct epmem_query_struct{
-    epmem_time_list prohibits;
-    std::vector<int> currents;
     epmem_time_id before;
     epmem_time_id after;
     bool do_graph_match;
@@ -173,8 +172,14 @@ typedef struct epmem_query_struct{
     int pos_query_index;
     int neg_query_index;
     int level;
+    epmem_time_list prohibits;
+    std::vector<int> currents;
     epmem_packed_cue_wme_list wmes;
     epmem_cue_symbols_packed_list symbols;
+
+    epmem_msg* pack();
+    void unpack(epmem_msg* msg);
+
 }epmem_query;//__attribute__((packed));
 
 typedef struct query_rsp_data_struct
@@ -185,8 +190,10 @@ typedef struct query_rsp_data_struct
     bool best_graph_matched;
     long best_cardinality;
     int leaf_literals_size;
-    epmem_literal_node_pair_map best_bindings;
-}query_rsp_data;//__attribute__((packed));
+
+    epmem_msg* pack();
+    void unpack(epmem_msg* msg);
+} query_rsp_data;//__attribute__((packed));
 
 // Represents a symbol in working memory, can be an identifier, lti, or value
 struct epmem_cue_symbol_struct{
