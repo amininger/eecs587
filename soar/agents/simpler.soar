@@ -153,81 +153,10 @@ sp {simple*apply*step6
 }
 
 
-# Time 7: 
-# Simple query
-sp {simple*apply*step*7
+sp {simple*apply*step*21
    (state <s> ^name simple
               ^operator.name step
-              ^time 7
-              ^epmem.command <cmd>)
--->
-   (<cmd> ^query <q>)
-   (<q> ^deep.left d-left)
-}
-
-
-# Time 9: 
-# Full surface match
-sp {simple*apply*step*9
-   (state <s> ^name simple
-              ^operator.name step
-              ^time 9
-              ^epmem.command <cmd>)
--->
-   (<cmd> ^query <q>)
-   (<q> ^deep.left d-left
-        ^deep.right d-right)
-}
-
-# Time 11:
-# Complete graph match farther back than a full surface match
-
-sp {simple*apply*step*11
-   (state <s> ^name simple
-              ^operator.name step
-              ^time 11
-              ^epmem.command <cmd>)
--->
-   (<cmd> ^query <q>)
-   (<q> ^deep <d>)
-   (<d> ^left d-left
-        ^right d-right)
-}
-
-# Time 13:
-# No exact match in the past
-
-sp {simple*apply*step*13
-   (state <s> ^name simple
-              ^operator.name step
-              ^time 13
-              ^epmem.command <cmd>)
--->
-   (<cmd> ^query <q>)
-   (<q> ^deep <d>
-        ^shallow sh)
-   (<d> ^left d-left
-        ^right d-right)
-}
-
-# Time 15
-# Should fail
-
-sp {simple*apply*step*15
-   (state <s> ^name simple
-              ^operator.name step
-              ^time 15
-              ^epmem.command <cmd>)
--->
-   (<cmd> ^query <q>)
-   (<q> ^deep.middle d-middle)
-}
-
-
-sp {simple*apply*step*20
-   (state <s> ^name simple
-              ^operator.name step
-              ^time 20)
+              ^time 21)
 -->
    (halt)
 }
