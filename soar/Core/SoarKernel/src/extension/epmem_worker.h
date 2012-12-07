@@ -47,6 +47,7 @@ public:
 
 	// Initialize the worker (create database, etc.)
 	void initialize(epmem_param_container* epmem_params);
+	void initialize(int page_size, bool optimization, char *str, bool from_thread);
 
 	// Add a new episode to the collection of episodes the worker currently has
 	void add_epmem_episode_diff(epmem_episode_diff* episode);
@@ -117,8 +118,12 @@ private:
 	*/
 	tc_number tc;
 	tc_number get_new_tc_number(){tc++;return tc;}
-	
-	
+	/*
+	bool epmem_register_pedges(
+	    epmem_node_id parent, epmem_literal* literal, epmem_pedge_pq& pedge_pq, 
+	    epmem_time_id after, epmem_triple_pedge_map pedge_caches[], 
+	     std::map<epmem_triple, epmem_uedge*> uedge_caches[]);
+	*/
 	epmem_literal* epmem_build_dnf(
 	    wme* cue_wme, epmem_wme_literal_map& literal_cache, 
 	    epmem_literal_set& leaf_literals, 
@@ -127,10 +132,7 @@ private:
 	    int query_type, 
 	    std::set<Symbol*>& visiting, soar_module::wme_set& cue_wmes,
 	    double balance);
-	bool epmem_register_pedges(
-	    epmem_node_id parent, epmem_literal* literal, epmem_pedge_pq& pedge_pq, 
-	    epmem_time_id after, epmem_triple_pedge_map pedge_caches[], 
-	    epmem_triple_uedge_map uedge_caches[]);
+	
 	bool epmem_graph_match(
 	    epmem_literal_deque::iterator& dnf_iter, 
 	    epmem_literal_deque::iterator& iter_end, 

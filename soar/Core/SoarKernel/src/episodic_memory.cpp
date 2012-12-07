@@ -96,6 +96,7 @@ void epmem_handle_query(
     epmem_time_list& prohibits, epmem_time_id before, epmem_time_id after, 
     epmem_symbol_set& currents, soar_module::wme_set& cue_wmes);
 void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* rsp);
+void send_epmem_worker_init_data(epmem_param_container* epmem_params);
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -982,7 +983,10 @@ void epmem_init_db( agent *my_agent, bool readonly = false )
 		// E587: AM:
 		my_agent->epmem_worker_p = new epmem_worker();
 		my_agent->epmem_worker_p->initialize(my_agent->epmem_params);
-
+		
+		// E587 JK
+		send_epmem_worker_init_data(my_agent->epmem_params);
+		
 		my_agent->epmem_stmts_master = new epmem_master_statement_container(my_agent);
 		my_agent->epmem_stmts_master->structure();
 		my_agent->epmem_stmts_master->prepare();
@@ -1768,6 +1772,56 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 	}
 }
 
+void send_epmem_worker_init_data(epmem_param_container* epmem_params)
+{
+	int page_size = epmem_params->page_size->get_value();
+	bool optimization = (epmem_params->opt->get_value() == epmem_param_container::opt_speed );
+	char* str = epmem_params->cache_size->get_string();
+	int size = strlen(str) + 1;
+
+	int dataSize = sizeof(epmem_worker_init_data) + size;
+	int msgsize = dataSize + sizeof(epmem_msg);
+	
+	char *msg = (char*)malloc(msgsize);
+	epmem_msg *ep = (epmem_msg*)msg;
+	
+	ep->source = AGENT_ID;
+    ep->size = msgsize;
+    ep->type = INIT_WORKER;
+	
+	epmem_worker_init_data* data = (epmem_worker_init_data*) &(ep->data);
+	data->page_size = page_size;
+	data->optimization = optimization;
+	data->buffsize = dataSize;
+    memcpy(&(data->str), str, size);//episode->buffer_size-10);
+	MPI::COMM_WORLD.Send(msg, msgsize, MPI::CHAR, MANAGER_ID, 1);
+    
+    delete msg;
+	free(str);
+    return;
+}
+
+void send_new_episode(epmem_episode_diff* episode)
+{
+	int ep_size = episode->buffer_size*sizeof(int64_t);
+    int size =  ep_size + sizeof(epmem_msg);//sizeof(int)*2 + sizeof(EPMEM_MSG_TYPE);
+	int id = MPI::COMM_WORLD.Get_rank(); 
+	
+	char *msg = (char*)malloc(size);//size);
+	epmem_msg *ep = (epmem_msg*)msg;
+	ep->source = AGENT_ID;
+    ep->size = size;
+    ep->type = NEW_EP;
+	
+	int64_t *buffer = (int64_t*)malloc(ep_size);
+	
+    memcpy(&(ep->data), (char*)episode->buffer, ep_size);//episode->buffer_size-10);
+    MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, MANAGER_ID, 1);
+    
+    delete msg;
+    return;
+}
+
 void epmem_epmem_episode_diff( agent *my_agent )
 {
 	// if this is the first episode, initialize db components
@@ -2041,11 +2095,12 @@ void epmem_epmem_episode_diff( agent *my_agent )
 		{
 			my_agent->epmem_wme_adds->clear();
 		}
-
-		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
+		// E587 message to master manager
+		send_new_episode(episode);
+		//my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
 		delete episode;
 	}
-
+	
 	////////////////////////////////////////////////////////////////////////////
 	my_agent->epmem_timers->storage->stop();
 	////////////////////////////////////////////////////////////////////////////
@@ -5297,18 +5352,18 @@ void epmem_handle_query(
     msg->source = 0;
     //TODO serialize currents and cue_wmes
     
-    //send msg
-    MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, 1, 1);
+    //send msg to manager
+    MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, MANAGER_ID, 1);
     delete msg;
     // get response
     //blocking probe call (unknown message size)
-    MPI::COMM_WORLD.Probe(1, 1, status);
+    MPI::COMM_WORLD.Probe(MANAGER_ID, 1, status);
     
     //get source and size of incoming message
     int buffSize = status.Get_count(MPI::CHAR);
     
     epmem_msg * recMsg = (epmem_msg*) malloc(buffSize);
-    MPI::COMM_WORLD.Recv(recMsg, buffSize, MPI::CHAR, 1, 1, status);
+    MPI::COMM_WORLD.Recv(recMsg, buffSize, MPI::CHAR, MANAGER_ID, 1, status);
     // handle 
     query_rsp_data *rsp = (query_rsp_data*)recMsg->data;
     epmem_handle_search_result(state, my_agent, rsp);

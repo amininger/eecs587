@@ -331,12 +331,9 @@ void epmem_worker::epmem_set_variable( epmem_variable_key variable_id, int64_t v
 	var_set->execute( soar_module::op_reinit );
 }
 
-void epmem_worker::initialize(epmem_param_container* epmem_params){
-	{
-
-		
-
-		
+void epmem_worker::initialize(int page_size, bool optimization, char *str, bool from_thread){
+{
+	
 	/////////////////////////////
 	// connect to rit state
 	/////////////////////////////
@@ -415,7 +412,7 @@ void epmem_worker::initialize(epmem_param_container* epmem_params){
 			{
 				// page_size
 				{
-					switch ( epmem_params->page_size->get_value() )
+					switch (page_size)//E587 JK
 					{
 						case ( epmem_param_container::page_1k ):
 							temp_q = new soar_module::sqlite_statement( epmem_db, "PRAGMA page_size = 1024" );
@@ -455,9 +452,11 @@ void epmem_worker::initialize(epmem_param_container* epmem_params){
 				// cache_size
 				{
 					std::string cache_sql( "PRAGMA cache_size = " );
-					char* str = epmem_params->cache_size->get_string();
+					// E587 JK
+                    //char* str = epmem_params->cache_size->get_string();
 					cache_sql.append( str );
-					free(str);
+					if (!from_thread)
+						free(str);
 					str = NULL;
 
 					temp_q = new soar_module::sqlite_statement( epmem_db, cache_sql.c_str() );
@@ -469,7 +468,7 @@ void epmem_worker::initialize(epmem_param_container* epmem_params){
 				}
 
 				// optimization
-				if ( epmem_params->opt->get_value() == epmem_param_container::opt_speed )
+				if (optimization)//E587 JK
 				{
 					// synchronous - don't wait for writes to complete (can corrupt the db in case unexpected crash during transaction)
 					temp_q = new soar_module::sqlite_statement( epmem_db, "PRAGMA synchronous = OFF" );
@@ -571,6 +570,11 @@ void epmem_worker::initialize(epmem_param_container* epmem_params){
 			}
 		}
 	}
+}
+void epmem_worker::initialize(epmem_param_container* epmem_params){
+	bool optimization = (epmem_params->opt->get_value() == epmem_param_container::opt_speed );
+	initialize(epmem_params->page_size->get_value(), optimization, epmem_params->cache_size->get_string(), false);
+			   
 }
 
 void epmem_worker::add_epmem_episode_diff(epmem_episode_diff* episode){
@@ -1300,7 +1304,7 @@ void epmem_worker::epmem_process_query(int64_t* datac)
 		    for (epmem_literal_set::iterator literal_iter = pedge->literals.begin(); literal_iter != pedge->literals.end(); literal_iter++) {
 			epmem_literal* literal = *literal_iter;
 			for (epmem_literal_set::iterator child_iter = literal->children.begin(); child_iter != literal->children.end(); child_iter++) {
-			    created |= epmem_register_pedges(triple.q1, *child_iter, pedge_pq, after, pedge_caches, uedge_caches);
+			    //created |= epmem_register_pedges(triple.q1, *child_iter, pedge_pq, after, pedge_caches, uedge_caches); TEMPTEMP TODO 
 			}
 		    }
 		}
@@ -1622,7 +1626,7 @@ void epmem_worker::epmem_process_query(int64_t* datac)
 	msg->source = MPI::COMM_WORLD.Get_rank();
 	//TODO serialize maps
 	//msg master
-	MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, 1, 1);
+	MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, MANAGER_ID, 1);
        
 	/*
 	if (best_episode == EPMEM_MEMID_NONE) {
@@ -1749,9 +1753,6 @@ void epmem_worker::epmem_process_query(int64_t* datac)
 }
 
 
-//ttttttt
-
-
 // E587 JK epmem build DNF
 epmem_literal* epmem_worker::epmem_build_dnf(
     wme* cue_wme, epmem_wme_literal_map& literal_cache, 
@@ -1876,11 +1877,11 @@ epmem_literal* epmem_worker::epmem_build_dnf(
     return literal;
 }
 
-
+#ifdef asdfadsfasd
 bool epmem_register_pedges(
     epmem_node_id parent, epmem_literal* literal, epmem_pedge_pq& pedge_pq, 
     epmem_time_id after, epmem_triple_pedge_map pedge_caches[], 
-    epmem_triple_uedge_map uedge_caches[]) {
+    std::map<epmem_triple, epmem_uedge*> uedge_caches[]) {
     // we don't need to keep track of visited literals/nodes because the literals are guaranteed to be acyclic
     // that is, the expansion to the literal's children will eventually bottom out
     // select the query
@@ -1961,6 +1962,7 @@ bool epmem_register_pedges(
     }
     return true;
 }
+#endif
 
 
 

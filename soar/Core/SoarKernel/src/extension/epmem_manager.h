@@ -27,11 +27,7 @@ class epmem_manager {
 public:
     epmem_manager();
     void initialize();//epmem_param_container* epmem_params);
-    //void add_epmem_episode_diff(epmem_episode_diff* episode, agent* my_agent);
-    //void finalize();
-    //void respond_to_cmd(agent *my_agent);
-   
-    
+     
 private:
     int numProc;
     int id;
@@ -39,6 +35,7 @@ private:
     int currentSize;
     epmem_worker *epmem_worker_p;
     
+	bool worker_active;
     void update_windowSize(int newSize);
     int calc_ep_size(epmem_episode_diff* episode);
     void manager_message_handler();
@@ -50,7 +47,7 @@ private:
 
 // Definitions for constant values
 #define WINDOW_SIZE_GROWTH_RATE 0
-#define DEFAULT_WINDOW_SIZE 30
+#define DEFAULT_WINDOW_SIZE 3
 #define MAX_EPMEM_MSG_SIZE 1000 //todo what size should this be?
 
 //may possibly have first worker be manager as well
@@ -63,6 +60,7 @@ private:
 typedef enum
 {
     NEW_EP = 0,
+	INIT_WORKER,
     RESIZE_WINDOW,
     RESIZE_REQUEST,
     SEARCH,
@@ -71,15 +69,22 @@ typedef enum
 } EPMEM_MSG_TYPE;
 
 //message structure
-struct epmem_msg
+typedef struct epmem_msg_struct
 {
     EPMEM_MSG_TYPE type;
     int size;
     int source;
-    char * data;
-} __attribute__((packed));
+    char data;
+} epmem_msg;
 
 
+typedef struct epmem_worker_init_data_struct
+{
+	int page_size;
+	bool optimization;
+	int buffsize;
+	char str;
+}epmem_worker_init_data;
 
 typedef struct query_data_struct
 {

@@ -2,11 +2,11 @@
 
 #ifndef SML_EMP_MPI_H
 #define SML_EMP_MPI_H
-class emp_mpi;
+#include "Export.h"
 
-class emp_mpi {
+class EXPORT emp_mpi {
 public:
-    emp_mpi();
+    emp_mpi(){};
     void init();
 };
 #endif

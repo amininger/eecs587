@@ -9,7 +9,7 @@
 #include <fstream>
 #include "sml_Client.h"
 #include "mpi.h"
-//#include "../Core/SoarKernel/src/extension/emp_mpi.h"
+#include "../Core/SoarKernel/src/extension/emp_mpi.h"
 
 using namespace std;
 using namespace sml;
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
     int id = MPI::COMM_WORLD.Get_rank();
     if (id > 0)//AGENT_ID)
     {
-	//emp_mpi* em = new emp_mpi();
+		emp_mpi* em;// = new emp_mpi();
 	//em->init();
 	//epmem_manager * ep_man = new epmem_manager();
 	//start processing
