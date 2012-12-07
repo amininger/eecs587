@@ -39,7 +39,7 @@ private:
     void update_windowSize(int newSize);
     int calc_ep_size(epmem_episode_diff* episode);
     void manager_message_handler();
-    //void epmem_worker_message_handler();
+    void worker_msg_handler();
     void pass_episode(epmem_episode_diff *episode); 
     void received_episode(epmem_episode_diff *episode);
     

@@ -18,6 +18,7 @@ struct epmem_episode_diff{
 	epmem_episode_diff(int64_t time, int num_nodes_add, int num_nodes_remove, int num_edges_add, int num_edges_remove);
 
 	epmem_episode_diff(int64_t* buffer);
+	epmem_episode_diff(int64_t* buffer, int size);
 
 	~epmem_episode_diff(){
 		delete [] buffer;

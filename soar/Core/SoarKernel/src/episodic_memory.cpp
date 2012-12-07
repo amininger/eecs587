@@ -1805,7 +1805,7 @@ void send_epmem_worker_init_data(epmem_param_container* epmem_params)
 
 void send_new_episode(epmem_episode_diff* episode)
 {
-	int ep_size = episode->buffer_size*sizeof(int64_t);
+	int ep_size = episode->buffer_size;//*sizeof(int64_t);
     int size =  ep_size + sizeof(epmem_msg);//sizeof(int)*2 + sizeof(EPMEM_MSG_TYPE);
 	int id = MPI::COMM_WORLD.Get_rank(); 
 	
@@ -2777,7 +2777,8 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 
     epmem_query* query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
 	
-	//MESSAGE HERE
+	// E587 JK MESSAGE HERE
+	//query_rsp_data* response = send_query_message(query);
     query_rsp_data* response = my_agent->epmem_worker_p->epmem_perform_query(query);
 
 	my_agent->epmem_timers->query->start();
