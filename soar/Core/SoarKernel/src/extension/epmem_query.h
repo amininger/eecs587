@@ -180,12 +180,11 @@ typedef struct epmem_query_struct{
 typedef struct query_rsp_data_struct
 {
     epmem_time_id best_episode;
-    int leaf_literals_size;
     double best_score;
-    bool best_graph_matched;
-    long int best_cardinality;
     double perfect_score;
-    //TODO serialize
+    bool best_graph_matched;
+    long best_cardinality;
+    int leaf_literals_size;
     epmem_literal_node_pair_map best_bindings;
 }query_rsp_data;//__attribute__((packed));
 

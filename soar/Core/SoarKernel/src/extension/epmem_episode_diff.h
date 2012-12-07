@@ -37,7 +37,8 @@ struct epmem_episode_diff{
 	epmem_edge_unique* removed_edges;
 	int num_removed_edges;
 
-	int buffer_size;
+	int buffer_size;    // Size of the buffer in bytes
+    int buffer_length;  // Length of the buffer array in int64_t
 	int64_t* buffer;
 	/* Buffer Structure (array of int64_ts)
 		[time]							: 1 int64_t consisting of the time of the episode
