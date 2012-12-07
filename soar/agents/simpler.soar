@@ -156,7 +156,7 @@ sp {simple*apply*step6
 sp {simple*apply*step*21
    (state <s> ^name simple
               ^operator.name step
-              ^time 21)
+              ^time 51)
 -->
    (halt)
 }

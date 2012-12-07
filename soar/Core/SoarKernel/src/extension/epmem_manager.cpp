@@ -172,16 +172,20 @@ void epmem_manager::manager_message_handler()
     //loop for central thread
     while(1)
     {
-		//blocking probe call (unknown message size)
 		//DEBUG("WAITING");
+		
+        //blocking probe call (unknown message size)
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
-		//DEBUG("RECEIVED");
-		//get source and size of incoming message
+		
+        //DEBUG("RECEIVED");
+		
+        //get source and size of incoming message
 		buffSize = status.Get_count(MPI::CHAR);
 	
 		src = status.Get_source();
 		MPI::COMM_WORLD.Recv(cmsg, buffSize, MPI::CHAR, src, 1, status);
 		epmem_msg *msg = (epmem_msg*) cmsg;
+		
 		//make sure data in message received agrees
 		if (msg->source != src || msg->size != buffSize)
 		{
@@ -239,7 +243,7 @@ void epmem_manager::manager_message_handler()
 			int best_size = buffSize;
 			epmem_msg *best_msg = (epmem_msg*) malloc(MAX_EPMEM_MSG_SIZE);
 			memcpy(best_msg, msg, best_size);
-			query_rsp_data *best_rsp = (query_rsp_data*)best_msg->data;
+			query_rsp_data *best_rsp = (query_rsp_data*)&(best_msg->data);
 			bool best_found = false;
 			int current_best = id;
 			int received = 1;
@@ -265,32 +269,32 @@ void epmem_manager::manager_message_handler()
 				if (msg->type != SEARCH_RESULT)
 					continue;
 				/*
-				query_rsp_data *rsp = (query_rsp_data*)msg->data;
-				// result is better if:
-				//     first to find episode
-				//     score is better
-				//     score is same but lower id
-				//     graph match on lower id
-				//     first graph match
-				if (rsp->best_episode == EPMEM_MEMID_NONE &&
-					best_rsp->best_episode != EPMEM_MEMID_NONE)
-					continue;
-				if ((rsp->best_episode != EPMEM_MEMID_NONE &&
-					 best_rsp->best_episode == EPMEM_MEMID_NONE) ||
-					(rsp->best_score > best_rsp->best_score) ||
-					(rsp->best_score == best_rsp->best_score &&
-					 id < current_best) ||
-					(rsp->do_graph_match && id < current_best
-					 && rsp->best_graph_matched) ||
-					(rsp->do_graph_match && 
-					 !best_rsp->best_graph_matched &&
-					 rsp->best_graph_matched))
-				{
-					best_size = buffSize;
-					memcpy(best_msg, msg, best_size);
-					best_rsp = (query_rsp_data*)best_msg->data;
-					current_best = id;
-				}
+				  query_rsp_data *rsp = (query_rsp_data*)msg->data;
+				  // result is better if:
+				  //     first to find episode
+				  //     score is better
+				  //     score is same but lower id
+				  //     graph match on lower id
+				  //     first graph match
+				  if (rsp->best_episode == EPMEM_MEMID_NONE &&
+				  best_rsp->best_episode != EPMEM_MEMID_NONE)
+				  continue;
+				  if ((rsp->best_episode != EPMEM_MEMID_NONE &&
+				  best_rsp->best_episode == EPMEM_MEMID_NONE) ||
+				  (rsp->best_score > best_rsp->best_score) ||
+				  (rsp->best_score == best_rsp->best_score &&
+				  id < current_best) ||
+				  (rsp->do_graph_match && id < current_best
+				  && rsp->best_graph_matched) ||
+				  (rsp->do_graph_match && 
+				  !best_rsp->best_graph_matched &&
+				  rsp->best_graph_matched))
+				  {
+				  best_size = buffSize;
+				  memcpy(best_msg, msg, best_size);
+				  best_rsp = (query_rsp_data*)best_msg->data;
+				  current_best = id;
+				  }
 				*/
 			}
 			//respond with data to agent
@@ -391,7 +395,7 @@ void epmem_manager::worker_msg_handler()
 				ERROR("Msg data size for resize window incorrect");
 				break;
 			}
-			int * newsize = (int*) msg->data;
+			int * newsize = (int*) (&msg->data);
 	    
 			if (*newsize < 1)
 			{
@@ -413,7 +417,7 @@ void epmem_manager::worker_msg_handler()
 				int bSize = sizeof(query_rsp_data) + sizeof(int)*2 + 
 					sizeof(EPMEM_MSG_TYPE);
 				/*
-				epmem_msg * rspMsg = (epmem_msg*) malloc(bSize);
+				  epmem_msg * rspMsg = (epmem_msg*) malloc(bSize);
 				
 				  query_rsp_data* rsp = (query_rsp_data*)msg->data;
 				  rsp->best_episode = EPMEM_MEMID_NONE;
