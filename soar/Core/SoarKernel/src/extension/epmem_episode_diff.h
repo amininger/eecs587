@@ -23,7 +23,7 @@ struct epmem_episode_diff{
 		delete [] buffer;
 	}
 
-	int64_t time;
+	epmem_time_id time;
 
 	epmem_node_unique* added_nodes;
 	int num_added_nodes;

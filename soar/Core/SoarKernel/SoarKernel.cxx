@@ -38,6 +38,7 @@
 #include "src/extension/epmem_episode_diff.cpp"
 #include "src/extension/epmem_worker.cpp"
 #include "src/extension/epmem_sql_containers.cpp"
+#include "src/extension/epmem_query.cpp"
 // E587: JK: Include
 #include "src/extension/epmem_manager.cpp"
 #include "src/extension/emp_mpi.cpp"

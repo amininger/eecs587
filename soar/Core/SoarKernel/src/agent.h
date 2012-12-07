@@ -24,8 +24,8 @@
 #include"gsysparam.h"
 #endif
 //E587: JK:
-//#include "mpi.h"
-#include "extension/epmem_manager.h"
+//!!!#include "mpi.h"
+//!!!#include "extension/epmem_manager.h"
 
 // E587: AM:
 #include <stdint.h>

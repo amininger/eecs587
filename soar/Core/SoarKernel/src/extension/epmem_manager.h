@@ -77,25 +77,8 @@ struct epmem_msg
     int size;
     int source;
     char * data;
-} __attribute__((packed));
+}__attribute__((packed));
 
-
-
-typedef struct query_data
-{
-    bool graph_match;
-    epmem_param_container::gm_ordering_choices gm_order;
-    epmem_time_id before_time;
-    double balance;
-    Symbol pos_query;
-    Symbol neg_query;
-    epmem_time_id before;
-    epmem_time_id after;
-    //TODO serialize
-    //epmem_time_list  prohibits;
-    //epmem_symbol_set  currents;
-    //soar_module::wme_set  cue_wmes;
-} __attribute__((packed));
 
 
 typedef struct query_rsp_data
@@ -111,8 +94,6 @@ typedef struct query_rsp_data
     bool do_graph_match;
     //TODO serialize
     epmem_literal_node_pair_map best_bindings;
-    soar_module::symbol_triple_list meta_wmes;
-    soar_module::symbol_triple_list retrieval_wmes;
 } __attribute__((packed));
 
 #endif

@@ -918,7 +918,7 @@ namespace soar_module
 	// Memory Pool Allocators
 	///////////////////////////////////////////////////////////////////////////
 
-#define USE_MEM_POOL_ALLOCATORS 1
+//#define USE_MEM_POOL_ALLOCATORS 1
 
 #ifdef USE_MEM_POOL_ALLOCATORS
 
@@ -1034,12 +1034,12 @@ namespace soar_module
 			typedef soar_memory_pool_allocator<U> other;
 		};
 
-
+        
 	private:
 		agent* my_agent;
 		memory_pool* mem_pool;
 		size_type size;
-
+        
 		soar_memory_pool_allocator() {}
 
 	};
