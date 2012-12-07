@@ -39,7 +39,7 @@ private:
     void update_windowSize(int newSize);
     int calc_ep_size(epmem_episode_diff* episode);
     void manager_message_handler();
-    void epmem_worker_message_handler();
+    //void epmem_worker_message_handler();
     void pass_episode(epmem_episode_diff *episode); 
     void received_episode(epmem_episode_diff *episode);
     
@@ -86,6 +86,7 @@ typedef struct epmem_worker_init_data_struct
 	char str;
 }epmem_worker_init_data;
 
+/*
 typedef struct query_data_struct
 {
     bool graph_match;
@@ -101,8 +102,8 @@ typedef struct query_data_struct
     //epmem_symbol_set  currents;
     //soar_module::wme_set  cue_wmes;
 } query_data;
-
-
+*/
+  /*
 typedef struct query_rsp_data_struct
 {
     epmem_time_id best_episode;
@@ -119,6 +120,6 @@ typedef struct query_rsp_data_struct
     //soar_module::symbol_triple_list meta_wmes;
     //soar_module::symbol_triple_list retrieval_wmes;
 } query_rsp_data;
-
+  */
 
 #endif

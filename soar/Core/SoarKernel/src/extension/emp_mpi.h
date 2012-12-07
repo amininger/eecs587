@@ -6,7 +6,7 @@
 
 class EXPORT emp_mpi {
 public:
-    emp_mpi(){};
+    emp_mpi();
     void init();
 };
 #endif

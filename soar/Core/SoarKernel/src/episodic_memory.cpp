@@ -2776,7 +2776,8 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 	}
 
     epmem_query* query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
-
+	
+	//MESSAGE HERE
     query_rsp_data* response = my_agent->epmem_worker_p->epmem_perform_query(query);
 
 	my_agent->epmem_timers->query->start();
@@ -4312,7 +4313,7 @@ bool epmem_backup_db( agent* my_agent, const char* file_name, std::string *err )
 }
 
 // E587 JK create message, send to manager master, wait for response and handle
-
+/*
 void epmem_handle_query(
     agent *my_agent, Symbol *state, Symbol *pos_query, Symbol *neg_query, 
     epmem_time_list& prohibits, epmem_time_id before, epmem_time_id after, 
@@ -4458,3 +4459,4 @@ void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* 
 	my_agent->epmem_timers->query_result->stop();
     }
 }
+*/

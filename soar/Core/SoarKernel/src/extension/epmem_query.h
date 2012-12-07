@@ -163,7 +163,7 @@ typedef std::priority_queue<epmem_interval*, std::vector<epmem_interval*>, epmem
 //////////////////////////////////////////////////////////
 // Defines structures sent back and forth as messages
 
-struct epmem_query_struct{
+typedef struct epmem_query_struct{
     epmem_time_list prohibits;
     std::vector<int> currents;
     epmem_time_id before;
@@ -175,9 +175,9 @@ struct epmem_query_struct{
     int level;
     epmem_packed_cue_wme_list wmes;
     epmem_cue_symbols_packed_list symbols;
-}__attribute__((packed));
+}epmem_query;//__attribute__((packed));
 
-struct query_rsp_data_struct
+typedef struct query_rsp_data_struct
 {
     epmem_time_id best_episode;
     int leaf_literals_size;
@@ -187,7 +187,7 @@ struct query_rsp_data_struct
     double perfect_score;
     //TODO serialize
     epmem_literal_node_pair_map best_bindings;
-}__attribute__((packed));
+}query_rsp_data;//__attribute__((packed));
 
 // Represents a symbol in working memory, can be an identifier, lti, or value
 struct epmem_cue_symbol_struct{
@@ -198,7 +198,7 @@ struct epmem_cue_symbol_struct{
     bool is_lti;
     epmem_time_id promotion_time;
     epmem_cue_wme_list* children;
-}__attribute__((packed));
+};//__attribute__((packed));
 
 // A temporary symbol table used to index into a list of symbols
 struct epmem_cue_symbol_table_struct{
@@ -220,7 +220,7 @@ struct epmem_packed_cue_wme_struct{
     int attr_index;
     int value_index;
     double activation;
-}__attribute__((packed));
+};//__attribute__((packed));
 
 // Simple wme structure with an (id ^attr value)
 struct epmem_cue_wme_struct{

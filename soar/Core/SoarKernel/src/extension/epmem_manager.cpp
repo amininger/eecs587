@@ -43,7 +43,7 @@ epmem_manager::epmem_manager()
  * @Notes    : initialize id, numProcs, windowSize, and worker
  *             call appropriate handler functions for processor
  **************************************************************************/
-void epmem_manager::initialize()//epmem_param_container* epmem_params)
+void epmem_manager::initialize()
 {    
     numProc = MPI::COMM_WORLD.Get_size();
     id = MPI::COMM_WORLD.Get_rank();
@@ -76,7 +76,7 @@ void epmem_manager::initialize()//epmem_param_container* epmem_params)
 		// JK COMMENT OUT FOR NOW
 		//epmem_worker_p->initialize(epmem_params); 
 		//handle all messages/commands to this worker processor
-		epmem_worker_message_handler();
+		//epmem_worker_message_handler();
 		break;
     }   
 }
@@ -273,6 +273,7 @@ void epmem_manager::manager_message_handler()
 				//only handle search results now
 				if (msg->type != SEARCH_RESULT)
 					continue;
+				/*
 				query_rsp_data *rsp = (query_rsp_data*)msg->data;
 				// result is better if:
 				//     first to find episode
@@ -299,6 +300,7 @@ void epmem_manager::manager_message_handler()
 					best_rsp = (query_rsp_data*)best_msg->data;
 					current_best = id;
 				}
+				*/
 			}
 			//respond with data to agent
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
@@ -320,6 +322,7 @@ void epmem_manager::manager_message_handler()
  * @Author   : 
  * @Notes    : message handler for epmem_workers on seperate procs
  **************************************************************************/
+/*
 void epmem_manager::epmem_worker_message_handler()
 {
     // malloc msg buffer size initially so dont have to keep remallocing
@@ -414,6 +417,7 @@ void epmem_manager::epmem_worker_message_handler()
 		int bSize = sizeof(query_rsp_data) + sizeof(int)*2 + 
 		    sizeof(EPMEM_MSG_TYPE);
 		epmem_msg * rspMsg = (epmem_msg*) malloc(bSize);
+		/*
 		query_rsp_data* rsp = (query_rsp_data*)msg->data;
 		rsp->best_episode = EPMEM_MEMID_NONE;
 		MPI::COMM_WORLD.Send(rspMsg, buffSize, MPI::CHAR, MANAGER_ID, 1);
@@ -422,6 +426,8 @@ void epmem_manager::epmem_worker_message_handler()
 	    
 	    query_data * data = (query_data*)msg->data;
 	    epmem_worker_p->epmem_process_query((int64_t*)data);
+		*/
+/*
 	    break;
 	}
 	default:
@@ -432,7 +438,7 @@ void epmem_manager::epmem_worker_message_handler()
     
     delete msg;	
 }
-
+*/
 
 
 
