@@ -5,6 +5,7 @@
 
 #include "../episodic_memory.h"
 
+
 struct epmem_episode{
 	epmem_episode(epmem_time_id time, int num_nodes, int num_edges)
 		:num_nodes(num_nodes), num_edges(num_edges)

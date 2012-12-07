@@ -117,7 +117,7 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 	promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
 	add( promote_id );
 
-	find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id FROM lti WHERE letter=? AND num=?" );
+	find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id, time_id FROM lti WHERE letter=? AND num=?" );
 	add( find_lti );
 
 	find_lti_promotion_time = new soar_module::sqlite_statement( new_db, "SELECT time_id FROM lti WHERE parent_id=?" );

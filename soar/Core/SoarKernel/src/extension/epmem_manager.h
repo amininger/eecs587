@@ -120,4 +120,5 @@ typedef struct query_rsp_data_struct
     //soar_module::symbol_triple_list retrieval_wmes;
 } query_rsp_data;
 
+
 #endif

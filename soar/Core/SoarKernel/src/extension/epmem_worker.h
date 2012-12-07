@@ -10,6 +10,7 @@ class epmem_worker;
 #include "epmem_episode_diff.h"
 #include "epmem_sql_containers.h"
 #include "epmem_episode.h"
+#include "epmem_query.h"
 
 #define EPMEM_RIT_ROOT								0
 #define EPMEM_RIT_OFFSET_INIT						-1
@@ -63,6 +64,8 @@ public:
 
 	epmem_episode* get_episode(epmem_time_id);
 
+    query_rsp_data* epmem_perform_query(epmem_query* query);
+
 	// Closes the worker and removes the database
 	void close();
 
@@ -108,36 +111,29 @@ private:
 	void epmem_set_variable( epmem_variable_key variable_id, int64_t variable_value );
 
 	// E587 JK
-	//#ifdef HAHSDFAHSDF
-	/*
-	memory_pool		  epmem_literal_pool;
-	memory_pool		  epmem_pedge_pool;
-	memory_pool		  epmem_uedge_pool;
-	memory_pool		  epmem_interval_pool;
-	void initialize_epmem_pools();
-	*/
+	//
+	//memory_pool		  epmem_literal_pool;
+	//memory_pool		  epmem_pedge_pool;
+	//memory_pool		  epmem_uedge_pool;
+	//memory_pool		  epmem_interval_pool;
+
+	//void initialize_epmem_pools();
+	
 	tc_number tc;
 	tc_number get_new_tc_number(){tc++;return tc;}
-	/*
-	bool epmem_register_pedges(
-	    epmem_node_id parent, epmem_literal* literal, epmem_pedge_pq& pedge_pq, 
-	    epmem_time_id after, epmem_triple_pedge_map pedge_caches[], 
-	     std::map<epmem_triple, epmem_uedge*> uedge_caches[]);
-	*/
-	epmem_literal* epmem_build_dnf(
-	    wme* cue_wme, epmem_wme_literal_map& literal_cache, 
-	    epmem_literal_set& leaf_literals, 
-	    epmem_symbol_int_map& symbol_num_incoming, 
-	    epmem_literal_deque& gm_ordering, epmem_symbol_set& currents, 
-	    int query_type, 
-	    std::set<Symbol*>& visiting, soar_module::wme_set& cue_wmes,
-	    double balance);
 	
-	bool epmem_graph_match(
-	    epmem_literal_deque::iterator& dnf_iter, 
-	    epmem_literal_deque::iterator& iter_end, 
-	    epmem_literal_node_pair_map& bindings, epmem_node_symbol_map bound_nodes[], int depth);
-	//#endif
+    void epmem_print_retrieval_state(epmem_wme_literal_map& literals, epmem_triple_pedge_map pedge_caches[], epmem_triple_uedge_map uedge_caches[]);
+
+    epmem_literal* epmem_build_dnf(epmem_query* query, epmem_cue_wme* cue_wme, epmem_wme_literal_map& literal_cache, epmem_literal_set& leaf_literals, epmem_symbol_int_map& symbol_num_incoming, epmem_literal_deque& gm_ordering, int query_type, epmem_cue_symbol_set& visiting, epmem_cue_symbol_set& currents, epmem_cue_wme_set& cue_wmes);
+
+    bool epmem_register_pedges(epmem_node_id parent, epmem_literal* literal, epmem_pedge_pq& pedge_pq, epmem_time_id after, epmem_triple_pedge_map pedge_caches[], epmem_triple_uedge_map uedge_caches[]);
+
+    bool epmem_satisfy_literal(epmem_literal* literal, epmem_node_id parent, epmem_node_id child, double& current_score, long int& current_cardinality, epmem_symbol_node_pair_int_map& symbol_node_count, epmem_triple_uedge_map uedge_caches[], epmem_symbol_int_map& symbol_num_incoming);
+
+    bool epmem_unsatisfy_literal(epmem_literal* literal, epmem_node_id parent, epmem_node_id child, double& current_score, long int& current_cardinality, epmem_symbol_node_pair_int_map& symbol_node_count) ;
+
+    bool epmem_graph_match(epmem_literal_deque::iterator& dnf_iter, epmem_literal_deque::iterator& iter_end, epmem_literal_node_pair_map& bindings, epmem_node_symbol_map bound_nodes[], int depth );
+
 };
 
 #endif // EPMEM_WORKER_H_

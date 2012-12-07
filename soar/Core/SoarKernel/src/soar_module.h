@@ -917,6 +917,7 @@ namespace soar_module
 	///////////////////////////////////////////////////////////////////////////
 	// Memory Pool Allocators
 	///////////////////////////////////////////////////////////////////////////
+
 // E587 JK dont use mem pool allocators
 //#define USE_MEM_POOL_ALLOCATORS 1
 
@@ -1034,12 +1035,12 @@ namespace soar_module
 			typedef soar_memory_pool_allocator<U> other;
 		};
 
-
+        
 	private:
 		agent* my_agent;
 		memory_pool* mem_pool;
 		size_type size;
-
+        
 		soar_memory_pool_allocator() {}
 
 	};
