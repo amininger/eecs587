@@ -68,6 +68,9 @@ public:
 	// Closes the worker and removes the database
 	void close();
 
+	// E587 JK
+	void epmem_process_query(int64_t* data);
+
 private:
 	soar_module::sqlite_database *epmem_db;
 

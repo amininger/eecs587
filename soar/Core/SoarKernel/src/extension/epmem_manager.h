@@ -80,20 +80,4 @@ struct epmem_msg
 }__attribute__((packed));
 
 
-
-typedef struct query_rsp_data
-{
-    epmem_time_id best_episode;
-    Symbol pos_query;
-    Symbol neg_query;
-    int leaf_literals_size;
-    double best_score;
-    bool best_graph_matched;
-    long int best_cardinality;
-    double perfect_score;
-    bool do_graph_match;
-    //TODO serialize
-    epmem_literal_node_pair_map best_bindings;
-} __attribute__((packed));
-
 #endif

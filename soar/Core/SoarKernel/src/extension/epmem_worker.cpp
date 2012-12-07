@@ -1,9 +1,12 @@
 #include "epmem_worker.h"
 #include <iostream>
+#include "epmem_manager.h"
+//#include "../instantiations.h"
+//#include "../symtab.h"
 
 epmem_worker::epmem_worker(){
-	 epmem_db = new soar_module::sqlite_database();
-	 epmem_stmts_common = NIL;
+	epmem_db = new soar_module::sqlite_database();
+	epmem_stmts_common = NIL;
 	 epmem_stmts_graph = NIL;
 	 last_removal = 0;
 }
@@ -75,7 +78,7 @@ int64_t epmem_worker::epmem_rit_fork_node( int64_t lower, int64_t upper, int64_t
 void epmem_worker::epmem_rit_clear_left_right()
 {
 	// E587: AM:
-	epmem_stmts_common->rit_truncate_left->execute( soar_module::op_reinit );
+    epmem_stmts_common->rit_truncate_left->execute( soar_module::op_reinit );
 	epmem_stmts_common->rit_truncate_right->execute( soar_module::op_reinit );
 }
 
@@ -113,7 +116,7 @@ void epmem_worker::epmem_rit_add_right( epmem_time_id id )
 void epmem_worker::epmem_rit_prep_left_right( int64_t lower, int64_t upper, epmem_rit_state *rit_state )
 {
 
-	int64_t offset = rit_state->offset.stat->get_value();
+    int64_t offset = rit_state->offset.stat->get_value();
 	int64_t node, step;
 	int64_t left_node, left_step;
 	int64_t right_node, right_step;
@@ -1033,9 +1036,6 @@ void epmem_worker::get_edges_at_episode(epmem_time_id time, std::vector<epmem_no
 
 	epmem_rit_clear_left_right();
 }
-
-
-#define QUERY_DEBUG 0
 
 void epmem_worker::epmem_print_retrieval_state(epmem_wme_literal_map& literals, epmem_triple_pedge_map pedge_caches[], epmem_triple_uedge_map uedge_caches[]) {
 	//std::map<epmem_node_id, std::string> tsh;

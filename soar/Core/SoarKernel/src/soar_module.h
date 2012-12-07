@@ -918,6 +918,7 @@ namespace soar_module
 	// Memory Pool Allocators
 	///////////////////////////////////////////////////////////////////////////
 
+// E587 JK dont use mem pool allocators
 //#define USE_MEM_POOL_ALLOCATORS 1
 
 #ifdef USE_MEM_POOL_ALLOCATORS

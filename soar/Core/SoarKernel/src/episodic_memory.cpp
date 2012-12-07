@@ -1,5 +1,5 @@
 #include <portability.h>
-
+#include "mpi.h"
 /*************************************************************************
  * PLEASE SEE THE FILE "COPYING" (INCLUDED WITH THIS SOFTWARE PACKAGE)
  * FOR LICENSE AND COPYRIGHT INFORMATION.
@@ -36,7 +36,7 @@
 #include "decide.h"
 
 // E587
-#include "epmem_manager.h"
+#include "extension/epmem_manager.h"
 
 #ifdef EPMEM_EXPERIMENT
 
@@ -89,6 +89,14 @@ soar_module::timer* epmem_exp_timer = NULL;
 
 // high-level api				epmem::api
 
+
+
+//E587 JK functions
+void epmem_handle_query(
+    agent *my_agent, Symbol *state, Symbol *pos_query, Symbol *neg_query, 
+    epmem_time_list& prohibits, epmem_time_id before, epmem_time_id after, 
+    epmem_symbol_set& currents, soar_module::wme_set& cue_wmes);
+void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* rsp);
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
