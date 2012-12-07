@@ -10,43 +10,45 @@ struct epmem_episode{
 	epmem_episode(epmem_time_id time, int num_nodes, int num_edges)
 		:num_nodes(num_nodes), num_edges(num_edges)
 	{
-		buffer_size = 3 + num_nodes + num_edges;
-		buffer = new epmem_node_id[buffer_size];
+		buffer_length = 3 + num_nodes + num_edges;
+        buffer_size = buffer_length * sizeof(epmem_node_id);
+		buffer = new epmem_node_id[buffer_length];
 
-		epmem_node_id* addr = buffer;
+        int index = 0;
 
-		*addr = time;
-		addr += 1;
+		buffer[index] = time;
+		index += 1;
 
-		*addr = num_nodes;
-		addr += 1;
-		nodes = addr;
-		addr += num_nodes;
+		buffer[index] = num_nodes;
+		index += 1;
+		nodes = &buffer[index];
+		index += num_nodes;
 
-		*addr = num_edges;
-		addr += 1;
-		edges = addr;
-		addr += num_edges;
+		buffer[index] = num_edges;
+		index += 1;
+		edges = &buffer[index];
+		index += num_edges;
 	}
 	
 	epmem_episode(int64_t* buffer):buffer(buffer)
 	{
-		int64_t* addr = buffer;
+		int index = 0;
 
-		time = *addr;
-		addr += 1;
+		time = buffer[index];
+		index += 1;
 
-		num_nodes = *addr;
-		addr += 1;
-		nodes = addr;
-		addr += num_nodes;
+		num_nodes = buffer[index];
+		index += 1;
+		nodes = &buffer[index];
+		index += num_nodes;
 		
-		num_edges = *addr;
-		addr += 1;
-		edges = addr;
-		addr += num_edges;
+		num_edges = buffer[index];
+		index += 1;
+		edges = &buffer[index];
+		index += num_edges;
 
-		buffer_size = 3 + num_nodes + num_edges;
+		buffer_length = 3 + num_nodes + num_edges;
+        buffer_size = sizeof(epmem_node_id) * buffer_length;
 	}
 
 	~epmem_episode(){
@@ -62,7 +64,8 @@ struct epmem_episode{
 	epmem_node_id* edges;
 
 	epmem_node_id* buffer;
-	int buffer_size;
+	int buffer_size;        // Size of the buffer in bytes
+    int buffer_length;      // Length of the buffer array in epmem_time_id
 };
 
 
