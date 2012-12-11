@@ -128,21 +128,22 @@ void epmem_manager::received_episode(epmem_episode_diff *episode)
     epmem_worker_p->add_epmem_episode_diff(episode);
     currentSize++;
     
-    // if last processor keep hold of all episodes regardless of windowsize
-    if (id >= (numProc - 1))
-    {
-		//TODO msg master or other node to consider resizing previous windows
-		return;
-    }
-    
-    if (currentSize > windowSize)
-    {
+    // if last processor keep hold of all episodes regardless of windowsize    
+    if ((currentSize > windowSize) && (id < (numProc - 1)))
+	{
 		DEBUG("Sending oldest episode to neighbor");
 		epmem_episode_diff *to_send = epmem_worker_p->remove_oldest_episode();
 		currentSize--;
 		pass_episode(to_send);
 		delete to_send;
     }
+	else
+	{
+		epmem_msg *msg = new epmem_msg();
+		MPI::COMM_WORLD.Send(msg, sizeof(epmem_msg), MPI::CHAR, MANAGER_ID, 2);
+		delete msg;
+	}
+	
     return;
 }
 
@@ -212,6 +213,8 @@ void epmem_manager::manager_message_handler()
 			DEBUG("Received new episode");
 
 			MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, id+1, 1);
+			
+			MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, MPI::ANY_SOURCE, 2);		
 
 			break;
 		}
@@ -265,14 +268,15 @@ void epmem_manager::manager_message_handler()
 				best_rsp->best_graph_matched && 
 				do_graph_match)
 			{
-				best_found = true;
+				//best_found = true;
 			}
 			//vector<int> rec;
 			std::list<int> notrec;
 			for (int i = FIRST_WORKER_ID; i < numProc; i++)
 				notrec.push_back(i);
-			//rec.push_back(best_bsg->source);
+			
 			notrec.remove(best_msg->source);
+			
 			while(!best_found && (received < (numProc-2)))
 			{
 				//blocking probe call (unknown message size)
@@ -298,6 +302,7 @@ void epmem_manager::manager_message_handler()
 				//response is best if either 
 				//  first ep to have full graph match and no earlier eps left
 				//  earliest ep to have full graph match and no earlier eps left
+				/*
 				if (rsp->best_graph_matched && 
 					(!(best_rsp->best_graph_matched) ||
 					 (best_rsp->best_graph_matched && 
@@ -313,6 +318,7 @@ void epmem_manager::manager_message_handler()
 							best_found = false;
 					}
 				}
+				*/
 				if (best_found)
 				{
 					best_size = buffSize;
@@ -320,6 +326,7 @@ void epmem_manager::manager_message_handler()
 					memcpy(best_msg, msg, best_size);
 					free(best_rsp);
 					best_rsp = rsp;
+					
 					break;
 				}
 				
@@ -333,14 +340,23 @@ void epmem_manager::manager_message_handler()
 				
 				if (rsp->best_episode == EPMEM_MEMID_NONE &&
 					best_rsp->best_episode != EPMEM_MEMID_NONE)
+				{
+					free(rsp); //cant be best
 					continue;
+				}
+				
 				if ((rsp->best_episode != EPMEM_MEMID_NONE &&
 					 best_rsp->best_episode == EPMEM_MEMID_NONE) ||
+					
 					(rsp->best_score > best_rsp->best_score) ||
+					
 					(rsp->best_score == best_rsp->best_score &&
-					 msg->source < best_msg->source) ||
+					 msg->source < best_msg->source && 
+					 !best_rsp->best_graph_matched) ||
+					
 					(do_graph_match && msg->source < best_msg->source
 					 && rsp->best_graph_matched) ||
+					
 					(do_graph_match && 
 					 !best_rsp->best_graph_matched &&
 					 rsp->best_graph_matched))
@@ -350,6 +366,10 @@ void epmem_manager::manager_message_handler()
 					memcpy(best_msg, msg, best_size);
 					free(best_rsp);
 					best_rsp = rsp;
+					/*
+					std::cout << "3BEST episode " << best_rsp->best_episode << " from " 
+							  << best_msg->source << " with score " << best_rsp->best_score << " and graph match " << best_rsp->best_graph_matched << std::endl;
+					*/
 				}
 				else
 					free(rsp);
@@ -485,7 +505,8 @@ void epmem_manager::worker_msg_handler()
 			delete query;
 			
 			epmem_msg* rspMsg = rsp->pack();
-			std::cout << "Worker " << id << " best ep: " << rsp->best_episode << std::endl;
+			//std::cout << "Worker " << id << " best ep: " << rsp->best_episode <<
+			//	" of number of episodes: " << currentSize << std::endl;
 			rspMsg->source = id;
 			DEBUG("Responding with search result");
 			MPI::COMM_WORLD.Send(rspMsg, rspMsg->size, MPI::CHAR, MANAGER_ID, 1);	

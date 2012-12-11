@@ -2278,10 +2278,6 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 	int64_t num_wmes = 0;
 	my_agent->epmem_stats->ncb_wmes->set_value( num_wmes );
 
-    if(my_agent->epmem_worker_p == NIL){
-        return;
-    }
-
 	// if no memory, say so
 	if ( ( memory_id == EPMEM_MEMID_NONE ) ||
 			!epmem_valid_episode( my_agent, memory_id ) )
@@ -2313,7 +2309,7 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 	// add *-id wme's
 	{
 		Symbol *my_meta;
-
+		
 		my_meta = make_int_constant( my_agent, static_cast<int64_t>( memory_id ) );
 		epmem_buffer_add_wme( meta_wmes, result_header, my_agent->epmem_sym_memory_id, my_meta );
 		symbol_remove_ref( my_agent, my_meta );
@@ -2324,6 +2320,7 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 	}
 
 	// install memory
+#ifndef USE_MPI //TODO MAY CHANGE
 	{
 		// Big picture: create identifier skeleton, then hang non-identifers
 		//
@@ -2579,6 +2576,7 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 			}
 		}
 	}
+	#endif
 
 	// adjust stat
 	my_agent->epmem_stats->ncb_wmes->set_value( num_wmes );
@@ -2835,7 +2833,6 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 #ifdef USE_MPI
 	double wtime = MPI::Wtime ();	
 	query_rsp_data* response = send_epmem_query_message(query);
-	std::cout << "BEST EP: " << response->best_episode << std::endl;
 	std::cout << "Query time: " << MPI::Wtime() - wtime << std::endl;
 #else
     // SEARCH QUERY
@@ -2922,6 +2919,7 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 				//}
 			}
 			// reconstruct the actual episode
+		
 			if (level > 2) {
 				epmem_install_memory(my_agent, state, response->best_episode, meta_wmes, retrieval_wmes, &node_mem_map);
 			}
