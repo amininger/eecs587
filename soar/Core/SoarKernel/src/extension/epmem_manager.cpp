@@ -20,6 +20,8 @@
 //#define DEBUG(a) printf("PROC %d:: %s. File: %s, Line: %d\n\n", id, a, __FILE__,__LINE__) 
 #define DEBUG(a) ;
 
+//#define DYNAMIC_WINDOW_1 1
+#define INCR_AMNT 2
 #include <list>
 
 #include "epmem_manager.h"
@@ -34,7 +36,8 @@
 epmem_manager::epmem_manager()
 {
     currentSize = 0;
-	receiving_results = false;
+	msgCount = 1;
+	sendEpNextTime = false;
     epmem_worker_p = new epmem_worker();
 }
 
@@ -74,9 +77,7 @@ void epmem_manager::initialize()
 			return;
 		}
 		worker_active = false;
-		// initalize epmem_worker
-		// JK COMMENT OUT FOR NOW
-		//epmem_worker_p->initialize(epmem_params); 
+		
 		//handle all messages/commands to this worker processor
 		worker_msg_handler();
 		break;
@@ -110,7 +111,7 @@ void epmem_manager::pass_episode(epmem_episode_diff *episode)
     msg->size = size;
     msg->type = NEW_EP;
     memcpy(&(msg->data), episode->buffer, ep_size);
-    MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, id+1, 1);
+    MPI::COMM_WORLD.Send(msg, size, MPI::CHAR, id+1, 2); //episodes sent on 2
     
     delete msg;
     return;
@@ -129,21 +130,26 @@ void epmem_manager::received_episode(epmem_episode_diff *episode)
     currentSize++;
     
     // if last processor keep hold of all episodes regardless of windowsize    
-    if ((currentSize > windowSize) && (id < (numProc - 1)))
+    if ((currentSize >= windowSize) && (id < (numProc - 1)))
 	{
+		sendEpNextTime = true;
+		/*
 		DEBUG("Sending oldest episode to neighbor");
 		epmem_episode_diff *to_send = epmem_worker_p->remove_oldest_episode();
 		currentSize--;
 		pass_episode(to_send);
 		delete to_send;
+		*/
     }
+	/*
 	else
 	{
+		//send ack!
 		epmem_msg *msg = new epmem_msg();
 		MPI::COMM_WORLD.Send(msg, sizeof(epmem_msg), MPI::CHAR, MANAGER_ID, 2);
 		delete msg;
 	}
-	
+	*/
     return;
 }
 
@@ -175,12 +181,9 @@ void epmem_manager::manager_message_handler()
     //loop for central thread
     while(1)
     {
-		//DEBUG("WAITING");
-		
-        //blocking probe call (unknown message size)
+		//blocking probe call (unknown message size)
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
-		
-        //DEBUG("RECEIVED");
+        DEBUG("RECEIVED");
 		
         //get source and size of incoming message
 		buffSize = status.Get_count(MPI::CHAR);
@@ -197,9 +200,7 @@ void epmem_manager::manager_message_handler()
 			ERROR("Message source/size information conflicts");
 			continue;
 		}
-		//DEBUG("PROCESSED");
-		int dataSize = buffSize - sizeof(int)*2 -sizeof(EPMEM_MSG_TYPE);
-		
+				
 		//switch on message type can be :
 		//      new_ep: need to add new episode
 		//      resize_request: need to adjust window size
@@ -211,10 +212,20 @@ void epmem_manager::manager_message_handler()
 		case NEW_EP:
 		{
 			DEBUG("Received new episode");
+			
+			// first broadcast so that all episodes know there is a new ep
+			msg->type = NEW_EP_NOTIFY;
+			msg->size = sizeof(epmem_msg);
+			for (int i = id+1; i < numProc; i++)
+				MPI::COMM_WORLD.Send(msg, msg->size, MPI::CHAR, i, 1);
 
+			msg->size = buffSize;
+			msg->type = NEW_EP;
 			MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, id+1, 1);
 			
-			MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, MPI::ANY_SOURCE, 2);		
+			//wait for receivie acknowledge from last process to add episode
+			//MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, 
+			//					 MPI::ANY_SOURCE, 2);		
 
 			break;
 		}
@@ -235,61 +246,57 @@ void epmem_manager::manager_message_handler()
 		{
 			// Broadcast search request to all workers
 			// TODO is there a better Bcast?
-			//MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
+			//
+			
+			msg->count = msgCount;
 			DEBUG("Received search request");
-			receiving_results = true;
+			//MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
+			
 			for (int i = id+1; i < numProc; i++)
 				MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, i, 1);
 			break;
 		}
 		case SEARCH_RESULT:
 		{
-			if (!receiving_results)
+			if (msg->count != msgCount) //dont process old results
 				break;
+			int underUtilized = -1; // mark a processor if being unutilized
+			
 			DEBUG("Received search result");
 			//first search results, set as temporary best
 			int best_size = buffSize;
-			
 			epmem_msg *best_msg = (epmem_msg*) malloc(MAX_EPMEM_MSG_SIZE);
 			memcpy(best_msg, msg, best_size);
-			
 			query_rsp_data *best_rsp = new query_rsp_data();
 			best_rsp->unpack(best_msg);
-			
 			bool best_found = false;
 			int received = 1;
 			query_rsp_data *rsp;
+			bool do_graph_match = true; //default always true
 
-			//do graph match always true?
-			bool do_graph_match = true;
-
+			//first processor did not respond first
+			if (best_msg->source != 2)
+				underUtilized = best_msg->source;
+			
 			//if graph match found by first worker, this is best
-			if (best_msg->source == 2 && 
-				best_rsp->best_graph_matched && 
+			if (best_msg->source == 2 && best_rsp->best_graph_matched && 
 				do_graph_match)
-			{
-				//best_found = true;
-			}
-			//vector<int> rec;
+				best_found = true;
+			
 			std::list<int> notrec;
 			for (int i = FIRST_WORKER_ID; i < numProc; i++)
 				notrec.push_back(i);
-			
 			notrec.remove(best_msg->source);
 			
 			while(!best_found && (received < (numProc-2)))
 			{
-				//blocking probe call (unknown message size)
+				//blocking probe call 
 				MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
-				
-				//get source and size of incoming message
 				buffSize = status.Get_count(MPI::CHAR);
 				src = status.Get_source();
 				MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 1, status);
-				
-				
-				//only handle search results now
-				if (msg->type != SEARCH_RESULT)
+								
+				if ((msg->type != SEARCH_RESULT) || (msg->count != msgCount))
 					continue;
 				
 				DEBUG("Received search result");
@@ -299,10 +306,11 @@ void epmem_manager::manager_message_handler()
 				rsp->unpack(msg);
 				
 				notrec.remove(msg->source);
+				
 				//response is best if either 
 				//  first ep to have full graph match and no earlier eps left
 				//  earliest ep to have full graph match and no earlier eps left
-				/*
+				
 				if (rsp->best_graph_matched && 
 					(!(best_rsp->best_graph_matched) ||
 					 (best_rsp->best_graph_matched && 
@@ -311,22 +319,22 @@ void epmem_manager::manager_message_handler()
 				{
 					best_found = true;
 					std::list<int>::const_iterator it;
-					
 					for(it=notrec.begin(); it!=notrec.end(); it++)
 					{
-						if (*it < msg->source) 
+						if (*it < msg->source)
+						{
 							best_found = false;
+							break;
+						}
 					}
 				}
-				*/
+				
 				if (best_found)
 				{
 					best_size = buffSize;
-					//avoid memcpys?
 					memcpy(best_msg, msg, best_size);
 					free(best_rsp);
 					best_rsp = rsp;
-					
 					break;
 				}
 				
@@ -362,26 +370,30 @@ void epmem_manager::manager_message_handler()
 					 rsp->best_graph_matched))
 				{
 					best_size = buffSize;
-					//avoid memcpys?
 					memcpy(best_msg, msg, best_size);
 					free(best_rsp);
 					best_rsp = rsp;
-					/*
-					std::cout << "3BEST episode " << best_rsp->best_episode << " from " 
-							  << best_msg->source << " with score " << best_rsp->best_score << " and graph match " << best_rsp->best_graph_matched << std::endl;
-					*/
 				}
 				else
 					free(rsp);
 				
 			}
 			//respond with data to agent
+			msgCount++;
 			DEBUG("Responding with best result");
-			//std::cout << "Master Best episode " << best_rsp->best_episode << std::endl;
-			//stop processing results from other processors
-			receiving_results = false;
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
 			delete best_msg;
+
+#ifdef DYNAMIC_WINDOW_1
+			if (underUtilized != -1)
+			{
+				msg->type = RESIZE_WINDOW;
+				msg->source = id;
+				msg->size = sizeof(epmem_msg);
+				MPI::COMM_WORLD.Send(msg, sizeof(epmem_msg), MPI::CHAR, 
+									 underUtilized, 1);
+			}
+#endif
 			break;
 		}
 		default:
@@ -413,14 +425,12 @@ void epmem_manager::worker_msg_handler()
     while(1)
     {
 		//blocking probe call (unknown message size)
-		//DEBUG("WAITING");
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
-	
-		//get source and size of incoming message
 		buffSize = status.Get_count(MPI::CHAR);
 		src = status.Get_source();
 		MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 1, status);
-		//DEBUG("RECEIVED");
+		
+		DEBUG("RECEIVED");
 		//make sure data in message received agrees
 		if (msg->size != buffSize)
 		{
@@ -429,10 +439,6 @@ void epmem_manager::worker_msg_handler()
 			ERROR("Message source/size information conflicts");
 			continue;
 		}
-	
-		
-		int dataSize = buffSize - sizeof(epmem_msg);//sizeof(int)*2 -sizeof(EPMEM_MSG_TYPE);
-	
 		//switch on message type can be :
 		//      new_ep: need to add new episode and possibly shift last
 		//      resize_window: need to adjust window size
@@ -444,20 +450,46 @@ void epmem_manager::worker_msg_handler()
 			if (!worker_active)
 				break;
 			DEBUG("Received new episode");
-			int64_t* ep_buffer = (int64_t*) &(msg->data);
-			epmem_episode_diff *episode = new epmem_episode_diff(ep_buffer, dataSize);
-			if (dataSize != calc_ep_size(episode))
-			{
-				printf("datasize %d episode size %d\n", 
-					   dataSize, calc_ep_size(episode));
-				ERROR("Msg data size for new episode incorrect");
+			receive_new_episode((int64_t*) &(msg->data), 
+								buffSize - sizeof(epmem_msg));
+			break;
+		}
+		case NEW_EP_NOTIFY:
+		{
+			if (!worker_active)
 				break;
+			if (sendEpNextTime)
+			{
+				DEBUG("Sending oldest episode to neighbor");
+				epmem_episode_diff *to_send = epmem_worker_p->remove_oldest_episode();
+				currentSize--;
+				pass_episode(to_send);
+				delete to_send;	
+				sendEpNextTime = false;
+			}
+			else if (id < (numProc -1))
+			{
+				//send null episode
+				epmem_msg *msgt = new epmem_msg();
+				msgt->type = NEW_EP_EMPTY;
+				msgt->size = sizeof(epmem_msg);
+				MPI::COMM_WORLD.Send(msgt,msgt->size, MPI::CHAR, id+1, 2);
+				delete msgt;
 			}
 			
-			//handle adding episode and shift last episode if needed
-			received_episode(episode);
-			delete episode;
-			break;
+			if (id == FIRST_WORKER_ID)//will get episode from manager
+				break;
+			// receive episode (tag 2) here to prevent getting query before
+			// episode received
+			MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 2, status);
+			//get source and size of incoming message
+			buffSize = status.Get_count(MPI::CHAR);
+			src = status.Get_source();
+			MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 2, status);
+			if (msg->type == NEW_EP_EMPTY)
+				break;
+			receive_new_episode((int64_t*) &(msg->data), 
+								buffSize - sizeof(epmem_msg));
 		}
 		case INIT_WORKER:
 		{
@@ -472,20 +504,9 @@ void epmem_manager::worker_msg_handler()
 		}
 		case RESIZE_WINDOW:
 		{
-			if (dataSize != sizeof(int))
-			{
-				ERROR("Msg data size for resize window incorrect");
-				break;
-			}
-			int * newsize = (int*) (&msg->data);
-	    
-			if (*newsize < 1)
-			{
-				ERROR("Illegal window size");
-				break;
-			}
-			update_windowSize(*newsize);
-	    
+			//int * newsize = (int*) (&msg->data);
+			update_windowSize(INCR_AMNT);//*newsize);
+			std::cout << id << " new window size " << windowSize << std::endl;
 			break;
 		}
 
@@ -494,20 +515,17 @@ void epmem_manager::worker_msg_handler()
 			if (!worker_active)
 				break;
 			DEBUG("Received search request");
-			
+			msgCount = msg->count;
 			epmem_query* query = new epmem_query();
 			query->unpack(msg);
 			
 			//get response
 			query_rsp_data* rsp = epmem_worker_p->epmem_perform_query(query);
-			//now have response send to master
-			DEBUG("got result");
 			delete query;
 			
 			epmem_msg* rspMsg = rsp->pack();
-			//std::cout << "Worker " << id << " best ep: " << rsp->best_episode <<
-			//	" of number of episodes: " << currentSize << std::endl;
 			rspMsg->source = id;
+			rspMsg->count = msgCount;
 			DEBUG("Responding with search result");
 			MPI::COMM_WORLD.Send(rspMsg, rspMsg->size, MPI::CHAR, MANAGER_ID, 1);	
 			delete rspMsg;
@@ -523,6 +541,22 @@ void epmem_manager::worker_msg_handler()
 	}   
 	delete msg;	
 	
+}
+
+void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
+{
+	epmem_episode_diff *episode = new epmem_episode_diff(ep_buffer, dataSize);
+	if (dataSize != calc_ep_size(episode))
+	{
+		printf("datasize %d episode size %d\n", 
+			   dataSize, calc_ep_size(episode));
+		ERROR("Msg data size for new episode incorrect");
+		return;
+	}
+	
+	//handle adding episode and shift last episode if needed
+	received_episode(episode);
+	delete episode;
 }
 
 
