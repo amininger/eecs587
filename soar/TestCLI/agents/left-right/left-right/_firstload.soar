@@ -1,2 +1,0 @@
-rl --set learning on
-indifferent-selection --epsilon-greedy

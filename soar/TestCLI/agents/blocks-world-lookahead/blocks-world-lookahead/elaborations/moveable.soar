@@ -1,8 +1,0 @@
-sp {elaborate*block*moveable
-   (state <s> ^name blocks-world
-              ^object <block>
-             -^ontop.bottom-block <block>
-             -^ontop.last-bottom <block>)
--->
-   (<s> ^moveable <block>)
-}
