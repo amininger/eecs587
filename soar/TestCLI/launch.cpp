@@ -30,7 +30,7 @@ int main(int argc, char** argv){
 		//epmem_manager * ep_man = new epmem_manager();
 		//start processing
 		//ep_man->initialize(); 
-		cout << "ppProcessor " << id << " online" << endl;
+		cout << "Processor " << id << " online" << endl;
 		while(1){}
 		//must have terminated
 		//delete epman;

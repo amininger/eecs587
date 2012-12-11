@@ -20,6 +20,7 @@
 //#define DEBUG(a) printf("PROC %d:: %s. File: %s, Line: %d\n\n", id, a, __FILE__,__LINE__) 
 #define DEBUG(a) ;
 
+#include <list>
 
 #include "epmem_manager.h"
 #include "epmem_query.h"
@@ -33,6 +34,7 @@
 epmem_manager::epmem_manager()
 {
     currentSize = 0;
+	receiving_results = false;
     epmem_worker_p = new epmem_worker();
 }
 
@@ -47,9 +49,8 @@ void epmem_manager::initialize()
 {    
     numProc = MPI::COMM_WORLD.Get_size();
     id = MPI::COMM_WORLD.Get_rank();
+      
     
-        
-    windowSize = DEFAULT_WINDOW_SIZE + id*WINDOW_SIZE_GROWTH_RATE;
     
     // launch appropraite handler function for processor/role
     switch(id)
@@ -66,6 +67,7 @@ void epmem_manager::initialize()
 		break;
     }
     default:
+		windowSize = DEFAULT_WINDOW_SIZE + (id-2)*WINDOW_SIZE_GROWTH_RATE;
 		if (id < FIRST_WORKER_ID)
 		{
 			ERROR("Invalid id");
@@ -148,11 +150,11 @@ void epmem_manager::received_episode(epmem_episode_diff *episode)
 /***************************************************************************
  * @Function : update_windowSize
  * @Author   : 
- * @Notes    : updates current value of windowSize to given
+ * @Notes    : updates current value of windowSize by given
  **************************************************************************/
-void epmem_manager::update_windowSize(int newSize)
+void epmem_manager::update_windowSize(int sizeIncr)
 {
-    windowSize = newSize;
+    windowSize += sizeIncr;
 }
 
 
@@ -232,12 +234,15 @@ void epmem_manager::manager_message_handler()
 			// TODO is there a better Bcast?
 			//MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
 			DEBUG("Received search request");
+			receiving_results = true;
 			for (int i = id+1; i < numProc; i++)
 				MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, i, 1);
 			break;
 		}
 		case SEARCH_RESULT:
 		{
+			if (!receiving_results)
+				break;
 			DEBUG("Received search result");
 			//first search results, set as temporary best
 			int best_size = buffSize;
@@ -249,16 +254,25 @@ void epmem_manager::manager_message_handler()
 			best_rsp->unpack(best_msg);
 			
 			bool best_found = false;
-			int current_best = id;
 			int received = 1;
 			query_rsp_data *rsp;
+
+			//do graph match always true?
+			bool do_graph_match = true;
+
 			//if graph match found by first worker, this is best
-			/* for now just wait for all responses 
-			   if (best_msg->source == 2 && 
-			   best_rsp->best_graph_matched && 
-			   best_rsp->do_graph_match)
-			   best_found = true;
-			*/
+			if (best_msg->source == 2 && 
+				best_rsp->best_graph_matched && 
+				do_graph_match)
+			{
+				best_found = true;
+			}
+			//vector<int> rec;
+			std::list<int> notrec;
+			for (int i = FIRST_WORKER_ID; i < numProc; i++)
+				notrec.push_back(i);
+			//rec.push_back(best_bsg->source);
+			notrec.remove(best_msg->source);
 			while(!best_found && (received < (numProc-2)))
 			{
 				//blocking probe call (unknown message size)
@@ -268,23 +282,55 @@ void epmem_manager::manager_message_handler()
 				buffSize = status.Get_count(MPI::CHAR);
 				src = status.Get_source();
 				MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 1, status);
-				received++;
-				DEBUG("Received search result");
+				
+				
 				//only handle search results now
 				if (msg->type != SEARCH_RESULT)
 					continue;
 				
+				DEBUG("Received search result");
+				received++;
+				
 				rsp = new query_rsp_data();
 				rsp->unpack(msg);
-				// result is better if:
+				
+				notrec.remove(msg->source);
+				//response is best if either 
+				//  first ep to have full graph match and no earlier eps left
+				//  earliest ep to have full graph match and no earlier eps left
+				if (rsp->best_graph_matched && 
+					(!(best_rsp->best_graph_matched) ||
+					 (best_rsp->best_graph_matched && 
+					  msg->source < best_msg->source)) && 
+					do_graph_match)
+				{
+					best_found = true;
+					std::list<int>::const_iterator it;
+					
+					for(it=notrec.begin(); it!=notrec.end(); it++)
+					{
+						if (*it < msg->source) 
+							best_found = false;
+					}
+				}
+				if (best_found)
+				{
+					best_size = buffSize;
+					//avoid memcpys?
+					memcpy(best_msg, msg, best_size);
+					free(best_rsp);
+					best_rsp = rsp;
+					break;
+				}
+				
+                // result is better if:
 				//     first to find episode
 				//     score is better
 				//     score is same but lower id
 				//     graph match on lower id
 				//     first graph match
 
-				//do graph match always true?
-				bool do_graph_match = true;
+				
 				if (rsp->best_episode == EPMEM_MEMID_NONE &&
 					best_rsp->best_episode != EPMEM_MEMID_NONE)
 					continue;
@@ -292,8 +338,8 @@ void epmem_manager::manager_message_handler()
 					 best_rsp->best_episode == EPMEM_MEMID_NONE) ||
 					(rsp->best_score > best_rsp->best_score) ||
 					(rsp->best_score == best_rsp->best_score &&
-					 id < current_best) ||
-					(do_graph_match && id < current_best
+					 msg->source < best_msg->source) ||
+					(do_graph_match && msg->source < best_msg->source
 					 && rsp->best_graph_matched) ||
 					(do_graph_match && 
 					 !best_rsp->best_graph_matched &&
@@ -304,8 +350,6 @@ void epmem_manager::manager_message_handler()
 					memcpy(best_msg, msg, best_size);
 					free(best_rsp);
 					best_rsp = rsp;
-
-					current_best = id;
 				}
 				else
 					free(rsp);
@@ -314,6 +358,8 @@ void epmem_manager::manager_message_handler()
 			//respond with data to agent
 			DEBUG("Responding with best result");
 			std::cout << "Master Best episode " << best_rsp->best_episode << std::endl;
+			//stop processing results from other processors
+			receiving_results = false;
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
 			delete best_msg;
 			break;
@@ -428,21 +474,7 @@ void epmem_manager::worker_msg_handler()
 			if (!worker_active)
 				break;
 			DEBUG("Received search request");
-			/*
-			if (currentSize == 0)// no episodes on worker
-			{
-				//send no episode result
-				//int bSize = sizeof(query_rsp_data) + sizeof(;
 			
-				
-				epmem_msg * rspMsg = (epmem_msg*) malloc(bSize);
-				
-				query_rsp_data* rsp = (query_rsp_data*)msg->data;
-				rsp->best_episode = EPMEM_MEMID_NONE;
-				MPI::COMM_WORLD.Send(rspMsg, buffSize, MPI::CHAR, MANAGER_ID, 1);
-				delete rspMsg;
-			}
-			*/
 			epmem_query* query = new epmem_query();
 			query->unpack(msg);
 			

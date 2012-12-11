@@ -34,9 +34,9 @@ private:
     int windowSize;
     int currentSize;
     epmem_worker *epmem_worker_p;
-    
+    bool receiving_results;
 	bool worker_active;
-    void update_windowSize(int newSize);
+    void update_windowSize(int sizeIncr);
     int calc_ep_size(epmem_episode_diff* episode);
     void manager_message_handler();
     void worker_msg_handler();

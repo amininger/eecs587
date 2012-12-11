@@ -2803,7 +2803,9 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
     epmem_query* query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
 	
 	// E587 JK MESSAGE HERE
+	double wtime = MPI::Wtime ();
 	query_rsp_data* response = send_epmem_query_message(query);
+	std::cout << "Query time: " << MPI::Wtime() - wtime << std::endl;
     //query_rsp_data* response = my_agent->epmem_worker_p->epmem_perform_query(query);
 
 	my_agent->epmem_timers->query->start();
