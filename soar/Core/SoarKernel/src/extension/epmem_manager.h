@@ -40,6 +40,7 @@ private:
 	bool worker_active;
     void update_windowSize(int sizeIncr);
 	
+	void receive_new_episode(int64_t *ep_buffer, int dataSize);
     int calc_ep_size(epmem_episode_diff* episode);
     void manager_message_handler();
     void worker_msg_handler();
@@ -64,6 +65,7 @@ typedef enum
 {
     NEW_EP = 0,
 	NEW_EP_NOTIFY,
+	NEW_EP_EMPTY,
 	INIT_WORKER,
     RESIZE_WINDOW,
     RESIZE_REQUEST,
