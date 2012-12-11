@@ -178,9 +178,10 @@ void epmem_manager::manager_message_handler()
     MPI::Status status;
     int buffSize;
     int src;
+    bool keep_running = true;
     
     //loop for central thread
-    while(1)
+    while(keep_running)
     {
 		//blocking probe call (unknown message size)
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
@@ -210,6 +211,15 @@ void epmem_manager::manager_message_handler()
 		
 		switch(msg->type)
 		{
+		case EXIT:
+		{
+			DEBUG("Exiting Program");
+			keep_running = false;
+			for(int i = id+1; i < numProc; i++){
+				MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, i, 1);	
+			} 
+			break;
+		}
 		case NEW_EP:
 		{
 			DEBUG("Received new episode");
@@ -422,8 +432,8 @@ void epmem_manager::worker_msg_handler()
     MPI::Status status;
     int buffSize;
     int src;
-    
-    while(1)
+    bool keep_running = true;    
+    while(keep_running)
     {
 		//blocking probe call (unknown message size)
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
@@ -446,6 +456,11 @@ void epmem_manager::worker_msg_handler()
 		//      search:  handle epmem search command
 		switch(msg->type)
 		{
+		case EXIT:
+		{
+			keep_running = false;
+			break;
+		}
 		case NEW_EP:
 		{
 			if (!worker_active)

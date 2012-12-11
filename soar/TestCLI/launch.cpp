@@ -5,7 +5,6 @@ using std::endl;
 #include "emp_mpi.h"
 #include <string>
 #include "sml_Client.h"
-
 using namespace sml;
 using namespace std;
 string strip(string s, string lc, string rc) {
@@ -31,7 +30,6 @@ int main(int argc, char** argv){
 		//start processing
 		//ep_man->initialize(); 
 		cout << "Processor " << id << " online" << endl;
-		while(1){}
 		//must have terminated
 		//delete epman;
     }
@@ -45,9 +43,10 @@ int main(int argc, char** argv){
 		agent->RegisterForPrintEvent(smlEVENT_PRINT, printcb, NULL);
 		
 		cout << agent->ExecuteCommandLine("source ../agents/worstcase.soar") << endl;
+	
+		agent->ExecuteCommandLine("run");	
+	//	cout << agent->ExecuteCommandLine("source ../agents/simple.soar") << endl;
 		
-		
-		cout << agent->ExecuteCommandLine("run") << endl;
 		
 		kernel->Shutdown();
 	}
