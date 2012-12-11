@@ -36,6 +36,7 @@
 epmem_manager::epmem_manager()
 {
     currentSize = 0;
+	totalEpCnt = 0;
 	msgCount = 1;
 	sendEpNextTime = false;
     epmem_worker_p = new epmem_worker();
@@ -553,7 +554,14 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 		ERROR("Msg data size for new episode incorrect");
 		return;
 	}
-	
+	//if received 
+	if (totalEpCnt > ((numProc-id)*DEFAULT_WINDOW_SIZE + 
+					   (windowSize - DEFAULT_WINDOW_SIZE)*(numProc-id)))
+	{
+		windowSize++;
+		std::cout << id << " new window size " << windowSize << std::endl;
+	}
+	totalEpCnt++;
 	//handle adding episode and shift last episode if needed
 	received_episode(episode);
 	delete episode;

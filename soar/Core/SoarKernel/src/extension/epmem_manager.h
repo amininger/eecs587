@@ -33,6 +33,7 @@ private:
     int numProc;
 	int msgCount;
     int id;
+	int totalEpCnt;
     int windowSize;
     int currentSize;
 	bool sendEpNextTime;
