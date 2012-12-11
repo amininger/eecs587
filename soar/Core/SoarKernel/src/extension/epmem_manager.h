@@ -18,6 +18,7 @@
 #ifndef EPMEM_MANAGER_H
 #define EPMEM_MANAGER_H
 
+
 class epmem_manager;
 
 #include "../episodic_memory.h"

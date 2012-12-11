@@ -357,7 +357,7 @@ void epmem_manager::manager_message_handler()
 			}
 			//respond with data to agent
 			DEBUG("Responding with best result");
-			std::cout << "Master Best episode " << best_rsp->best_episode << std::endl;
+			//std::cout << "Master Best episode " << best_rsp->best_episode << std::endl;
 			//stop processing results from other processors
 			receiving_results = false;
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);

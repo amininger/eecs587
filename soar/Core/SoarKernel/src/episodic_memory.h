@@ -17,6 +17,7 @@
 
 // E587: AM:
 #include <stdint.h>
+#define USE_MPI 1
 
 #include <map>
 #include <list>

@@ -72,14 +72,11 @@ public:
 	// E587 JK
 	void epmem_process_query(int64_t* data);
 
-private:
 	soar_module::sqlite_database *epmem_db;
 
+private:
+
 	epmem_common_statement_container *epmem_stmts_common;
-
-	std::map<long, int> node_now_start_times;
-
-	std::map<long, int> edge_now_start_times;
 
   epmem_rit_state epmem_rit_state_graph[2];
 

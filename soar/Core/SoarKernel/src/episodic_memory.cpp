@@ -1,5 +1,4 @@
 #include <portability.h>
-#include "mpi.h"
 /*************************************************************************
  * PLEASE SEE THE FILE "COPYING" (INCLUDED WITH THIS SOFTWARE PACKAGE)
  * FOR LICENSE AND COPYRIGHT INFORMATION.
@@ -35,8 +34,11 @@
 #include "instantiations.h"
 #include "decide.h"
 
-// E587
+// E587: 
+#ifdef USE_MPI
 #include "extension/epmem_manager.h"
+#include "mpi.h"
+#endif
 
 #ifdef EPMEM_EXPERIMENT
 
@@ -92,6 +94,7 @@ soar_module::timer* epmem_exp_timer = NULL;
 
 
 //E587 JK functions
+#ifdef USE_MPI
 void epmem_handle_query(
     agent *my_agent, Symbol *state, Symbol *pos_query, Symbol *neg_query, 
     epmem_time_list& prohibits, epmem_time_id before, epmem_time_id after, 
@@ -99,6 +102,7 @@ void epmem_handle_query(
 void epmem_handle_search_result(Symbol *state, agent* my_agent, query_rsp_data* rsp);
 void send_epmem_worker_init_data(epmem_param_container* epmem_params);
 query_rsp_data* send_epmem_query_message(epmem_query* query);
+#endif
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -723,8 +727,10 @@ void epmem_close( agent *my_agent )
 	// E587: AM:
 	if ( my_agent->epmem_db->get_status() == soar_module::connected )
 	{
+#ifndef USE_MPI
 		my_agent->epmem_worker_p->close();
 		delete my_agent->epmem_worker_p;
+#endif
 
 		// if lazy, commit
 		if ( my_agent->epmem_params->lazy_commit->get_value() == soar_module::on )
@@ -982,13 +988,15 @@ void epmem_init_db( agent *my_agent, bool readonly = false )
 		// update validation count
 		my_agent->epmem_validation++;
 
-		// E587: AM:
+#ifdef USE_MPI
+		send_epmem_worker_init_data(my_agent->epmem_params);
+#else
 		my_agent->epmem_worker_p = new epmem_worker();
 		my_agent->epmem_worker_p->initialize(my_agent->epmem_params);
-		
-		// E587 JK
-		send_epmem_worker_init_data(my_agent->epmem_params);
-		
+        my_agent->epmem_worker_p2 = new epmem_worker();
+        my_agent->epmem_worker_p2->initialize(my_agent->epmem_params);
+#endif
+
 		my_agent->epmem_stmts_master = new epmem_master_statement_container(my_agent);
 		my_agent->epmem_stmts_master->structure();
 		my_agent->epmem_stmts_master->prepare();
@@ -1774,6 +1782,7 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 	}
 }
 
+#ifdef USE_MPI
 query_rsp_data* send_epmem_query_message(epmem_query* query)
 {
 	epmem_msg *msg = query->pack();
@@ -1849,7 +1858,7 @@ void send_new_episode(epmem_episode_diff* episode)
     return;
 }
 
-//void epmem_epmem_episode_diff( agent *my_agent )
+#endif
 
 void epmem_new_episode( agent *my_agent )
 {
@@ -2124,9 +2133,27 @@ void epmem_new_episode( agent *my_agent )
 		{
 			my_agent->epmem_wme_adds->clear();
 		}
-		// E587 message to master manager
-		send_new_episode(episode);
-		//my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
+
+        // Send the episode diff to the processor
+
+#ifdef USE_MPI
+        send_new_episode(episode);
+#else
+        //STORE
+		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
+        if(episode->time == 8){
+            my_agent->epmem_worker_p->epmem_db->backup("p1_before.db", new std::string("Backup error"));
+            for(int i = 0; i < 4; i++){
+                epmem_episode_diff* diff = my_agent->epmem_worker_p->remove_oldest_episode();
+                my_agent->epmem_worker_p2->add_epmem_episode_diff(diff);
+            }
+            my_agent->epmem_worker_p->epmem_db->backup("p1_after.db", new std::string("Backup error"));
+            my_agent->epmem_worker_p2->epmem_db->backup("p2_after.db", new std::string("Backup error"));
+        }
+        if(episode->time == 12){
+            my_agent->epmem_worker_p->epmem_db->backup("p1_step12.db", new std::string("Backup error"));
+        }
+#endif
 		delete episode;
 	}
 	
@@ -2252,6 +2279,10 @@ void epmem_install_memory( agent *my_agent, Symbol *state, epmem_time_id memory_
 	// initialize stat
 	int64_t num_wmes = 0;
 	my_agent->epmem_stats->ncb_wmes->set_value( num_wmes );
+
+    if(my_agent->epmem_worker_p == NIL){
+        return;
+    }
 
 	// if no memory, say so
 	if ( ( memory_id == EPMEM_MEMID_NONE ) ||
@@ -2802,11 +2833,26 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 
     epmem_query* query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
 	
-	// E587 JK MESSAGE HERE
-	double wtime = MPI::Wtime ();
+
+#ifdef USE_MPI
+	double wtime = MPI::Wtime ();	
 	query_rsp_data* response = send_epmem_query_message(query);
+	std::cout << "BEST EP: " << response->best_episode << std::endl;
 	std::cout << "Query time: " << MPI::Wtime() - wtime << std::endl;
-    //query_rsp_data* response = my_agent->epmem_worker_p->epmem_perform_query(query);
+#else
+    // SEARCH QUERY
+    query_rsp_data* r1 = my_agent->epmem_worker_p2->epmem_perform_query(query);
+    query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
+    query_rsp_data* r2 = my_agent->epmem_worker_p->epmem_perform_query(query);
+
+    query_rsp_data* response = r2;
+    if((r1->best_score > r2->best_score) ||
+        (query->do_graph_match && r1->best_graph_matched && !r2->best_graph_matched)){
+            response = r1;
+    } else {
+        response = r2;
+    }
+#endif
 
 	my_agent->epmem_timers->query->start();
 
@@ -2923,6 +2969,10 @@ void epmem_print_episode( agent* my_agent, epmem_time_id memory_id, std::string*
 	{
 		epmem_init_db( my_agent );
 	}
+
+    if(my_agent->epmem_worker_p == NIL){
+        return;
+    }
 
 	// if bad memory, bail
 	buf->clear();
@@ -3110,6 +3160,10 @@ void epmem_visualize_episode( agent* my_agent, epmem_time_id memory_id, std::str
 	{
 		epmem_init_db( my_agent );
 	}
+
+    if(my_agent->epmem_worker_p == NIL){
+        return;
+    }
 
 	// if bad memory, bail
 	buf->clear();

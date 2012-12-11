@@ -1,6 +1,9 @@
 #include "epmem_worker.h"
 #include <iostream>
+
+#ifdef USE_MPI
 #include "epmem_manager.h"
+#endif
 //#include "../instantiations.h"
 //#include "../symtab.h"
 
@@ -575,8 +578,7 @@ void epmem_worker::initialize(int page_size, bool optimization, char *str, bool 
 }
 void epmem_worker::initialize(epmem_param_container* epmem_params){
 	bool optimization = (epmem_params->opt->get_value() == epmem_param_container::opt_speed );
-	initialize(epmem_params->page_size->get_value(), optimization, epmem_params->cache_size->get_string(), false);
-			   
+	initialize(epmem_params->page_size->get_value(), optimization, epmem_params->cache_size->get_string(), false);			   
 }
 
 void epmem_worker::add_epmem_episode_diff(epmem_episode_diff* episode){
@@ -660,8 +662,6 @@ void epmem_worker::add_new_nodes(epmem_episode_diff* episode){
 		epmem_stmts_graph->add_node_now->bind_int( 1, node->id );
 		epmem_stmts_graph->add_node_now->bind_int( 2, episode->time );
 		epmem_stmts_graph->add_node_now->execute( soar_module::op_reinit );
-
-		node_now_start_times.insert(std::pair<long, int>(node->id, episode->time));
 	}
 }
 
@@ -670,7 +670,7 @@ void epmem_worker::add_new_edges(epmem_episode_diff* episode){
 	for(int i = 0; i < episode->num_added_edges; i++){
 		epmem_edge_unique* edge = &episode->added_edges[i];
 		
-		// If the id is not in the node_unique table then add it
+		// If the id is not in the edge_unique table then add it
 		epmem_stmts_graph->get_edge_unique->bind_int( 1, edge->id );
 		if ( epmem_stmts_graph->get_edge_unique->execute() != soar_module::row ) {
 					// insert (child_id,q0,w,q1,last)
@@ -683,12 +683,10 @@ void epmem_worker::add_new_edges(epmem_episode_diff* episode){
 		}
 		epmem_stmts_graph->get_edge_unique->reinitialize();
 
-		// Add the node to the node_now table (id, start)
+		// Add the edge to the edge_now table (id, start)
 		epmem_stmts_graph->add_edge_now->bind_int( 1, edge->id );
 		epmem_stmts_graph->add_edge_now->bind_int( 2, episode->time );
 		epmem_stmts_graph->add_edge_now->execute( soar_module::op_reinit );
-
-		edge_now_start_times.insert(std::pair<long, int>(edge->id, episode->time));
 
 		// updates the last times for all edge_unique's
 		epmem_stmts_graph->update_edge_unique_last->bind_int( 1, LLONG_MAX );
@@ -702,19 +700,21 @@ void epmem_worker::remove_old_nodes(epmem_episode_diff* episode){
 	for(int i = 0; i < episode->num_removed_nodes; i++){
 		epmem_node_unique* node = &episode->removed_nodes[i];
 
+        // Get the start time of the node
+        int range_start = 1;
+        epmem_stmts_graph->get_node_now->bind_int(1, node->id);
+        if(epmem_stmts_graph->get_node_now->execute() == soar_module::row){
+            range_start = epmem_stmts_graph->get_node_now->column_int(0);
+            epmem_stmts_graph->get_node_now->reinitialize();
+        } else {
+            // For some reason the node is not in the database, skip
+            epmem_stmts_graph->get_node_now->reinitialize();
+            continue;
+        }
+
 		// Remove node_now row
 		epmem_stmts_graph->delete_node_now->bind_int( 1, node->id );
 		epmem_stmts_graph->delete_node_now->execute( soar_module::op_reinit );
-		
-		// Get the episode number the node started at
-		int range_start;
-		std::map<long, int>::iterator node_start_itr = node_now_start_times.find(node->id);
-		if(node_start_itr != node_now_start_times.end()){
-			range_start = node_start_itr->second;
-			node_now_start_times.erase(node_start_itr);
-		} else {
-			range_start = 1;
-		}
 
 		// Check to see if going to add the node as a point or range
 		int range_end = episode->time - 1;
@@ -735,21 +735,24 @@ void epmem_worker::remove_old_edges(epmem_episode_diff* episode){
 	for(int i = 0; i < episode->num_removed_edges; i++){
 		epmem_edge_unique* edge = &episode->removed_edges[i];
 
-		// Remove node_now row
+
+        // Get the start of the edge
+        int range_start = 1;
+        epmem_stmts_graph->get_edge_now->bind_int(1, edge->id);
+        if(epmem_stmts_graph->get_edge_now->execute() == soar_module::row){
+            range_start = epmem_stmts_graph->get_edge_now->column_int(0);
+            epmem_stmts_graph->get_edge_now->reinitialize();
+        } else {
+            // For some reason the edge is not in the database, skip
+            epmem_stmts_graph->get_edge_now->reinitialize();
+            continue;
+        }
+
+		// Remove edge_now row
 		epmem_stmts_graph->delete_edge_now->bind_int( 1, edge->id );
 		epmem_stmts_graph->delete_edge_now->execute( soar_module::op_reinit );
-		
-		// Get the episode number the node started at
-		int range_start;
-		std::map<long, int>::iterator edge_start_itr = edge_now_start_times.find(edge->id);
-		if(edge_start_itr != edge_now_start_times.end()){
-			range_start = edge_start_itr->second;
-			edge_now_start_times.erase(edge_start_itr);
-		} else {
-			range_start = 1;
-		}
 
-		// Check to see if going to add the node as a point or range
+		// Check to see if going to add the edge as a point or range
 		int range_end = episode->time - 1;
 		if(range_start == range_end){
 			// insert edge_point
@@ -778,10 +781,9 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 	epmem_time_id min_time = get_min_time.column_int(0);
 	epmem_time_id max_time = get_max_time.column_int(0);
 
-	if(min_time == max_time){
-		// No episodes are currently stored in the database
-		return NIL;
-	}
+    if(max_time == 0){
+        return NIL;
+    }
 
 	// Building up the diff structure to return
 	std::vector<epmem_node_unique> nodes_to_remove;
@@ -842,6 +844,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 
 		// Update the starting values of all old node_nows to that of the episode being removed
 		soar_module::sqlite_statement update_node_now_start(epmem_db, "UPDATE node_now SET start=? WHERE start=?");
+        update_node_now_start.prepare();
 		update_node_now_start.bind_int(1, min_time);
 		update_node_now_start.bind_int(2, last_removal);
 		update_node_now_start.execute();
@@ -851,6 +854,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 	{
 		// Get all edge_nows that start at the removed episode
 		soar_module::sqlite_statement get_edge_now(epmem_db, "SELECT parent_id, q0, w, q1 FROM edge_unique WHERE parent_id IN (SELECT id FROM edge_now WHERE start=?)");
+        get_edge_now.prepare();
 
 		get_edge_now.bind_int(1, min_time);
 		while(get_edge_now.execute() == soar_module::row){
@@ -967,6 +971,11 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 	{
 		std::copy(nodes_to_remove.begin(), nodes_to_remove.end(), episode->removed_nodes);
 
+        soar_module::sqlite_statement remove_node_points(epmem_db, "DELETE FROM node_point WHERE start=?");
+        remove_node_points.prepare();
+        remove_node_points.bind_int(1, last_removal);
+        remove_node_points.execute();
+
 		// Check to see if the node_unique still exists somewhere, if not, delete it
 		soar_module::sqlite_statement remove_unused_nodes(epmem_db, "DELETE FROM node_unique WHERE child_id NOT IN (SELECT id FROM node_now UNION SELECT id FROM node_range UNION SELECT id FROM node_point)");
         remove_unused_nodes.prepare();
@@ -976,6 +985,11 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 	// edges_to_remove
 	{
 		std::copy(edges_to_remove.begin(), edges_to_remove.begin() + episode->num_removed_edges, episode->removed_edges);
+
+        soar_module::sqlite_statement remove_edge_points(epmem_db, "DELETE FROM edge_point WHERE start=?");
+        remove_edge_points.prepare();
+        remove_edge_points.bind_int(1, last_removal);
+        remove_edge_points.execute();
 
 		// Check to see if the edge_unique still exists somewhere, if not, delete it
 		soar_module::sqlite_statement remove_unused_edges(epmem_db, "DELETE FROM edge_unique WHERE parent_id NOT IN (SELECT id FROM edge_now UNION SELECT id FROM edge_range UNION SELECT id FROM edge_point)");
@@ -1354,9 +1368,19 @@ bool epmem_worker::epmem_unsatisfy_literal(epmem_literal* literal, epmem_node_id
 				if (literal->matches.size() == 0) {
 					for (epmem_literal_set::iterator child_iter = literal->children.begin(); child_iter != literal->children.end(); child_iter++) {
 						epmem_literal* child_lit = *child_iter;
-						for (epmem_node_pair_set::iterator node_iter = child_lit->matches.begin(); node_iter != child_lit->matches.end(); node_iter++) {
+                        int num_child_matches = child_lit->matches.size();
+                        for(int i = num_child_matches; i > 0; i--){
+                            epmem_node_pair_set::iterator node_iter = child_lit->matches.begin();
 							changed_score |= epmem_unsatisfy_literal(child_lit, (*node_iter).first, (*node_iter).second, current_score, current_cardinality, symbol_node_count);
-						}
+                            if(child_lit->matches.size() != i-1){
+                                // Something wasn't removed
+                                std::cerr << "epmem_unsatisfy_literal: a match wasn't removed from child_lit->matches" << std::endl;
+                                break;
+                            }
+                        }
+						//for (epmem_node_pair_set::iterator node_iter = child_lit->matches.begin(); node_iter != child_lit->matches.end(); node_iter++) {
+						//	changed_score |= epmem_unsatisfy_literal(child_lit, (*node_iter).first, (*node_iter).second, current_score, current_cardinality, symbol_node_count);
+						//}
 					}
 				} else {
 					epmem_node_pair node_pair = std::make_pair(child, EPMEM_NODEID_BAD);
@@ -1701,7 +1725,6 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 				perfect_cardinality++;
 			}
 		}
-	    epmem_db->backup( "debug.db", new std::string("Backup error"));
 
 		// set default values for before and after
 		if (query->before == EPMEM_MEMID_NONE) {
@@ -1718,6 +1741,13 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 		}
 		epmem_time_id current_episode = query->before;
 		epmem_time_id next_episode;
+        
+        epmem_time_id min_time = EPMEM_MEMID_NONE;
+	    soar_module::sqlite_statement get_min_time(epmem_db, "SELECT MAX(id) FROM times");
+        get_min_time.prepare();
+        if(get_min_time.execute() == soar_module::row){
+			min_time = get_min_time.column_int(0);
+        }
 
 		// create dummy edges and intervals
 		{
@@ -1771,7 +1801,7 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 #endif
 
 		// main loop of interval walk
-		while (pedge_pq.size() && current_episode > query->after) {
+		while (pedge_pq.size() && current_episode > query->after && current_episode >= min_time) {
 			epmem_time_id next_edge;
 			epmem_time_id next_interval;
 
