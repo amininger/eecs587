@@ -554,9 +554,9 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 		ERROR("Msg data size for new episode incorrect");
 		return;
 	}
-	//if received 
-	if (totalEpCnt > ((numProc-id)*DEFAULT_WINDOW_SIZE + 
-					   (windowSize - DEFAULT_WINDOW_SIZE)*(numProc-id)))
+	//if received more episodes than could be evenly held increase window size
+	// assumes even window sizes among processors
+	if (totalEpCnt > ((numProc-id)*windowSize))
 	{
 		windowSize++;
 		std::cout << id << " new window size " << windowSize << std::endl;
