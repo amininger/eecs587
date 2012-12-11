@@ -89,6 +89,7 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		//
 
 		soar_module::sqlite_statement *add_node_now;
+        soar_module::sqlite_statement *get_node_now;
 		soar_module::sqlite_statement *delete_node_now;
 		soar_module::sqlite_statement *add_node_point;
 		soar_module::sqlite_statement *add_node_range;
@@ -101,6 +102,7 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		//
 
 		soar_module::sqlite_statement *add_edge_now;
+        soar_module::sqlite_statement *get_edge_now;
 		soar_module::sqlite_statement *delete_edge_now;
 		soar_module::sqlite_statement *add_edge_point;
 		soar_module::sqlite_statement *add_edge_range;

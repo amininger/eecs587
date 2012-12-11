@@ -285,8 +285,13 @@ epmem_graph_statement_container::epmem_graph_statement_container( soar_module::s
 	add_node_now = new soar_module::sqlite_statement( new_db, "INSERT INTO node_now (id,start) VALUES (?,?)" );
 	add( add_node_now );
 
+    get_node_now = new soar_module::sqlite_statement( new_db, "SELECT start FROM node_now WHERE id=?" );
+    add( get_node_now );
+
 	delete_node_now = new soar_module::sqlite_statement( new_db, "DELETE FROM node_now WHERE id=?" );
 	add( delete_node_now );
+
+
 
 	add_node_point = new soar_module::sqlite_statement( new_db, "INSERT INTO node_point (id,start) VALUES (?,?)" );
 	add( add_node_point );
@@ -313,6 +318,9 @@ epmem_graph_statement_container::epmem_graph_statement_container( soar_module::s
 
 	add_edge_now = new soar_module::sqlite_statement( new_db, "INSERT INTO edge_now (id,start) VALUES (?,?)" );
 	add( add_edge_now );
+
+    get_edge_now = new soar_module::sqlite_statement( new_db, "SELECT start FROM edge_now WHERE id=?" );
+    add( get_edge_now );
 
 	delete_edge_now = new soar_module::sqlite_statement( new_db, "DELETE FROM edge_now WHERE id=?" );
 	add( delete_edge_now );

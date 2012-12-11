@@ -5,7 +5,32 @@
 
 #include "../episodic_memory.h"
 #include "soar_module.h"
+
+#ifdef USE_MPI
 #include "epmem_manager.h"
+#else
+
+typedef enum
+{
+    NEW_EP = 0,
+	INIT_WORKER,
+    RESIZE_WINDOW,
+    RESIZE_REQUEST,
+    SEARCH,
+    SEARCH_RESULT,
+    TERMINATE_SEARCH
+} EPMEM_MSG_TYPE;
+
+//message structure
+typedef struct epmem_msg_struct
+{
+    EPMEM_MSG_TYPE type;
+    int size;
+    int source;
+    char data;
+} epmem_msg;
+
+#endif
 
 //////////////////////////////////////////////////////////
 // cue structures - used as substitutions on the worker processors
@@ -16,6 +41,7 @@ typedef struct epmem_cue_wme_struct epmem_cue_wme;
 typedef struct epmem_cue_symbol_struct epmem_cue_symbol;
 typedef struct epmem_packed_cue_wme_struct epmem_packed_cue_wme;
 typedef struct epmem_cue_symbol_table_struct epmem_cue_symbol_table;
+
 typedef struct epmem_query_struct epmem_query;
 typedef struct query_rsp_data_struct query_rsp_data;
 
@@ -164,7 +190,7 @@ typedef std::priority_queue<epmem_interval*, std::vector<epmem_interval*>, epmem
 //////////////////////////////////////////////////////////
 // Defines structures sent back and forth as messages
 
-typedef struct epmem_query_struct{
+struct epmem_query_struct{
     epmem_time_id before;
     epmem_time_id after;
     bool do_graph_match;
@@ -180,9 +206,9 @@ typedef struct epmem_query_struct{
     epmem_msg* pack();
     void unpack(epmem_msg* msg);
 
-}epmem_query;//__attribute__((packed));
+};//__attribute__((packed));
 
-typedef struct query_rsp_data_struct
+struct query_rsp_data_struct
 {
     epmem_time_id best_episode;
     double best_score;
@@ -193,7 +219,7 @@ typedef struct query_rsp_data_struct
 
     epmem_msg* pack();
     void unpack(epmem_msg* msg);
-} query_rsp_data;//__attribute__((packed));
+};//__attribute__((packed));
 
 // Represents a symbol in working memory, can be an identifier, lti, or value
 struct epmem_cue_symbol_struct{

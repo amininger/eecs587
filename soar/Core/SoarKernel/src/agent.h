@@ -23,9 +23,12 @@
 #ifndef GSYSPARAMS_H
 #include"gsysparam.h"
 #endif
+
+#ifdef USE_MPI
 //E587: JK:
-//!!!#include "mpi.h"
-//!!!#include "extension/epmem_manager.h"
+#include "mpi.h"
+#include "extension/epmem_manager.h"
+#endif
 
 // E587: AM:
 #include <stdint.h>
@@ -905,6 +908,7 @@ kernel time and total_cpu_time greater than the derived total CPU time. REW */
   epmem_master_statement_container *epmem_stmts_master;
 
   epmem_worker *epmem_worker_p;
+  epmem_worker *epmem_worker_p2;
   //  soar_module::sqlite_database *epmem_db;
   //  epmem_common_statement_container *epmem_stmts_common;
   //  epmem_graph_statement_container *epmem_stmts_graph;
