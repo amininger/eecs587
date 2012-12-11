@@ -35,6 +35,7 @@ private:
     int id;
     int windowSize;
     int currentSize;
+	bool sendEpNextTime;
     epmem_worker *epmem_worker_p;
 	bool worker_active;
     void update_windowSize(int sizeIncr);
@@ -49,7 +50,7 @@ private:
 
 // Definitions for constant values
 #define WINDOW_SIZE_GROWTH_RATE 0
-#define DEFAULT_WINDOW_SIZE 4
+#define DEFAULT_WINDOW_SIZE 3
 #define MAX_EPMEM_MSG_SIZE 1000 //todo what size should this be?
 
 //may possibly have first worker be manager as well
@@ -62,6 +63,7 @@ private:
 typedef enum
 {
     NEW_EP = 0,
+	NEW_EP_NOTIFY,
 	INIT_WORKER,
     RESIZE_WINDOW,
     RESIZE_REQUEST,

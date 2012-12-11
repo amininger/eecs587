@@ -20,6 +20,8 @@
 //#define DEBUG(a) printf("PROC %d:: %s. File: %s, Line: %d\n\n", id, a, __FILE__,__LINE__) 
 #define DEBUG(a) ;
 
+//#define DYNAMIC_WINDOW_1 1
+#define INCR_AMNT 2
 #include <list>
 
 #include "epmem_manager.h"
@@ -35,6 +37,7 @@ epmem_manager::epmem_manager()
 {
     currentSize = 0;
 	msgCount = 1;
+	sendEpNextTime = false;
     epmem_worker_p = new epmem_worker();
 }
 
@@ -127,21 +130,26 @@ void epmem_manager::received_episode(epmem_episode_diff *episode)
     currentSize++;
     
     // if last processor keep hold of all episodes regardless of windowsize    
-    if ((currentSize > windowSize) && (id < (numProc - 1)))
+    if ((currentSize >= windowSize) && (id < (numProc - 1)))
 	{
+		sendEpNextTime = true;
+		/*
 		DEBUG("Sending oldest episode to neighbor");
 		epmem_episode_diff *to_send = epmem_worker_p->remove_oldest_episode();
 		currentSize--;
 		pass_episode(to_send);
 		delete to_send;
+		*/
     }
+	/*
 	else
 	{
+		//send ack!
 		epmem_msg *msg = new epmem_msg();
 		MPI::COMM_WORLD.Send(msg, sizeof(epmem_msg), MPI::CHAR, MANAGER_ID, 2);
 		delete msg;
 	}
-	
+	*/
     return;
 }
 
@@ -204,12 +212,20 @@ void epmem_manager::manager_message_handler()
 		case NEW_EP:
 		{
 			DEBUG("Received new episode");
+			
+			// first broadcast so that all episodes know there is a new ep
+			msg->type = NEW_EP_NOTIFY;
+			msg->size = sizeof(epmem_msg);
+			for (int i = id+1; i < numProc; i++)
+				MPI::COMM_WORLD.Send(msg, msg->size, MPI::CHAR, i, 1);
 
+			msg->size = buffSize;
+			msg->type = NEW_EP;
 			MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, id+1, 1);
 			
 			//wait for receivie acknowledge from last process to add episode
-			MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, 
-								 MPI::ANY_SOURCE, 2);		
+			//MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, 
+			//					 MPI::ANY_SOURCE, 2);		
 
 			break;
 		}
@@ -230,10 +246,11 @@ void epmem_manager::manager_message_handler()
 		{
 			// Broadcast search request to all workers
 			// TODO is there a better Bcast?
-			//MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
+			//
 			
 			msg->count = msgCount;
 			DEBUG("Received search request");
+			//MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
 			
 			for (int i = id+1; i < numProc; i++)
 				MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, i, 1);
@@ -246,6 +263,8 @@ void epmem_manager::manager_message_handler()
 			{
 				break;
 			}
+			// mark a processor if being unutilized
+			int underUtilized = -1;
 			
 			DEBUG("Received search result");
 			//first search results, set as temporary best
@@ -264,6 +283,10 @@ void epmem_manager::manager_message_handler()
 			//do graph match always true?
 			bool do_graph_match = true;
 
+			//first processor did not respond first
+			if (best_msg->source != 2)
+				underUtilized = best_msg->source;
+			
 			//if graph match found by first worker, this is best
 			if (best_msg->source == 2 && 
 				best_rsp->best_graph_matched && 
@@ -301,6 +324,7 @@ void epmem_manager::manager_message_handler()
 				rsp->unpack(msg);
 				
 				notrec.remove(msg->source);
+
 				//response is best if either 
 				//  first ep to have full graph match and no earlier eps left
 				//  earliest ep to have full graph match and no earlier eps left
@@ -316,8 +340,11 @@ void epmem_manager::manager_message_handler()
 					
 					for(it=notrec.begin(); it!=notrec.end(); it++)
 					{
-						if (*it < msg->source) 
+						if (*it < msg->source)
+						{
 							best_found = false;
+							break;
+						}
 					}
 				}
 				
@@ -379,6 +406,21 @@ void epmem_manager::manager_message_handler()
 			
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
 			delete best_msg;
+
+#ifdef DYNAMIC_WINDOW_1
+			//had to wait for all processors
+			if (underUtilized != -1)
+			{
+				msg->type = RESIZE_WINDOW;
+				msg->source = id;
+				msg->size = sizeof(epmem_msg);
+				MPI::COMM_WORLD.Send(msg, sizeof(epmem_msg), MPI::CHAR, 
+									 underUtilized, 1);
+				//waited longest for this proc
+				
+			}
+#endif
+			
 			break;
 		}
 		default:
@@ -456,6 +498,18 @@ void epmem_manager::worker_msg_handler()
 			delete episode;
 			break;
 		}
+		case NEW_EP_NOTIFY:
+		{
+			if (sendEpNextTime)
+			{
+				DEBUG("Sending oldest episode to neighbor");
+				epmem_episode_diff *to_send = epmem_worker_p->remove_oldest_episode();
+				currentSize--;
+				pass_episode(to_send);
+				delete to_send;	
+				sendEpNextTime = false;
+			}
+		}
 		case INIT_WORKER:
 		{
 			DEBUG("Received initialization");
@@ -469,20 +523,16 @@ void epmem_manager::worker_msg_handler()
 		}
 		case RESIZE_WINDOW:
 		{
-			if (dataSize != sizeof(int))
-			{
-				ERROR("Msg data size for resize window incorrect");
-				break;
-			}
-			int * newsize = (int*) (&msg->data);
-	    
+			/*int * newsize = (int*) (&msg->data);
+			
 			if (*newsize < 1)
 			{
 				ERROR("Illegal window size");
 				break;
 			}
-			update_windowSize(*newsize);
-	    
+			*/
+			update_windowSize(INCR_AMNT);//*newsize);
+			std::cout << id << " new window size " << windowSize << std::endl;
 			break;
 		}
 
