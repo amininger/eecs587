@@ -237,7 +237,7 @@ void epmem_manager::manager_message_handler()
 			//wait for receivie acknowledge from last process to add episode
 			//MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, 
 			//					 MPI::ANY_SOURCE, 2);		
-
+			MPI::COMM_WORLD.Barrier();
 			break;
 		}
 		case INIT_WORKER:
@@ -468,6 +468,7 @@ void epmem_manager::worker_msg_handler()
 			DEBUG("Received new episode");
 			receive_new_episode((int64_t*) &(msg->data), 
 								buffSize - sizeof(epmem_msg));
+			MPI::COMM_WORLD.Barrier();
 			break;
 		}
 		case NEW_EP_NOTIFY:
@@ -503,9 +504,13 @@ void epmem_manager::worker_msg_handler()
 			src = status.Get_source();
 			MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 2, status);
 			if (msg->type == NEW_EP_EMPTY)
+			{
+				MPI::COMM_WORLD.Barrier();
 				break;
+			}
 			receive_new_episode((int64_t*) &(msg->data), 
 								buffSize - sizeof(epmem_msg));
+			MPI::COMM_WORLD.Barrier();
 		}
 		case INIT_WORKER:
 		{
