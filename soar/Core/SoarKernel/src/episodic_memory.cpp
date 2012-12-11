@@ -2141,18 +2141,16 @@ void epmem_new_episode( agent *my_agent )
 #else
         //STORE
 		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
-        if(episode->time == 8){
-            my_agent->epmem_worker_p->epmem_db->backup("p1_before.db", new std::string("Backup error"));
-            for(int i = 0; i < 4; i++){
+        if(episode->time == 4){
+            for(int i = 0; i < 3; i++){
                 epmem_episode_diff* diff = my_agent->epmem_worker_p->remove_oldest_episode();
                 my_agent->epmem_worker_p2->add_epmem_episode_diff(diff);
-            }
+               }
+            my_agent->epmem_worker_p2->epmem_db->backup("p1_with3.db", new std::string("Backup error"));
+        }
+/*
             my_agent->epmem_worker_p->epmem_db->backup("p1_after.db", new std::string("Backup error"));
-            my_agent->epmem_worker_p2->epmem_db->backup("p2_after.db", new std::string("Backup error"));
-        }
-        if(episode->time == 12){
-            my_agent->epmem_worker_p->epmem_db->backup("p1_step12.db", new std::string("Backup error"));
-        }
+            my_agent->epmem_worker_p2->epmem_db->backup("p2_after.db", new std::string("Backup error"));*/
 #endif
 		delete episode;
 	}
@@ -2852,6 +2850,8 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
     } else {
         response = r2;
     }
+
+
 #endif
 
 	my_agent->epmem_timers->query->start();
