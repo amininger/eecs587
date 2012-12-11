@@ -105,6 +105,7 @@ env = Environment(
 	OUT_DIR = os.path.realpath(GetOption('outdir')),
 	SOAR_VERSION = SOAR_VERSION,
 	VISHIDDEN = False,   # needed by swig
+	CPPPATH = '/home/software/rhel6/openmpi-1.6.0/intel-12.1/include'
 )
 
 if GetOption('cc') != None:
@@ -127,9 +128,11 @@ elif env['CXX'].endswith('cl') or (env['CXX'] == '$CC' and env['CC'].endswith('c
 	compiler = 'msvc'
 else:
 	compiler = os.path.split(env['CXX'])[1]
-#compiler = 'mpic++'
-Export('compiler')
 
+#compiler = 'mpic++'
+
+Export('compiler')
+print "Using Compiler: ", compiler
 cflags = []
 lnflags = []
 libs = ['Soar']
