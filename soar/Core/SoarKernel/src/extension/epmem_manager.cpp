@@ -574,7 +574,7 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 	if (totalEpCnt > ((numProc-id)*windowSize))
 	{
 		windowSize++;
-		std::cout << id << " new window size " << windowSize << std::endl;
+		//std::cout << id << " new window size " << windowSize << std::endl;
 	}
 	totalEpCnt++;
 	//handle adding episode and shift last episode if needed
