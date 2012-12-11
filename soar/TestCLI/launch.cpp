@@ -48,7 +48,6 @@ int main(int argc, char** argv){
 	//	cout << agent->ExecuteCommandLine("source ../agents/simple.soar") << endl;
 		
 		
-		
 		kernel->Shutdown();
 	}
 		
