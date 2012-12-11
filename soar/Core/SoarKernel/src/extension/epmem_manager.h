@@ -67,7 +67,8 @@ typedef enum
     RESIZE_REQUEST,
     SEARCH,
     SEARCH_RESULT,
-    TERMINATE_SEARCH
+    TERMINATE_SEARCH,
+    EXIT
 } EPMEM_MSG_TYPE;
 
 //message structure

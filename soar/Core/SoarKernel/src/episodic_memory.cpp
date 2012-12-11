@@ -40,6 +40,11 @@
 #include "mpi.h"
 #endif
 
+#ifdef USE_MPI
+void close_workers();
+#endif
+
+
 #ifdef EPMEM_EXPERIMENT
 
 uint64_t epmem_episodes_searched = 0;
@@ -730,6 +735,8 @@ void epmem_close( agent *my_agent )
 #ifndef USE_MPI
 		my_agent->epmem_worker_p->close();
 		delete my_agent->epmem_worker_p;
+#else
+		close_workers();
 #endif
 
 		// if lazy, commit
@@ -1783,6 +1790,13 @@ inline void _epmem_store_level( agent* my_agent, std::queue< Symbol* >& parent_s
 }
 
 #ifdef USE_MPI
+void close_workers(){
+	epmem_msg msg;
+	msg.source = AGENT_ID;
+	msg.type = EXIT;
+	msg.size = sizeof(epmem_msg);
+	MPI::COMM_WORLD.Send(&msg, msg.size, MPI::CHAR, MANAGER_ID, 1);
+}
 query_rsp_data* send_epmem_query_message(epmem_query* query)
 {
 	epmem_msg *msg = query->pack();
