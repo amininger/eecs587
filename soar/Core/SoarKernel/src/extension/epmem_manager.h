@@ -48,7 +48,7 @@ private:
 
 // Definitions for constant values
 #define WINDOW_SIZE_GROWTH_RATE 0
-#define DEFAULT_WINDOW_SIZE 3
+#define DEFAULT_WINDOW_SIZE 30
 #define MAX_EPMEM_MSG_SIZE 1000 //todo what size should this be?
 
 //may possibly have first worker be manager as well
