@@ -31,13 +31,14 @@ public:
      
 private:
     int numProc;
+	int msgCount;
     int id;
     int windowSize;
     int currentSize;
     epmem_worker *epmem_worker_p;
-    bool receiving_results;
 	bool worker_active;
     void update_windowSize(int sizeIncr);
+	
     int calc_ep_size(epmem_episode_diff* episode);
     void manager_message_handler();
     void worker_msg_handler();
@@ -48,7 +49,7 @@ private:
 
 // Definitions for constant values
 #define WINDOW_SIZE_GROWTH_RATE 0
-#define DEFAULT_WINDOW_SIZE 30
+#define DEFAULT_WINDOW_SIZE 4
 #define MAX_EPMEM_MSG_SIZE 1000 //todo what size should this be?
 
 //may possibly have first worker be manager as well
@@ -75,6 +76,7 @@ typedef struct epmem_msg_struct
     EPMEM_MSG_TYPE type;
     int size;
     int source;
+	int count;
     char data;
 } epmem_msg;
 

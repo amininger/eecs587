@@ -34,7 +34,7 @@
 epmem_manager::epmem_manager()
 {
     currentSize = 0;
-	receiving_results = false;
+	msgCount = 1;
     epmem_worker_p = new epmem_worker();
 }
 
@@ -74,9 +74,7 @@ void epmem_manager::initialize()
 			return;
 		}
 		worker_active = false;
-		// initalize epmem_worker
-		// JK COMMENT OUT FOR NOW
-		//epmem_worker_p->initialize(epmem_params); 
+		
 		//handle all messages/commands to this worker processor
 		worker_msg_handler();
 		break;
@@ -175,12 +173,9 @@ void epmem_manager::manager_message_handler()
     //loop for central thread
     while(1)
     {
-		//DEBUG("WAITING");
-		
-        //blocking probe call (unknown message size)
+		//blocking probe call (unknown message size)
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
-		
-        //DEBUG("RECEIVED");
+        DEBUG("RECEIVED");
 		
         //get source and size of incoming message
 		buffSize = status.Get_count(MPI::CHAR);
@@ -197,9 +192,7 @@ void epmem_manager::manager_message_handler()
 			ERROR("Message source/size information conflicts");
 			continue;
 		}
-		//DEBUG("PROCESSED");
-		int dataSize = buffSize - sizeof(int)*2 -sizeof(EPMEM_MSG_TYPE);
-		
+				
 		//switch on message type can be :
 		//      new_ep: need to add new episode
 		//      resize_request: need to adjust window size
@@ -214,7 +207,9 @@ void epmem_manager::manager_message_handler()
 
 			MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, id+1, 1);
 			
-			MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, MPI::ANY_SOURCE, 2);		
+			//wait for receivie acknowledge from last process to add episode
+			MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, 
+								 MPI::ANY_SOURCE, 2);		
 
 			break;
 		}
@@ -236,16 +231,22 @@ void epmem_manager::manager_message_handler()
 			// Broadcast search request to all workers
 			// TODO is there a better Bcast?
 			//MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
+			
+			msg->count = msgCount;
 			DEBUG("Received search request");
-			receiving_results = true;
+			
 			for (int i = id+1; i < numProc; i++)
 				MPI::COMM_WORLD.Send(msg, buffSize, MPI::CHAR, i, 1);
 			break;
 		}
 		case SEARCH_RESULT:
 		{
-			if (!receiving_results)
+			//dont process old results
+			if (msg->count != msgCount)
+			{
 				break;
+			}
+			
 			DEBUG("Received search result");
 			//first search results, set as temporary best
 			int best_size = buffSize;
@@ -268,7 +269,7 @@ void epmem_manager::manager_message_handler()
 				best_rsp->best_graph_matched && 
 				do_graph_match)
 			{
-				//best_found = true;
+				best_found = true;
 			}
 			//vector<int> rec;
 			std::list<int> notrec;
@@ -288,8 +289,9 @@ void epmem_manager::manager_message_handler()
 				MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 1, status);
 				
 				
-				//only handle search results now
-				if (msg->type != SEARCH_RESULT)
+				//only handle search results that are not old
+				
+				if ((msg->type != SEARCH_RESULT) || (msg->count != msgCount))
 					continue;
 				
 				DEBUG("Received search result");
@@ -302,7 +304,7 @@ void epmem_manager::manager_message_handler()
 				//response is best if either 
 				//  first ep to have full graph match and no earlier eps left
 				//  earliest ep to have full graph match and no earlier eps left
-				/*
+				
 				if (rsp->best_graph_matched && 
 					(!(best_rsp->best_graph_matched) ||
 					 (best_rsp->best_graph_matched && 
@@ -318,11 +320,10 @@ void epmem_manager::manager_message_handler()
 							best_found = false;
 					}
 				}
-				*/
+				
 				if (best_found)
 				{
 					best_size = buffSize;
-					//avoid memcpys?
 					memcpy(best_msg, msg, best_size);
 					free(best_rsp);
 					best_rsp = rsp;
@@ -362,24 +363,20 @@ void epmem_manager::manager_message_handler()
 					 rsp->best_graph_matched))
 				{
 					best_size = buffSize;
-					//avoid memcpys?
 					memcpy(best_msg, msg, best_size);
 					free(best_rsp);
 					best_rsp = rsp;
-					/*
-					std::cout << "3BEST episode " << best_rsp->best_episode << " from " 
-							  << best_msg->source << " with score " << best_rsp->best_score << " and graph match " << best_rsp->best_graph_matched << std::endl;
-					*/
 				}
 				else
 					free(rsp);
 				
 			}
 			//respond with data to agent
+			msgCount++;
 			DEBUG("Responding with best result");
-			//std::cout << "Master Best episode " << best_rsp->best_episode << std::endl;
-			//stop processing results from other processors
-			receiving_results = false;
+			
+            //stop processing results from other processors
+			
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
 			delete best_msg;
 			break;
@@ -413,14 +410,14 @@ void epmem_manager::worker_msg_handler()
     while(1)
     {
 		//blocking probe call (unknown message size)
-		//DEBUG("WAITING");
 		MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, 1, status);
 	
 		//get source and size of incoming message
 		buffSize = status.Get_count(MPI::CHAR);
 		src = status.Get_source();
 		MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 1, status);
-		//DEBUG("RECEIVED");
+		
+		DEBUG("RECEIVED");
 		//make sure data in message received agrees
 		if (msg->size != buffSize)
 		{
@@ -431,7 +428,7 @@ void epmem_manager::worker_msg_handler()
 		}
 	
 		
-		int dataSize = buffSize - sizeof(epmem_msg);//sizeof(int)*2 -sizeof(EPMEM_MSG_TYPE);
+		int dataSize = buffSize - sizeof(epmem_msg);
 	
 		//switch on message type can be :
 		//      new_ep: need to add new episode and possibly shift last
@@ -495,19 +492,23 @@ void epmem_manager::worker_msg_handler()
 				break;
 			DEBUG("Received search request");
 			
+			msgCount = msg->count;
+			
 			epmem_query* query = new epmem_query();
 			query->unpack(msg);
 			
 			//get response
 			query_rsp_data* rsp = epmem_worker_p->epmem_perform_query(query);
-			//now have response send to master
+			
+            // send to master
 			DEBUG("got result");
 			delete query;
 			
 			epmem_msg* rspMsg = rsp->pack();
-			//std::cout << "Worker " << id << " best ep: " << rsp->best_episode <<
-			//	" of number of episodes: " << currentSize << std::endl;
+			
 			rspMsg->source = id;
+			rspMsg->count = msgCount;
+			
 			DEBUG("Responding with search result");
 			MPI::COMM_WORLD.Send(rspMsg, rspMsg->size, MPI::CHAR, MANAGER_ID, 1);	
 			delete rspMsg;

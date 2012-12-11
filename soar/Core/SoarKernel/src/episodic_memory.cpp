@@ -1791,6 +1791,7 @@ query_rsp_data* send_epmem_query_message(epmem_query* query)
 	MPI::COMM_WORLD.Send(msg, msg->size, MPI::CHAR, MANAGER_ID, 1);
 	delete msg;
 	
+
 	// get response
     //blocking probe call (unknown message size)
     MPI::COMM_WORLD.Probe(MANAGER_ID, 1, status);
@@ -1802,6 +1803,7 @@ query_rsp_data* send_epmem_query_message(epmem_query* query)
     MPI::COMM_WORLD.Recv(recMsg, buffSize, MPI::CHAR, MANAGER_ID, 1, status);
     // handle
 	query_rsp_data* rsp = new query_rsp_data();
+	
 	rsp->unpack(recMsg);
 	delete recMsg;
 
