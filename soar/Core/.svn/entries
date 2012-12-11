@@ -1,89 +1,0 @@
-10
-
-dir
-13694
-http://soar.googlecode.com/svn/trunk/SoarSuite/Core
-http://soar.googlecode.com/svn
-
-
-
-2012-11-28T17:59:29.530678Z
-13691
-mazzin@gmail.com
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-915bf4ee-6d5f-11de-9cf4-4bf9f06b8206
-
-ClientSMLSWIG
-dir
-
-SoarKernel
-dir
-
-shared
-dir
-
-CLI
-dir
-
-SConscript
-file
-
-
-
-
-2012-11-28T21:58:16.201945Z
-ede3b22b077aa5153371dff260aa6bc1
-2012-10-08T20:29:46.638586Z
-13607
-josephzxu@gmail.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2752
-
-pcre
-dir
-
-ClientSML
-dir
-
-ElementXML
-dir
-
-ConnectionSML
-dir
-
-KernelSML
-dir
-

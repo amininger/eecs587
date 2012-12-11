@@ -2143,13 +2143,13 @@ void epmem_new_episode( agent *my_agent )
 #else
         //STORE
 		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
-        if(episode->time == 4){
-            for(int i = 0; i < 3; i++){
-                epmem_episode_diff* diff = my_agent->epmem_worker_p->remove_oldest_episode();
-                my_agent->epmem_worker_p2->add_epmem_episode_diff(diff);
-               }
-            my_agent->epmem_worker_p2->epmem_db->backup("p1_with3.db", new std::string("Backup error"));
-        }
+        //if(episode->time == 4){
+        //    for(int i = 0; i < 3; i++){
+        //        epmem_episode_diff* diff = my_agent->epmem_worker_p->remove_oldest_episode();
+        //        my_agent->epmem_worker_p2->add_epmem_episode_diff(diff);
+        //       }
+        //    my_agent->epmem_worker_p2->epmem_db->backup("p1_with3.db", new std::string("Backup error"));
+        //}
 /*
             my_agent->epmem_worker_p->epmem_db->backup("p1_after.db", new std::string("Backup error"));
             my_agent->epmem_worker_p2->epmem_db->backup("p2_after.db", new std::string("Backup error"));*/
@@ -2838,17 +2838,18 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 	std::cout << "Query time: " << MPI::Wtime() - wtime << std::endl;
 #else
     // SEARCH QUERY
-    query_rsp_data* r1 = my_agent->epmem_worker_p2->epmem_perform_query(query);
-    query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
-    query_rsp_data* r2 = my_agent->epmem_worker_p->epmem_perform_query(query);
-
-    query_rsp_data* response = r2;
-    if((r1->best_score > r2->best_score) ||
-        (query->do_graph_match && r1->best_graph_matched && !r2->best_graph_matched)){
-            response = r1;
-    } else {
-        response = r2;
-    }
+    query_rsp_data* r1 = my_agent->epmem_worker_p->epmem_perform_query(query);
+    query_rsp_data* response = r1;
+    
+    //query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
+    //query_rsp_data* r2 = my_agent->epmem_worker_p2->epmem_perform_query(query);
+    //
+    //if((r1->best_score > r2->best_score) ||
+    //    (query->do_graph_match && r1->best_graph_matched && !r2->best_graph_matched)){
+    //        response = r1;
+    //} else {
+    //    response = r2;
+    //}
 
 
 #endif
