@@ -7,9 +7,9 @@ emp_mpi::emp_mpi()
 }
 
 
-void emp_mpi::init()
+void emp_mpi::init(int startWindowSize, bool evenDivFlag)
 {
-    epmem_manager * ep_man = new epmem_manager();
+    epmem_manager * ep_man = new epmem_manager(startWindowSize, evenDivFlag);
     
 //start processing
     ep_man->initialize(); 
