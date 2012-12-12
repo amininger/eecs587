@@ -17,9 +17,9 @@ sp {simple*apply*init-simple
 -->
    (<s> ^name simple
         ^time 2
-        ^do-query 500
-        ^step-size 500
-        ^stop-after 10002)
+        ^do-query 1000
+        ^step-size 1000
+        ^stop-after 100002)
 }
 
 # Simple step operator that advances time
