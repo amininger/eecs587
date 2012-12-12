@@ -1895,6 +1895,9 @@ void epmem_new_episode( agent *my_agent )
 	////////////////////////////////////////////////////////////////////////////
 
 	epmem_time_id time_counter = my_agent->epmem_stats->time->get_value();
+#ifdef USE_MPI
+	double start_time = MPI_Wtime();
+#endif
 
 	// provide trace output
 	if ( my_agent->sysparams[ TRACE_EPMEM_SYSPARAM ] )
@@ -2158,22 +2161,24 @@ void epmem_new_episode( agent *my_agent )
 #else
         //STORE
 		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
-        if(episode->time == 8){
-            my_agent->epmem_worker_p->epmem_db->backup("p1_before.db", new std::string("Backup error"));
-            for(int i = 0; i < 4; i++){
-                epmem_episode_diff* diff = my_agent->epmem_worker_p->remove_oldest_episode();
-                my_agent->epmem_worker_p2->add_epmem_episode_diff(diff);
-            }
+        //if(episode->time == 4){
+        //    for(int i = 0; i < 3; i++){
+        //        epmem_episode_diff* diff = my_agent->epmem_worker_p->remove_oldest_episode();
+        //        my_agent->epmem_worker_p2->add_epmem_episode_diff(diff);
+        //       }
+        //    my_agent->epmem_worker_p2->epmem_db->backup("p1_with3.db", new std::string("Backup error"));
+        //}
+/*
             my_agent->epmem_worker_p->epmem_db->backup("p1_after.db", new std::string("Backup error"));
-            my_agent->epmem_worker_p2->epmem_db->backup("p2_after.db", new std::string("Backup error"));
-        }
-        if(episode->time == 12){
-            my_agent->epmem_worker_p->epmem_db->backup("p1_step12.db", new std::string("Backup error"));
-        }
+            my_agent->epmem_worker_p2->epmem_db->backup("p2_after.db", new std::string("Backup error"));*/
 #endif
 		delete episode;
 	}
-	
+#ifdef USE_MPI
+	if(time_counter % 1001 == 0){
+		std::cout << "Storing " << time_counter << " time(" << (MPI_Wtime() - start_time) << ")" << std::endl;
+	}
+#endif
 	////////////////////////////////////////////////////////////////////////////
 	my_agent->epmem_timers->storage->stop();
 	////////////////////////////////////////////////////////////////////////////
@@ -2856,17 +2861,20 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 	std::cout << "Query time: " << MPI::Wtime() - wtime << std::endl;
 #else
     // SEARCH QUERY
-    query_rsp_data* r1 = my_agent->epmem_worker_p2->epmem_perform_query(query);
-    query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
-    query_rsp_data* r2 = my_agent->epmem_worker_p->epmem_perform_query(query);
+    query_rsp_data* r1 = my_agent->epmem_worker_p->epmem_perform_query(query);
+    query_rsp_data* response = r1;
+    
+    //query = construct_epmem_query(my_agent, state, pos_query, neg_query, prohibits, before, after, currents, cue_wmes, level);
+    //query_rsp_data* r2 = my_agent->epmem_worker_p2->epmem_perform_query(query);
+    //
+    //if((r1->best_score > r2->best_score) ||
+    //    (query->do_graph_match && r1->best_graph_matched && !r2->best_graph_matched)){
+    //        response = r1;
+    //} else {
+    //    response = r2;
+    //}
 
-    query_rsp_data* response = r2;
-    if((r1->best_score > r2->best_score) ||
-        (query->do_graph_match && r1->best_graph_matched && !r2->best_graph_matched)){
-            response = r1;
-    } else {
-        response = r2;
-    }
+
 #endif
 
 	my_agent->epmem_timers->query->start();

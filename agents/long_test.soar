@@ -1,0 +1,234 @@
+epmem --set learning on
+epmem --set trigger dc
+epmem --set phase output
+
+w 0
+
+sp {simple*propose*init-simple
+   (state <s> ^superstate nil
+             -^name)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name init-simple)
+}
+
+sp {simple*apply*init-simple
+   (state <s> ^operator.name init-simple)
+-->
+   (<s> ^name simple
+        ^time 2
+        ^do-query 1000
+        ^step-size 1000
+        ^stop-after 100002)
+}
+
+# Simple step operator that advances time
+
+sp {propose*step*operator
+   (state <s> ^name simple
+              ^time <t>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name step
+        ^time <t>)
+#   (write (crlf) |Starting step | <t>)
+}
+
+sp {apply*step*operator
+   (state <s> ^name simple
+              ^operator.name step
+              ^time <t>)
+-->
+   (<s> ^time <t> -
+        ^time (+ <t> 1))
+}
+
+
+# handles epmem queries
+sp {apply*step*remove*queries
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem <epmem>)
+   (<epmem> ^command <cmd>
+            ^result <res>)
+   (<cmd> ^query <q>)
+   (<res> ^{<< success failure >>} <q>)
+-->
+   (<cmd> ^query <q> -)
+}
+sp {propose*query*print*time
+   (state <s> ^name simple
+              ^epmem.command.query <q>
+              ^time <t>)
+-->
+   (write (crlf) |QUERY AT EPISODE | <t>)
+}
+
+sp {apply*step*query*failure
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem.result.failure)
+-->
+#   (write (crlf) |EPMEM QUERY FAILURE|)
+}
+
+sp {apply*step*query*success
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem.result <res>)
+   (<res> ^success 
+          ^memory-id <id>)
+-->
+#   (write (crlf) |EPMEM QUERY SUCCESS: | <id>)
+}
+
+sp {apply*step*query*stats
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem.result <res>)
+   (<res> ^success 
+          ^match-cardinality <card>
+          ^normalized-match-score <score>
+          ^graph-match <graph>)
+-->
+   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|)
+}
+
+
+
+# Time 2:
+# (<s> ^shallow sh
+#	   ^deep <d>)
+# (<d> ^left d-left
+#  	   ^deeper <dd>)
+# (<dd> ^left d-left)
+
+sp {simple*apply*step2
+   (state <s> ^name simple
+              ^operator.name step
+              ^time 2)
+-->
+   (<s> ^shallow sh
+        ^deep <d>)
+   (<d> ^left d-left
+   		^deeper <dd>)
+   (<dd> ^left d-left)
+}
+
+# Time 3:
+# (<s> ^deep <d>)
+# (<d> ^left d-left
+#	   ^right d-right
+#	   ^deeper <dd>)
+# (<dd> ^left none)
+
+sp {simple*apply*step3
+   (state <s> ^name simple
+              ^operator.name step
+              ^time 3
+              ^deep <d>)
+   (<d> ^deeper <d2>)
+-->
+   (<s> ^shallow sh -)
+   (<d2> ^left d-left -)
+   (<d> ^right d-right)
+   (<d2> ^left none)
+}
+
+# Time 4:
+# WAIT 1 DC
+
+
+# Time 5:
+# (<s> ^shallow sh
+#	   ^deep <d1>
+#	   ^deep <d2>)
+# (<d2> ^left d-left)
+# (<d1> ^right d-right
+#       ^deeper <dd>)
+# (<dd> ^left d-left)
+
+sp {simple*apply*step5
+   (state <s> ^name simple
+              ^operator.name step
+              ^time 5
+              ^deep <d>)
+   (<d> ^deeper <dd>)
+-->
+   (<d> ^left d-left -)
+   (<dd> ^left none -)
+   (<dd> ^left d-left)
+   (<s> ^deep.right d-right
+        ^shallow sh)
+}
+
+# Time 5+: even
+# (<s> ^shallow sh
+#	   ^deep <d1>
+#	   ^deep <d2>)
+# (<d2> ^left d-left)
+# (<d1> ^right d-right
+#       ^deeper <dd>)
+# (<dd> ^left none)
+
+sp {simple*apply*step*even
+   (state <s> ^name simple
+              ^operator.name step
+			  ^time {<time> > 5}
+              ^deep <d>)
+   (<d> ^deeper <dd>)
+   (<dd> ^left d-left)
+-->
+   (<dd> ^left d-left -)
+   (<dd> ^left none)
+}
+
+# Time 5+: odd
+# (<s> ^shallow sh
+#	   ^deep <d1>
+#	   ^deep <d2>)
+# (<d2> ^left d-left)
+# (<d1> ^right d-right
+#       ^deeper <dd>)
+# (<dd> ^left d-left)
+
+sp {simple*apply*step*odd
+   (state <s> ^name simple
+              ^operator.name step
+			  ^time {<time> > 5}
+              ^deep <d>)
+   (<d> ^deeper <dd>)
+   (<dd> ^left none)
+-->
+   (<dd> ^left d-left)
+   (<dd> ^left none - )
+}
+
+
+# Time do-query: 
+# Simple query
+sp {simple*apply*step*7
+   (state <s> ^name simple
+              ^operator.name step
+              ^do-query <t>
+              ^step-size <stepsize>
+              ^time <t> 
+              ^epmem.command <cmd>)
+-->
+   (<s> ^do-query <t> -
+        ^do-query (+ <t> <stepsize>)) 
+   (<cmd> ^query <q>)
+   (<q> ^deep <d>)
+   (<d> ^left d-left ^deeper.left d-left)
+}
+
+
+sp {simple*apply*step*stop-after
+   (state <s> ^name simple
+              ^operator.name step
+              ^stop-after <t>
+              ^time <t>)
+-->
+   (halt)
+}
+   

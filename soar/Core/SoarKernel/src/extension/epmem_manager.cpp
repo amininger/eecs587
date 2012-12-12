@@ -413,7 +413,7 @@ void epmem_manager::manager_message_handler()
 				//message new split value to all workers
 				// TODO May have deadlock msg issue
 				epmem_msg *smsg = (epmem_msg*)malloc(sizeof(epmem_msg) + sizeof(double));
-				std::cout << "New split: " << split << std::endl;
+				//std::cout << "New split: " << split << std::endl;
 				smsg->source = id;
 				smsg->size = sizeof(epmem_msg) + sizeof(double);
 				smsg->type = UPDATE_SPLIT;
@@ -551,7 +551,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			//int * newsize = (int*) (&msg->data);
 			update_windowSize(INCR_AMNT);//*newsize);
-			std::cout << id << " new window size " << windowSize << std::endl;
+			//std::cout << id << " new window size " << windowSize << std::endl;
 			break;
 		}
 
@@ -559,7 +559,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			if (!worker_active)
 				break;
-			std::cout << id << " new window size " << windowSize << std::endl;
+			//std::cout << id << " new window size " << windowSize << std::endl;
 			DEBUG("Received search request");
 			msgCount = msg->count;
 			epmem_query* query = new epmem_query();

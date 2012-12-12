@@ -60,17 +60,15 @@ public:
 class epmem_common_statement_container: public soar_module::sqlite_statement_container
 {
 	public:
-//		soar_module::sqlite_statement *begin;
-//		soar_module::sqlite_statement *commit;
-//		soar_module::sqlite_statement *rollback;
-
-		// E587: AM: Get/Set Variables
+        // Get/set vars
 		soar_module::sqlite_statement *var_get;
 		soar_module::sqlite_statement *var_set;
-
-		// E587: AM: Get/Add Symbol Hash
-		//soar_module::sqlite_statement *hash_get;
-		//soar_module::sqlite_statement *hash_add;
+        
+        // Time modification
+	    soar_module::sqlite_statement *add_time;
+        soar_module::sqlite_statement* get_min_time;
+	    soar_module::sqlite_statement* get_max_time;
+	    soar_module::sqlite_statement* remove_time;
 
 		// RIT stuff
 		soar_module::sqlite_statement *rit_add_left;
@@ -82,10 +80,43 @@ class epmem_common_statement_container: public soar_module::sqlite_statement_con
 		epmem_common_statement_container( soar_module::sqlite_database *new_db );
 };
 
+class epmem_episode_removal_container: public soar_module::sqlite_statement_container
+{
+public:
+	soar_module::sqlite_statement* get_node_point;
+	soar_module::sqlite_statement* get_edge_point;
+
+	soar_module::sqlite_statement* get_node_now;
+	soar_module::sqlite_statement* get_edge_now;
+
+	soar_module::sqlite_statement* update_node_now_start;
+	soar_module::sqlite_statement* update_edge_now_start;
+
+	soar_module::sqlite_statement* get_node_range_start;
+	soar_module::sqlite_statement* get_edge_range_start;
+
+	soar_module::sqlite_statement* get_node_range;
+	soar_module::sqlite_statement* get_edge_range;
+
+	soar_module::sqlite_statement* remove_node_range;
+	soar_module::sqlite_statement* remove_edge_range;
+
+	soar_module::sqlite_statement* update_edge_range_start;
+	soar_module::sqlite_statement* update_node_range_start;
+
+    soar_module::sqlite_statement* remove_node_points;
+    soar_module::sqlite_statement* remove_edge_points;
+
+	soar_module::sqlite_statement* remove_unused_nodes;
+	soar_module::sqlite_statement* remove_unused_edges;
+
+	epmem_episode_removal_container( soar_module::sqlite_database *new_db );
+
+};
+
 class epmem_graph_statement_container: public soar_module::sqlite_statement_container
 {
 	public:
-		soar_module::sqlite_statement *add_time;
 		//
 
 		soar_module::sqlite_statement *add_node_now;
@@ -98,8 +129,6 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		soar_module::sqlite_statement *add_node_unique_with_id;
 		soar_module::sqlite_statement *find_node_unique;
 		soar_module::sqlite_statement *get_node_unique;
-
-		//
 
 		soar_module::sqlite_statement *add_edge_now;
         soar_module::sqlite_statement *get_edge_now;
@@ -117,15 +146,7 @@ class epmem_graph_statement_container: public soar_module::sqlite_statement_cont
 		soar_module::sqlite_statement *get_node_ids;
 		soar_module::sqlite_statement *get_edge_ids;
 
-		//
-
 		soar_module::sqlite_statement *update_edge_unique_last;
-		
-	// LTI and promotion management
-	//soar_module::sqlite_statement *promote_id;
-	//soar_module::sqlite_statement *find_lti;
-	//soar_module::sqlite_statement *find_lti_promotion_time;
-		//
 
 		soar_module::sqlite_statement_pool *pool_find_edge_queries[2][2];
 		soar_module::sqlite_statement_pool *pool_find_interval_queries[2][2][3];

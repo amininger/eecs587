@@ -508,6 +508,10 @@ void epmem_worker::initialize(int page_size, bool optimization, char *str, bool 
 			epmem_stmts_graph->structure();
 			epmem_stmts_graph->prepare();
 
+            // setup for episode removal
+            epmem_stmts_removal = new epmem_episode_removal_container(epmem_db);
+            epmem_stmts_removal->structure();
+            epmem_stmts_removal->prepare();
 
 			
 
@@ -583,8 +587,8 @@ void epmem_worker::initialize(epmem_param_container* epmem_params){
 
 void epmem_worker::add_epmem_episode_diff(epmem_episode_diff* episode){
 	// Add the time to the database
-	epmem_stmts_graph->add_time->bind_int(1, episode->time);
-	epmem_stmts_graph->add_time->execute(soar_module::op_reinit);
+	epmem_stmts_common->add_time->bind_int(1, episode->time);
+	epmem_stmts_common->add_time->execute(soar_module::op_reinit);
 
 	// Add new nodes/edges
 	add_new_nodes(episode);
@@ -635,6 +639,7 @@ void epmem_worker::close(){
 
 		delete epmem_stmts_common;
 		delete epmem_stmts_graph;
+        delete epmem_stmts_removal;
 
 		if(epmem_db->get_status() == soar_module::connected){
 			epmem_db->disconnect();
@@ -767,24 +772,24 @@ void epmem_worker::remove_old_edges(epmem_episode_diff* episode){
 }
 
 epmem_episode_diff* epmem_worker::remove_oldest_episode(){
-	soar_module::sqlite_statement get_min_time(epmem_db, "SELECT MIN(id) FROM times");
-	soar_module::sqlite_statement get_max_time(epmem_db, "SELECT MAX(id) FROM times");
-    get_min_time.prepare();
-    get_max_time.prepare();
-
-	if(get_min_time.execute() != soar_module::row || get_max_time.execute() != soar_module::row){
+	if(epmem_stmts_common->get_min_time->execute() != soar_module::row || 
+        epmem_stmts_common->get_max_time->execute() != soar_module::row){
 		// No episodes are stored in the database
+        epmem_stmts_common->get_min_time->reinitialize();
+        epmem_stmts_common->get_max_time->reinitialize();
 		return NIL;
 	} 
 
 	// Min and max times in the times table
-	epmem_time_id min_time = get_min_time.column_int(0);
-	epmem_time_id max_time = get_max_time.column_int(0);
+	epmem_time_id min_time = epmem_stmts_common->get_min_time->column_int(0);
+	epmem_time_id max_time = epmem_stmts_common->get_max_time->column_int(0);
+
+    epmem_stmts_common->get_min_time->reinitialize();
+    epmem_stmts_common->get_max_time->reinitialize();
 
     if(max_time == 0){
         return NIL;
     }
-
 	// Building up the diff structure to return
 	std::vector<epmem_node_unique> nodes_to_remove;
 	std::vector<epmem_node_unique> nodes_to_add;
@@ -793,110 +798,91 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 
 	// node_point 
 	{
-		soar_module::sqlite_statement get_node_point(epmem_db, "SELECT child_id, parent_id, attrib, value FROM node_unique WHERE child_id IN (SELECT id FROM node_point WHERE start=?)");
-        get_node_point.prepare();
-
 		// Add all edge_points that are at the removed episode
-		get_node_point.bind_int(1, min_time);
-		while(get_node_point.execute() == soar_module::row){
-			nodes_to_add.push_back(epmem_node_unique(&get_node_point));
+		epmem_stmts_removal->get_node_point->bind_int(1, min_time);
+		while(epmem_stmts_removal->get_node_point->execute() == soar_module::row){
+			nodes_to_add.push_back(epmem_node_unique(epmem_stmts_removal->get_node_point));
 		}
-		get_node_point.reinitialize();
+		epmem_stmts_removal->get_node_point->reinitialize();
 
 		// The node_points that were present in the last episode removed will need to be 
 		// marked as removed in the episode diff
-		get_node_point.bind_int(1, last_removal);
-		while(get_node_point.execute() == soar_module::row){
-			nodes_to_remove.push_back(epmem_node_unique(&get_node_point));
+		epmem_stmts_removal->get_node_point->bind_int(1, last_removal);
+		while(epmem_stmts_removal->get_node_point->execute() == soar_module::row){
+			nodes_to_remove.push_back(epmem_node_unique(epmem_stmts_removal->get_node_point));
 		}
+        epmem_stmts_removal->get_node_point->reinitialize();
 	}
 	
 	// edge_point
 	{
-		soar_module::sqlite_statement get_edge_point(epmem_db, "SELECT parent_id, q0, w, q1 FROM edge_unique WHERE parent_id IN (SELECT id FROM edge_point WHERE start=?)");
-        get_edge_point.prepare();
-
 		// Add all edge_points that are at the removed episode
-		get_edge_point.bind_int(1, min_time);
-		while(get_edge_point.execute() == soar_module::row){
-			edges_to_add.push_back(epmem_edge_unique(&get_edge_point));
+		epmem_stmts_removal->get_edge_point->bind_int(1, min_time);
+		while(epmem_stmts_removal->get_edge_point->execute() == soar_module::row){
+			edges_to_add.push_back(epmem_edge_unique(epmem_stmts_removal->get_edge_point));
 		}
-		get_edge_point.reinitialize();
+		epmem_stmts_removal->get_edge_point->reinitialize();
 
 		// The edge_points that were present in the last episode removed will need to be 
 		// marked as removed in the episode diff
-		get_edge_point.bind_int(1, last_removal);
-		while(get_edge_point.execute() == soar_module::row){
-			edges_to_remove.push_back(epmem_edge_unique(&get_edge_point));
+		epmem_stmts_removal->get_edge_point->bind_int(1, last_removal);
+		while(epmem_stmts_removal->get_edge_point->execute() == soar_module::row){
+			edges_to_remove.push_back(epmem_edge_unique(epmem_stmts_removal->get_edge_point));
 		}
+        epmem_stmts_removal->get_edge_point->reinitialize();
 	}
 
 	// node_now
 	{
 		// Get all node_nows that start at the removed episode
-		soar_module::sqlite_statement get_node_now(epmem_db, "SELECT child_id, parent_id, attrib, value FROM node_unique WHERE child_id IN (SELECT id FROM node_now WHERE start=?)");
-        get_node_now.prepare();
-
-		get_node_now.bind_int(1, min_time);
-		while(get_node_now.execute() == soar_module::row){
-			nodes_to_add.push_back(epmem_node_unique(&get_node_now));
+		epmem_stmts_removal->get_node_now->bind_int(1, min_time);
+		while(epmem_stmts_removal->get_node_now->execute() == soar_module::row){
+			nodes_to_add.push_back(epmem_node_unique(epmem_stmts_removal->get_node_now));
 		}
+        epmem_stmts_removal->get_node_now->reinitialize();
 
 		// Update the starting values of all old node_nows to that of the episode being removed
-		soar_module::sqlite_statement update_node_now_start(epmem_db, "UPDATE node_now SET start=? WHERE start=?");
-        update_node_now_start.prepare();
-		update_node_now_start.bind_int(1, min_time);
-		update_node_now_start.bind_int(2, last_removal);
-		update_node_now_start.execute();
+		epmem_stmts_removal->update_node_now_start->bind_int(1, min_time);
+		epmem_stmts_removal->update_node_now_start->bind_int(2, last_removal);
+        epmem_stmts_removal->update_node_now_start->execute(soar_module::op_reinit);
 	}
 
 	// edge_now
 	{
 		// Get all edge_nows that start at the removed episode
-		soar_module::sqlite_statement get_edge_now(epmem_db, "SELECT parent_id, q0, w, q1 FROM edge_unique WHERE parent_id IN (SELECT id FROM edge_now WHERE start=?)");
-        get_edge_now.prepare();
-
-		get_edge_now.bind_int(1, min_time);
-		while(get_edge_now.execute() == soar_module::row){
-			edges_to_add.push_back(epmem_edge_unique(&get_edge_now));
+		epmem_stmts_removal->get_edge_now->bind_int(1, min_time);
+		while(epmem_stmts_removal->get_edge_now->execute() == soar_module::row){
+			edges_to_add.push_back(epmem_edge_unique(epmem_stmts_removal->get_edge_now));
 		}
 
 		// Update the starting values of all old edge_nows to that of the episode being removed
-		soar_module::sqlite_statement update_edge_now_start(epmem_db, "UPDATE edge_now SET start=? WHERE start=?");
-        update_edge_now_start.prepare();
-		update_edge_now_start.bind_int(1, min_time);
-		update_edge_now_start.bind_int(2, last_removal);
-		update_edge_now_start.execute();
+		epmem_stmts_removal->update_edge_now_start->bind_int(1, min_time);
+		epmem_stmts_removal->update_edge_now_start->bind_int(2, last_removal);
+		epmem_stmts_removal->update_edge_now_start->execute(soar_module::op_reinit);
 	}
 
 	// node_range
 	{
 		// Add all node_ranges that start on the episode being removed
-		soar_module::sqlite_statement get_node_range(epmem_db, "SELECT child_id, parent_id, attrib, value FROM node_unique WHERE child_id IN (SELECT id FROM node_range WHERE start=?)");
-        get_node_range.prepare();
-
-		get_node_range.bind_int(1, min_time);
-		while(get_node_range.execute() == soar_module::row){
-			nodes_to_add.push_back(epmem_node_unique(&get_node_range));
+		epmem_stmts_removal->get_node_range_start->bind_int(1, min_time);
+		while(epmem_stmts_removal->get_node_range_start->execute() == soar_module::row){
+			nodes_to_add.push_back(epmem_node_unique(epmem_stmts_removal->get_node_range_start));
 		}
+        epmem_stmts_removal->get_node_range_start->reinitialize();
 
 		// Get a list of all ranges that will collapse to a point when the episode is removed
 		std::vector<epmem_node_id> new_node_points;
-		soar_module::sqlite_statement get_node_range_to_remove(epmem_db, "SELECT id FROM node_range WHERE (start=? AND end=?)");
-        get_node_range_to_remove.prepare();
-
-		get_node_range_to_remove.bind_int(1, last_removal);
-		get_node_range_to_remove.bind_int(2, min_time);
-		while(get_node_range_to_remove.execute() == soar_module::row){
-			new_node_points.push_back(get_node_range_to_remove.column_int(0));
+		epmem_stmts_removal->get_node_range->bind_int(1, last_removal);
+		epmem_stmts_removal->get_node_range->bind_int(2, min_time);
+		while(epmem_stmts_removal->get_node_range->execute() == soar_module::row){
+			new_node_points.push_back(epmem_stmts_removal->get_node_range->column_int(0));
 		}
+        epmem_stmts_removal->get_node_range->reinitialize();
 
 		// Delete the ranges and add node_points
-		soar_module::sqlite_statement remove_node_range(epmem_db, "DELETE FROM node_range WHERE (start=? AND end=?)");
-        remove_node_range.prepare();
-		remove_node_range.bind_int(1, last_removal);
-		remove_node_range.bind_int(2, min_time);
-		remove_node_range.execute();
+		epmem_stmts_removal->remove_node_range->bind_int(1, last_removal);
+		epmem_stmts_removal->remove_node_range->bind_int(2, min_time);
+		epmem_stmts_removal->remove_node_range->execute(soar_module::op_reinit);
 
 		for(int i = 0; i < new_node_points.size(); i++){
 			epmem_stmts_graph->add_node_point->bind_int(1, new_node_points[i]);
@@ -905,41 +891,34 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 		}
 		
 		// Update the starting values of all node_ranges with start values in the last_removal
-		soar_module::sqlite_statement update_node_range_start(epmem_db, "UPDATE node_range SET start=? WHERE start=?");
-        update_node_range_start.prepare();
-		update_node_range_start.bind_int(1, min_time);
-		update_node_range_start.bind_int(2, last_removal);
-		update_node_range_start.execute();
+		epmem_stmts_removal->update_node_range_start->bind_int(1, min_time);
+		epmem_stmts_removal->update_node_range_start->bind_int(2, last_removal);
+		epmem_stmts_removal->update_node_range_start->execute(soar_module::op_reinit);
 	}
 
 		// edge_range
 	{
 		// Add all edge_ranges that start on the episode being removed
-		soar_module::sqlite_statement get_edge_range(epmem_db, "SELECT parent_id, q0, w, q1 FROM edge_unique WHERE parent_id IN (SELECT id FROM edge_range WHERE start=?)");
-        get_edge_range.prepare();
-
-		get_edge_range.bind_int(1, min_time);
-		while(get_edge_range.execute() == soar_module::row){
-			edges_to_add.push_back(epmem_edge_unique(&get_edge_range));
+		epmem_stmts_removal->get_edge_range_start->bind_int(1, min_time);
+		while(epmem_stmts_removal->get_edge_range_start->execute() == soar_module::row){
+			edges_to_add.push_back(epmem_edge_unique(epmem_stmts_removal->get_edge_range_start));
 		}
+        epmem_stmts_removal->get_edge_range_start->reinitialize();
 
 		// Get a list of all ranges that will collapse to a point when the episode is removed
 		std::vector<epmem_node_id> new_edge_points;
-		soar_module::sqlite_statement get_edge_range_to_remove(epmem_db, "SELECT id FROM edge_range WHERE (start=? AND end=?)");
-        get_edge_range_to_remove.prepare();
 
-		get_edge_range_to_remove.bind_int(1, last_removal);
-		get_edge_range_to_remove.bind_int(2, min_time);
-		while(get_edge_range_to_remove.execute() == soar_module::row){
-			new_edge_points.push_back(get_edge_range_to_remove.column_int(0));
+		epmem_stmts_removal->get_edge_range->bind_int(1, last_removal);
+		epmem_stmts_removal->get_edge_range->bind_int(2, min_time);
+		while(epmem_stmts_removal->get_edge_range->execute() == soar_module::row){
+			new_edge_points.push_back(epmem_stmts_removal->get_edge_range->column_int(0));
 		}
+        epmem_stmts_removal->get_edge_range->reinitialize();
 
 		// Delete the ranges and add edge_points
-		soar_module::sqlite_statement remove_edge_range(epmem_db, "DELETE FROM edge_range WHERE (start=? AND end=?)");
-        remove_edge_range.prepare();
-		remove_edge_range.bind_int(1, last_removal);
-		remove_edge_range.bind_int(2, min_time);
-		remove_edge_range.execute();
+		epmem_stmts_removal->remove_edge_range->bind_int(1, last_removal);
+		epmem_stmts_removal->remove_edge_range->bind_int(2, min_time);
+		epmem_stmts_removal->remove_edge_range->execute(soar_module::op_reinit);
 
 		for(int i = 0; i < new_edge_points.size(); i++){
 			epmem_stmts_graph->add_edge_point->bind_int(1, new_edge_points[i]);
@@ -948,11 +927,9 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 		}
 		
 		// Update the starting values of all edge_ranges with start values in the last_removal
-		soar_module::sqlite_statement update_edge_range_start(epmem_db, "UPDATE edge_range SET start=? WHERE start=?");
-        update_edge_range_start.prepare();
-		update_edge_range_start.bind_int(1, min_time);
-		update_edge_range_start.bind_int(2, last_removal);
-		update_edge_range_start.execute();
+		epmem_stmts_removal->update_edge_range_start->bind_int(1, min_time);
+		epmem_stmts_removal->update_edge_range_start->bind_int(2, last_removal);
+		epmem_stmts_removal->update_edge_range_start->execute(soar_module::op_reinit);
 	}
 
 	epmem_episode_diff* episode = new epmem_episode_diff(min_time, nodes_to_add.size(), nodes_to_remove.size(), edges_to_add.size(), edges_to_remove.size());
@@ -971,39 +948,30 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 	{
 		std::copy(nodes_to_remove.begin(), nodes_to_remove.end(), episode->removed_nodes);
 
-        soar_module::sqlite_statement remove_node_points(epmem_db, "DELETE FROM node_point WHERE start=?");
-        remove_node_points.prepare();
-        remove_node_points.bind_int(1, last_removal);
-        remove_node_points.execute();
+        epmem_stmts_removal->remove_node_points->bind_int(1, last_removal);
+        epmem_stmts_removal->remove_node_points->execute(soar_module::op_reinit);
 
 		// Check to see if the node_unique still exists somewhere, if not, delete it
-		soar_module::sqlite_statement remove_unused_nodes(epmem_db, "DELETE FROM node_unique WHERE child_id NOT IN (SELECT id FROM node_now UNION SELECT id FROM node_range UNION SELECT id FROM node_point)");
-        remove_unused_nodes.prepare();
-        remove_unused_nodes.execute();
+        //epmem_stmts_removal->remove_unused_nodes->execute(soar_module::op_reinit);
 	}
 
 	// edges_to_remove
 	{
 		std::copy(edges_to_remove.begin(), edges_to_remove.begin() + episode->num_removed_edges, episode->removed_edges);
 
-        soar_module::sqlite_statement remove_edge_points(epmem_db, "DELETE FROM edge_point WHERE start=?");
-        remove_edge_points.prepare();
-        remove_edge_points.bind_int(1, last_removal);
-        remove_edge_points.execute();
+        epmem_stmts_removal->remove_edge_points->bind_int(1, last_removal);
+        epmem_stmts_removal->remove_edge_points->execute(soar_module::op_reinit);
 
 		// Check to see if the edge_unique still exists somewhere, if not, delete it
-		soar_module::sqlite_statement remove_unused_edges(epmem_db, "DELETE FROM edge_unique WHERE parent_id NOT IN (SELECT id FROM edge_now UNION SELECT id FROM edge_range UNION SELECT id FROM edge_point)");
-        remove_unused_edges.prepare();
-		remove_unused_edges.execute();
+        //epmem_stmts_removal->remove_unused_edges->execute(soar_module::op_reinit);
 	}
 		
 	// update times table
 	{
 		last_removal = min_time;
-		soar_module::sqlite_statement remove_time(epmem_db, "DELETE FROM times WHERE id=?");
-        remove_time.prepare();
-		remove_time.bind_int(1, min_time);
-		remove_time.execute();
+
+        epmem_stmts_common->remove_time->bind_int(1, min_time);
+        epmem_stmts_common->remove_time->execute(soar_module::op_reinit);
 	}
 
 	return episode;
@@ -1521,37 +1489,37 @@ epmem_literal* epmem_worker::epmem_build_dnf(epmem_query* query, epmem_cue_wme* 
 
 	cue_wmes.insert(cue_wme);
 	epmem_cue_symbol* value = cue_wme->value;
-	epmem_literal* literal = reinterpret_cast<epmem_literal*>(malloc(sizeof(epmem_literal)));
-	new(&(literal->parents)) epmem_literal_set();
-	new(&(literal->children)) epmem_literal_set();
+	epmem_literal* ep_literal = reinterpret_cast<epmem_literal*>(malloc(sizeof(epmem_literal)));
+	new(&(ep_literal->parents)) epmem_literal_set();
+	new(&(ep_literal->children)) epmem_literal_set();
 
     if (!value->is_id) { // WME is a value
-		literal->value_is_id = EPMEM_RIT_STATE_NODE;
-		literal->is_leaf = true;
-		literal->q1 = value->id;
-        literal->is_lti = false;
-		leaf_literals.insert(literal);
+		ep_literal->value_is_id = EPMEM_RIT_STATE_NODE;
+		ep_literal->is_leaf = true;
+		ep_literal->q1 = value->id;
+        ep_literal->is_lti = false;
+		leaf_literals.insert(ep_literal);
 	} else if (value->is_lti) { // WME is an LTI
 		// E587: AM:
 		// if we can find the LTI node id, cache it; otherwise, return failure
-		literal->value_is_id = EPMEM_RIT_STATE_EDGE;
-		literal->is_leaf = true;
-		literal->q1 = value->id;
-        literal->is_lti = true;
-        literal->promotion_time = value->promotion_time;
+		ep_literal->value_is_id = EPMEM_RIT_STATE_EDGE;
+		ep_literal->is_leaf = true;
+		ep_literal->q1 = value->id;
+        ep_literal->is_lti = true;
+        ep_literal->promotion_time = value->promotion_time;
 	} else { // WME is a normal identifier
 		// we determine whether it is a leaf by checking for children
 		epmem_cue_wme_list* children = value->children;
-		literal->value_is_id = EPMEM_RIT_STATE_EDGE;
-		literal->q1 = EPMEM_NODEID_BAD;
-        literal->is_lti = false;
+		ep_literal->value_is_id = EPMEM_RIT_STATE_EDGE;
+		ep_literal->q1 = EPMEM_NODEID_BAD;
+        ep_literal->is_lti = false;
 
 		// if the WME has no children, then it's a leaf
 		// otherwise, we recurse for all children
 		if (children->empty()) {
-			literal->is_leaf = true;
-			leaf_literals.insert(literal);
-			delete children;
+			ep_literal->is_leaf = true;
+			leaf_literals.insert(ep_literal);
+			//delete children;
 		} else {
 			bool cycle = false;
 			visiting.insert(cue_wme->value);
@@ -1560,24 +1528,24 @@ epmem_literal* epmem_worker::epmem_build_dnf(epmem_query* query, epmem_cue_wme* 
 				// if it does, we skip over it
 				epmem_literal* child = epmem_build_dnf(query, *wme_iter, literal_cache, leaf_literals, symbol_num_incoming, gm_ordering, query_type, visiting, currents, cue_wmes);
 				if (child) {
-					child->parents.insert(literal);
-					literal->children.insert(child);
+					child->parents.insert(ep_literal);
+					ep_literal->children.insert(child);
 				} else {
 					cycle = true;
 				}
 			}
-			delete children;
+			//delete children;
 			visiting.erase(cue_wme->value);
 			// if all children of this WME lead to cycles, then we don't need to walk this path
 			// in essence, this forces the DNF graph to be acyclic
 			// this results in savings in not walking edges and intervals
-			if (cycle && literal->children.empty()) {
-				literal->parents.~epmem_literal_set();
-				literal->children.~epmem_literal_set();
-                delete literal;
+			if (cycle && ep_literal->children.empty()) {
+				ep_literal->parents.~epmem_literal_set();
+				ep_literal->children.~epmem_literal_set();
+                delete ep_literal;
 				return NULL;
 			}
-			literal->is_leaf = false;
+			ep_literal->is_leaf = false;
 			epmem_symbol_int_map::iterator rem_iter = symbol_num_incoming.find(value);
 			if (rem_iter == symbol_num_incoming.end()) {
 				symbol_num_incoming[value] = 1;
@@ -1588,22 +1556,22 @@ epmem_literal* epmem_worker::epmem_build_dnf(epmem_query* query, epmem_cue_wme* 
 	}
 
 	if (!query_type) {
-		gm_ordering.push_front(literal);
+		gm_ordering.push_front(ep_literal);
 	}
 
-	literal->id_sym = cue_wme->id;
-	literal->value_sym = cue_wme->value;
-	literal->is_current = (currents.count(value) > 0);
-	literal->w = cue_wme->attr->id;
-	literal->is_neg_q = query_type;
+	ep_literal->id_sym = cue_wme->id;
+	ep_literal->value_sym = cue_wme->value;
+	ep_literal->is_current = (currents.count(value) > 0);
+	ep_literal->w = cue_wme->attr->id;
+	ep_literal->is_neg_q = query_type;
     // E587: AM: XXX: HACK, want real value here
     double balance = 1;
-	literal->weight = (literal->is_neg_q ? -1 : 1) * (balance >= 1.0 - 1.0e-8 ? 1.0 : cue_wme->activation);
-	new(&(literal->matches)) epmem_node_pair_set();
-	new(&(literal->values)) epmem_node_int_map();
+	ep_literal->weight = (ep_literal->is_neg_q ? -1 : 1) * (balance >= 1.0 - 1.0e-8 ? 1.0 : cue_wme->activation);
+	new(&(ep_literal->matches)) epmem_node_pair_set();
+	new(&(ep_literal->values)) epmem_node_int_map();
 
-	literal_cache[cue_wme] = literal;
-	return literal;
+	literal_cache[cue_wme] = ep_literal;
+	return ep_literal;
 }
 
 query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
@@ -1728,11 +1696,10 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 
 		// set default values for before and after
 		if (query->before == EPMEM_MEMID_NONE) {
-	        soar_module::sqlite_statement get_max_time(epmem_db, "SELECT MAX(id) FROM times");
-            get_max_time.prepare();
-            if(get_max_time.execute() == soar_module::row){
-			    query->before = get_max_time.column_int(0);
+            if(epmem_stmts_common->get_max_time->execute() == soar_module::row){
+			    query->before = epmem_stmts_common->get_max_time->column_int(0);
             }
+            epmem_stmts_common->get_max_time->reinitialize();
 		} else {
 			query->before = query->before - 1; // since before's are strict
 		}
@@ -1743,11 +1710,10 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 		epmem_time_id next_episode;
         
         epmem_time_id min_time = EPMEM_MEMID_NONE;
-	    soar_module::sqlite_statement get_min_time(epmem_db, "SELECT MAX(id) FROM times");
-        get_min_time.prepare();
-        if(get_min_time.execute() == soar_module::row){
-			min_time = get_min_time.column_int(0);
+        if(epmem_stmts_common->get_min_time->execute() == soar_module::row){
+			min_time = epmem_stmts_common->get_min_time->column_int(0);
         }
+	epmem_stmts_common->get_min_time->reinitialize();
 
 		// create dummy edges and intervals
 		{

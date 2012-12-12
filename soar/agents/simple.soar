@@ -115,6 +115,18 @@ sp {simple*apply*step3
    (<d> ^right d-right)
 }
 
+sp {simple*apply*step*3*query
+   (state <s> ^name simple
+              ^operator.name step
+              ^time 3
+              ^epmem.command <cmd>)
+-->
+   (<cmd> ^query <q>)
+   (<q> ^deep.left d-left
+        ^deep.right d-right)
+}
+
+
 # Time 4:
 # WAIT 1 DC
 
