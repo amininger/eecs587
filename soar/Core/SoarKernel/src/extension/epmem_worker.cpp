@@ -1713,7 +1713,7 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
         if(epmem_stmts_common->get_min_time->execute() == soar_module::row){
 			min_time = epmem_stmts_common->get_min_time->column_int(0);
         }
-	epmem_stmts_common->get_min_time->reinitialize();
+        epmem_stmts_common->get_min_time->reinitialize();
 
 		// create dummy edges and intervals
 		{
