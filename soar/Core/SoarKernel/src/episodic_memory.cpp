@@ -2173,7 +2173,7 @@ void epmem_new_episode( agent *my_agent )
 		delete episode;
 	}
 #ifdef USE_MPI
-	if(time_counter % 1000 == 0){
+	if(time_counter % 1001 == 0){
 		std::cout << "Storing " << time_counter << " time(" << (MPI_Wtime() - start_time) << ")" << std::endl;
 	}
 #endif
