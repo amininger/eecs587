@@ -1895,7 +1895,9 @@ void epmem_new_episode( agent *my_agent )
 	////////////////////////////////////////////////////////////////////////////
 
 	epmem_time_id time_counter = my_agent->epmem_stats->time->get_value();
+#ifdef USE_MPI
 	double start_time = MPI_Wtime();
+#endif
 
 	// provide trace output
 	if ( my_agent->sysparams[ TRACE_EPMEM_SYSPARAM ] )
@@ -2172,10 +2174,11 @@ void epmem_new_episode( agent *my_agent )
 #endif
 		delete episode;
 	}
-	
+#ifdef USE_MPI
 	if(time_counter % 1000 == 0){
 		std::cout << "Storing " << time_counter << " time(" << (MPI_Wtime() - start_time) << ")" << std::endl;
 	}
+#endif
 	////////////////////////////////////////////////////////////////////////////
 	my_agent->epmem_timers->storage->stop();
 	////////////////////////////////////////////////////////////////////////////

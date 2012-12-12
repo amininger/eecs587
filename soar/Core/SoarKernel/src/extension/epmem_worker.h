@@ -41,7 +41,6 @@ typedef struct epmem_rit_state_struct
 
 class epmem_worker{
 public:
-	epmem_graph_statement_container *epmem_stmts_graph;
 
 	// Constructor
 	epmem_worker();
@@ -77,6 +76,10 @@ public:
 private:
 
 	epmem_common_statement_container *epmem_stmts_common;
+
+    epmem_episode_removal_container* epmem_stmts_removal;
+
+	epmem_graph_statement_container *epmem_stmts_graph;
 
   epmem_rit_state epmem_rit_state_graph[2];
 

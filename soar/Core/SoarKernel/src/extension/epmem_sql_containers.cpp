@@ -16,7 +16,7 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 	// [TABLE] node_unique: (child_id, parent_id, attrib, value)
 	add_structure( "CREATE TABLE IF NOT EXISTS node_unique (child_id INTEGER PRIMARY KEY AUTOINCREMENT,parent_id INTEGER,attrib INTEGER, value INTEGER)" );
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS node_unique_parent_attrib_value ON node_unique (parent_id,attrib,value)" );
-
+    
 	// [TABLE] edge_unique: (parent_id, q0, w, q1, last)
 	add_structure( "CREATE TABLE IF NOT EXISTS edge_unique (parent_id INTEGER PRIMARY KEY AUTOINCREMENT,q0 INTEGER,w INTEGER,q1 INTEGER, last INTEGER)" );
 	add_structure( "CREATE INDEX IF NOT EXISTS edge_unique_q0_w_last ON edge_unique (q0,w,last)" );
@@ -165,18 +165,8 @@ epmem_master_statement_container::epmem_master_statement_container( agent *new_a
 // E587: AM: moving onto worker processor
 epmem_common_statement_container::epmem_common_statement_container( soar_module::sqlite_database *new_db ): soar_module::sqlite_statement_container( new_db )
 {
-
-
-	//
-
-	//add_structure( "CREATE TABLE IF NOT EXISTS temporal_symbol_hash (id INTEGER PRIMARY KEY, sym_const NONE, sym_type INTEGER)" );
-	//add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS temporal_symbol_hash_const_type ON temporal_symbol_hash (sym_type,sym_const)" );
-
-	//// workaround for tree: type 1 = IDENTIFIER_SYMBOL_TYPE
-	//add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (0,NULL,1)" );
-
-	//// workaround for acceptable preference wmes: id 1 = "operator+"
-	//add_structure( "INSERT OR IGNORE INTO temporal_symbol_hash (id,sym_const,sym_type) VALUES (1,'operator*',2)" );
+    // [TABLE] vars: (id)
+	add_structure( "CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY)" );
 	
 	// [TABLE] vars: (id, value)
 	add_structure( "CREATE TABLE IF NOT EXISTS vars (id INTEGER PRIMARY KEY,value NONE)" );
@@ -209,21 +199,85 @@ epmem_common_statement_container::epmem_common_statement_container( soar_module:
 	rit_truncate_right = new soar_module::sqlite_statement( new_db, "DELETE FROM rit_right_nodes" );
 	add( rit_truncate_right );
 
-	//
-//	// E587: AM:
-	//hash_get = new soar_module::sqlite_statement( new_db, "SELECT id FROM temporal_symbol_hash WHERE sym_type=? AND sym_const=?" );
-	//add( hash_get );
+    
+    // Add a time
+	add_time = new soar_module::sqlite_statement( new_db, "INSERT INTO times (id) VALUES (?)" );
+	add( add_time );
 
-	//hash_add = new soar_module::sqlite_statement( new_db, "INSERT INTO temporal_symbol_hash (sym_type,sym_const) VALUES (?,?)" );
-	//add( hash_add );
+    // get the min/max times
+    get_min_time = new soar_module::sqlite_statement(new_db, "SELECT MIN(id) FROM times");
+    add(get_min_time);
+
+	get_max_time = new soar_module::sqlite_statement(new_db, "SELECT MAX(id) FROM times");
+    add(get_max_time);
+
+    // Removes a time from the database
+	remove_time = new soar_module::sqlite_statement (new_db, "DELETE FROM times WHERE id=?");
+    add(remove_time);
+}
+
+epmem_episode_removal_container::epmem_episode_removal_container(soar_module::sqlite_database* new_db): soar_module::sqlite_statement_container(new_db){
+    // Get node/edge point by start 
+    get_node_point = new soar_module::sqlite_statement (new_db, "SELECT child_id, parent_id, attrib, value FROM node_unique WHERE child_id IN (SELECT id FROM node_point WHERE start=?)");
+    add(get_node_point);
+	get_edge_point = new soar_module::sqlite_statement (new_db, "SELECT parent_id, q0, w, q1 FROM edge_unique WHERE parent_id IN (SELECT id FROM edge_point WHERE start=?)");
+    add(get_edge_point);
+
+    // Get node/edge now by start
+	get_node_now = new soar_module::sqlite_statement (new_db, "SELECT child_id, parent_id, attrib, value FROM node_unique WHERE child_id IN (SELECT id FROM node_now WHERE start=?)");
+    add(get_node_now);
+	get_edge_now = new soar_module::sqlite_statement (new_db, "SELECT parent_id, q0, w, q1 FROM edge_unique WHERE parent_id IN (SELECT id FROM edge_now WHERE start=?)");
+    add(get_edge_now);
+
+    // Update node/edge now by modifying start
+	update_node_now_start = new soar_module::sqlite_statement (new_db, "UPDATE node_now SET start=? WHERE start=?");
+    add(update_node_now_start);
+	update_edge_now_start = new soar_module::sqlite_statement (new_db, "UPDATE edge_now SET start=? WHERE start=?");
+    add(update_edge_now_start);
+
+    // Get node/edge range by start
+	get_node_range_start = new soar_module::sqlite_statement (new_db, "SELECT child_id, parent_id, attrib, value FROM node_unique WHERE child_id IN (SELECT id FROM node_range WHERE start=?)");
+    add(get_node_range_start);
+	get_edge_range_start = new soar_module::sqlite_statement (new_db, "SELECT parent_id, q0, w, q1 FROM edge_unique WHERE parent_id IN (SELECT id FROM edge_range WHERE start=?)");
+    add(get_edge_range_start);
+
+    // Get an edge range by start and end
+	get_node_range = new soar_module::sqlite_statement (new_db, "SELECT id FROM node_range WHERE (start=? AND end=?)");
+    add(get_node_range);
+	get_edge_range = new soar_module::sqlite_statement (new_db, "SELECT id FROM edge_range WHERE (start=? AND end=?)");
+    add(get_edge_range);
+
+    // Remove an edge/node range with the given start/end
+	remove_node_range = new soar_module::sqlite_statement (new_db, "DELETE FROM node_range WHERE (start=? AND end=?)");
+    add(remove_node_range);
+	remove_edge_range = new soar_module::sqlite_statement (new_db, "DELETE FROM edge_range WHERE (start=? AND end=?)");
+    add(remove_edge_range);
+
+    // UPdate the start value of a node/edge range
+	update_node_range_start = new soar_module::sqlite_statement (new_db, "UPDATE node_range SET start=? WHERE start=?");
+    add(update_node_range_start);
+	update_edge_range_start = new soar_module::sqlite_statement (new_db, "UPDATE edge_range SET start=? WHERE start=?");
+    add(update_edge_range_start);
+
+    // Remove all node/edge points with the given start
+    remove_node_points = new soar_module::sqlite_statement (new_db, "DELETE FROM node_point WHERE start=?");
+    add(remove_node_points);
+    remove_edge_points = new soar_module::sqlite_statement (new_db, "DELETE FROM edge_point WHERE start=?");
+    add(remove_edge_points);
+
+    // Remove all node/edge unique which are no longer in the database
+	remove_unused_nodes = new soar_module::sqlite_statement (new_db, "DELETE FROM node_unique WHERE child_id NOT IN (SELECT id FROM node_now UNION SELECT id FROM node_range UNION SELECT id FROM node_point)");
+    add(remove_unused_nodes);
+	remove_unused_edges = new soar_module::sqlite_statement (new_db, "DELETE FROM edge_unique WHERE parent_id NOT IN (SELECT id FROM edge_now UNION SELECT id FROM edge_range UNION SELECT id FROM edge_point)");
+    add(remove_unused_edges);
+
+
 }
 
 epmem_graph_statement_container::epmem_graph_statement_container( soar_module::sqlite_database* new_db ): soar_module::sqlite_statement_container( new_db )
 {
 
 	//
-
-	add_structure( "CREATE TABLE IF NOT EXISTS times (id INTEGER PRIMARY KEY)" );
 
 	add_structure( "CREATE TABLE IF NOT EXISTS node_now (id INTEGER,start INTEGER)" );
 	add_structure( "CREATE INDEX IF NOT EXISTS node_now_start ON node_now (start)" );
@@ -261,23 +315,6 @@ epmem_graph_statement_container::epmem_graph_statement_container( soar_module::s
 	add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS edge_unique_q0_w_q1 ON edge_unique (q0,w,q1)" );
 
 	//
-
-	// [TABLE] lti: (parent_id, letter, num, time_id)
-	//add_structure( "CREATE TABLE IF NOT EXISTS lti (parent_id INTEGER PRIMARY KEY, letter INTEGER, num INTEGER, time_id INTEGER)" );
-	//add_structure( "CREATE UNIQUE INDEX IF NOT EXISTS lti_letter_num ON lti (letter,num)" );
-
-	add_time = new soar_module::sqlite_statement( new_db, "INSERT INTO times (id) VALUES (?)" );
-	add( add_time );
-
-	//
-	//promote_id = new soar_module::sqlite_statement( new_db, "INSERT OR IGNORE INTO lti (parent_id,letter,num,time_id) VALUES (?,?,?,?)" );
-	//add( promote_id );
-
-	//find_lti = new soar_module::sqlite_statement( new_db, "SELECT parent_id FROM lti WHERE letter=? AND num=?" );
-	//add( find_lti );
-
-	//find_lti_promotion_time = new soar_module::sqlite_statement( new_db, "SELECT time_id FROM lti WHERE parent_id=?" );
-	//add( find_lti_promotion_time );
 
 
 	//
@@ -348,8 +385,6 @@ epmem_graph_statement_container::epmem_graph_statement_container( soar_module::s
   // E587: AM: returns the row of the given edge looked up by id
 	get_edge_unique = new soar_module::sqlite_statement(new_db, "SELECT q0,w,q1,last FROM edge_unique WHERE parent_id=?");
 	add(get_edge_unique);
-
-	
 
 	//
 	get_node_ids = new soar_module::sqlite_statement(new_db, "SELECT f.child_id FROM node_unique f WHERE f.child_id IN (SELECT n.id FROM node_now n WHERE n.start<= ? UNION ALL SELECT p.id FROM node_point p WHERE p.start=? UNION ALL SELECT e1.id FROM node_range e1, rit_left_nodes lt WHERE e1.rit_node=lt.min AND e1.end >= ? UNION ALL SELECT e2.id FROM node_range e2, rit_right_nodes rt WHERE e2.rit_node = rt.node AND e2.start <= ?) ORDER BY f.child_id ASC");
