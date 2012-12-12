@@ -4363,7 +4363,6 @@ void inline _epmem_exp( agent* my_agent )
  **************************************************************************/
 void epmem_go( agent *my_agent, bool allow_store )
 {
-	double start_time = MPI_Wtime();
 
 	my_agent->epmem_timers->total->start();
 
@@ -4385,7 +4384,6 @@ void epmem_go( agent *my_agent, bool allow_store )
 #endif // EPMEM_EXPERIMENT
 
 	my_agent->epmem_timers->total->stop();
-	std::cout << "ELAPSED: " << MPI_Wtime() - start_time << std::endl;
 
 }
 
