@@ -394,7 +394,7 @@ void epmem_manager::manager_message_handler()
 				//message new split value to all workers
 				// TODO May have deadlock msg issue
 				epmem_msg *smsg = (epmem_msg*)malloc(sizeof(epmem_msg) + sizeof(double));
-				std::cout << "from " << best_msg->source << " New split: " << split << std::endl;
+				std::cout << " New split value: " << split << std::endl;
 				smsg->source = id;
 				smsg->size = sizeof(epmem_msg) + sizeof(double);
 				smsg->type = UPDATE_SPLIT;
@@ -540,7 +540,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			if (!worker_active)
 				break;
-			std::cout << id << " new window size " << windowSize << std::endl;
+			
 			DEBUG("Received search request");
 			msgCount = msg->count;
 			epmem_query* query = new epmem_query();
@@ -555,6 +555,10 @@ void epmem_manager::worker_msg_handler()
 			rspMsg->count = msgCount;
 			DEBUG("Responding with search result");
 			MPI::COMM_WORLD.Send(rspMsg, rspMsg->size, MPI::CHAR, MANAGER_ID, 1);	
+			if (divisionType == DYNAMIC_DIV)
+			{
+				std::cout << id << " Window size " << windowSize << std::endl;
+			}
 			delete rspMsg;
 			delete rsp;
 			
