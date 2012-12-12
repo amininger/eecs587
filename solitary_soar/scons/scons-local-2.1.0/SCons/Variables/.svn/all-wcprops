@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/13266/trunk/SoarSuite/scons/scons-local-2.1.0/SCons/Variables
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/13266/trunk/SoarSuite/scons/scons-local-2.1.0/SCons/Variables/__init__.py
+END
+ListVariable.py
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/13266/trunk/SoarSuite/scons/scons-local-2.1.0/SCons/Variables/ListVariable.py
+END
+BoolVariable.py
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/13266/trunk/SoarSuite/scons/scons-local-2.1.0/SCons/Variables/BoolVariable.py
+END
+PackageVariable.py
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/13266/trunk/SoarSuite/scons/scons-local-2.1.0/SCons/Variables/PackageVariable.py
+END
+PathVariable.py
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/13266/trunk/SoarSuite/scons/scons-local-2.1.0/SCons/Variables/PathVariable.py
+END
+EnumVariable.py
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/13266/trunk/SoarSuite/scons/scons-local-2.1.0/SCons/Variables/EnumVariable.py
+END

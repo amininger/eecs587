@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/ClientSMLSWIG/Java
+END
+SConscript
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/ClientSMLSWIG/Java/SConscript
+END
+JavaCallbackByHand.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/11852/trunk/SoarSuite/Core/ClientSMLSWIG/Java/JavaCallbackByHand.h
+END
+Java_sml_ClientInterface.i
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/13266/trunk/SoarSuite/Core/ClientSMLSWIG/Java/Java_sml_ClientInterface.i
+END

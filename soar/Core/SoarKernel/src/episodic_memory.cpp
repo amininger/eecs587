@@ -1895,6 +1895,7 @@ void epmem_new_episode( agent *my_agent )
 	////////////////////////////////////////////////////////////////////////////
 
 	epmem_time_id time_counter = my_agent->epmem_stats->time->get_value();
+	double start_time = MPI_Wtime();
 
 	// provide trace output
 	if ( my_agent->sysparams[ TRACE_EPMEM_SYSPARAM ] )
@@ -2154,6 +2155,7 @@ void epmem_new_episode( agent *my_agent )
 
 #ifdef USE_MPI
         send_new_episode(episode);
+		MPI::COMM_WORLD.Barrier();
 #else
         //STORE
 		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
@@ -2171,6 +2173,9 @@ void epmem_new_episode( agent *my_agent )
 		delete episode;
 	}
 	
+	if(time_counter % 1000 == 0){
+		std::cout << "Storing " << time_counter << " time(" << (MPI_Wtime() - start_time) << ")" << std::endl;
+	}
 	////////////////////////////////////////////////////////////////////////////
 	my_agent->epmem_timers->storage->stop();
 	////////////////////////////////////////////////////////////////////////////
@@ -2847,6 +2852,7 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 	
 
 #ifdef USE_MPI
+	//MPI::COMM_WORLD.Barrier();
 	double wtime = MPI::Wtime ();	
 	query_rsp_data* response = send_epmem_query_message(query);
 	std::cout << "Query time: " << MPI::Wtime() - wtime << std::endl;

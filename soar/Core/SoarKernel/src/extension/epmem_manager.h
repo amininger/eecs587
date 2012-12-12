@@ -26,13 +26,15 @@ class epmem_manager;
 
 class epmem_manager {
 public:
-    epmem_manager();
-    void initialize();//epmem_param_container* epmem_params);
+    epmem_manager(int startWindowSize, bool evenDivFlag);
+    void initialize();
      
 private:
     int numProc;
 	int msgCount;
     int id;
+	bool evenDiv;
+	int totalEpCnt;
     int windowSize;
     int currentSize;
 	bool sendEpNextTime;
@@ -51,7 +53,7 @@ private:
 
 // Definitions for constant values
 #define WINDOW_SIZE_GROWTH_RATE 0
-#define DEFAULT_WINDOW_SIZE 20
+//#define DEFAULT_WINDOW_SIZE 4
 #define MAX_EPMEM_MSG_SIZE 1000 //todo what size should this be?
 
 //may possibly have first worker be manager as well

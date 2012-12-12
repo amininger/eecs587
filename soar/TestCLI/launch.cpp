@@ -20,12 +20,14 @@ void printcb(smlPrintEventId id, void *d, Agent *a, char const *m) {
 int main(int argc, char** argv){
 	MPI::Init(argc, argv); //move
     int id = MPI::COMM_WORLD.Get_rank();
-	
+		
+	int window = atoi(argv[1]);
+	bool evenDiv = (atoi(argv[2]) == 1);
 	if (id > 0)//AGENT_ID)
     {
 		cout << "Processor " << id << " online" << endl;
 		emp_mpi* em = new emp_mpi();
-		em->init();
+		em->init(window, evenDiv);
 		//epmem_manager * ep_man = new epmem_manager();
 		//start processing
 		//ep_man->initialize(); 
@@ -42,11 +44,12 @@ int main(int argc, char** argv){
 		
 		agent->RegisterForPrintEvent(smlEVENT_PRINT, printcb, NULL);
 		
-		cout << agent->ExecuteCommandLine("source ../agents/worstcase.soar") << endl;
+		string source = "source ";
+		source += argv[3];
+		cout << agent->ExecuteCommandLine(source.c_str()) << endl;
 	
 		agent->ExecuteCommandLine("run");	
 	//	cout << agent->ExecuteCommandLine("source ../agents/simple.soar") << endl;
-		
 		
 		
 		kernel->Shutdown();

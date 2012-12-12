@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/winstl/performance
+END
+performance_counter.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/winstl/performance/performance_counter.hpp
+END
+highperformance_counter.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/winstl/performance/highperformance_counter.hpp
+END
+systemtime_counter.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/winstl/performance/systemtime_counter.hpp
+END
+threadtimes_counter.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/12182/trunk/SoarSuite/Core/shared/winstl/performance/threadtimes_counter.hpp
+END
+multimedia_counter.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/winstl/performance/multimedia_counter.hpp
+END
+tick_counter.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/winstl/performance/tick_counter.hpp
+END
+processtimes_counter.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/11591/trunk/SoarSuite/Core/shared/winstl/performance/processtimes_counter.hpp
+END

@@ -33,9 +33,12 @@
  * @Author   : 
  * @Notes    : Construct intializes currentSize to 0, create epmem_worker
  **************************************************************************/
-epmem_manager::epmem_manager()
+epmem_manager::epmem_manager(int startWindowSize, bool evenDivFlag)
 {
     currentSize = 0;
+	totalEpCnt = 0;
+	windowSize = startWindowSize;
+	evenDiv = evenDivFlag;
 	msgCount = 1;
 	sendEpNextTime = false;
     epmem_worker_p = new epmem_worker();
@@ -70,7 +73,7 @@ void epmem_manager::initialize()
 		break;
     }
     default:
-		windowSize = DEFAULT_WINDOW_SIZE + (id-2)*WINDOW_SIZE_GROWTH_RATE;
+		//windowSize = DEFAULT_WINDOW_SIZE + (id-2)*WINDOW_SIZE_GROWTH_RATE;
 		if (id < FIRST_WORKER_ID)
 		{
 			ERROR("Invalid id");
@@ -236,7 +239,7 @@ void epmem_manager::manager_message_handler()
 			//wait for receivie acknowledge from last process to add episode
 			//MPI::COMM_WORLD.Recv(cmsg, sizeof(epmem_msg), MPI::CHAR, 
 			//					 MPI::ANY_SOURCE, 2);		
-
+			MPI::COMM_WORLD.Barrier();
 			break;
 		}
 		case INIT_WORKER:
@@ -467,6 +470,7 @@ void epmem_manager::worker_msg_handler()
 			DEBUG("Received new episode");
 			receive_new_episode((int64_t*) &(msg->data), 
 								buffSize - sizeof(epmem_msg));
+			MPI::COMM_WORLD.Barrier();
 			break;
 		}
 		case NEW_EP_NOTIFY:
@@ -502,9 +506,13 @@ void epmem_manager::worker_msg_handler()
 			src = status.Get_source();
 			MPI::COMM_WORLD.Recv(msg, buffSize, MPI::CHAR, src, 2, status);
 			if (msg->type == NEW_EP_EMPTY)
+			{
+				MPI::COMM_WORLD.Barrier();
 				break;
+			}
 			receive_new_episode((int64_t*) &(msg->data), 
 								buffSize - sizeof(epmem_msg));
+			MPI::COMM_WORLD.Barrier();
 		}
 		case INIT_WORKER:
 		{
@@ -521,7 +529,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			//int * newsize = (int*) (&msg->data);
 			update_windowSize(INCR_AMNT);//*newsize);
-			std::cout << id << " new window size " << windowSize << std::endl;
+			//std::cout << id << " new window size " << windowSize << std::endl;
 			break;
 		}
 
@@ -529,6 +537,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			if (!worker_active)
 				break;
+			//std::cout << id << " new window size " << windowSize << std::endl;
 			DEBUG("Received search request");
 			msgCount = msg->count;
 			epmem_query* query = new epmem_query();
@@ -568,7 +577,20 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 		ERROR("Msg data size for new episode incorrect");
 		return;
 	}
+	//if received more episodes than could be evenly held increase window size
+	// assumes even window sizes among processors
+	totalEpCnt++;
 	
+	if (!evenDiv)
+	{
+		int k = (numProc-id);
+		int div = pow(2, k) -1;
+		if ((totalEpCnt % div) == 0)
+			windowSize++;
+	}
+	else if (totalEpCnt > ((numProc-id)*windowSize))
+		windowSize++;
+		
 	//handle adding episode and shift last episode if needed
 	received_episode(episode);
 	delete episode;
