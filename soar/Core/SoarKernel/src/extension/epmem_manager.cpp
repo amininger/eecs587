@@ -145,23 +145,8 @@ void epmem_manager::received_episode(epmem_episode_diff *episode)
     if ((currentSize >= windowSize) && (id < (numProc - 1)))
 	{
 		sendEpNextTime = true;
-		/*
-		DEBUG("Sending oldest episode to neighbor");
-		epmem_episode_diff *to_send = epmem_worker_p->remove_oldest_episode();
-		currentSize--;
-		pass_episode(to_send);
-		delete to_send;
-		*/
     }
-	/*
-	else
-	{
-		//send ack!
-		epmem_msg *msg = new epmem_msg();
-		MPI::COMM_WORLD.Send(msg, sizeof(epmem_msg), MPI::CHAR, MANAGER_ID, 2);
-		delete msg;
-	}
-	*/
+	
     return;
 }
 
@@ -266,10 +251,7 @@ void epmem_manager::manager_message_handler()
 		}
 		case SEARCH:
 		{
-			// Broadcast search request to all workers
-			// TODO is there a better Bcast?
-			//
-			
+			// Broadcast search request to all workers			
 			msg->count = msgCount;
 			DEBUG("Received search request");
 			//MPI::COMM_WORLD.Bcast(msg, buffSize, MPI::CHAR, id);
@@ -399,8 +381,7 @@ void epmem_manager::manager_message_handler()
 			//respond with data to agent
 			msgCount++;
 			DEBUG("Responding with best result");
-			///qqq
-			
+						
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
 			
 
@@ -413,7 +394,7 @@ void epmem_manager::manager_message_handler()
 				//message new split value to all workers
 				// TODO May have deadlock msg issue
 				epmem_msg *smsg = (epmem_msg*)malloc(sizeof(epmem_msg) + sizeof(double));
-				//std::cout << "New split: " << split << std::endl;
+				std::cout << "from " << best_msg->source << " New split: " << split << std::endl;
 				smsg->source = id;
 				smsg->size = sizeof(epmem_msg) + sizeof(double);
 				smsg->type = UPDATE_SPLIT;
@@ -437,7 +418,7 @@ void epmem_manager::manager_message_handler()
 
 
 /***************************************************************************
- * @Function : epmem_worker_message_handler
+ * @Function : worker_msg_handler
  * @Author   : 
  * @Notes    : message handler for epmem_workers on seperate procs
  **************************************************************************/
@@ -559,7 +540,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			if (!worker_active)
 				break;
-			//std::cout << id << " new window size " << windowSize << std::endl;
+			std::cout << id << " new window size " << windowSize << std::endl;
 			DEBUG("Received search request");
 			msgCount = msg->count;
 			epmem_query* query = new epmem_query();
@@ -603,7 +584,7 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 	// determine if this episode addition also needs a window size increase
 	
 	totalEpCnt++;
-	int mod = (int) ((pow(2, (numProc-id)) -1)*split + (numProc-id)*(1-split));
+	int mod = (int) ((double)(pow(2, (numProc-id)) -1.0)*split + (double)(numProc-id)*(1.0-split));
 	
 	if ((totalEpCnt % mod) == 0)
 		windowSize++;

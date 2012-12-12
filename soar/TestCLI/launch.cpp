@@ -43,7 +43,7 @@ int main(int argc, char** argv){
 		Kernel* kernel = Kernel::CreateKernelInNewThread();
 		Agent* agent = kernel->CreateAgent("HelloSoar");
 		
-		//agent->RegisterForPrintEvent(smlEVENT_PRINT, printcb, NULL);
+		agent->RegisterForPrintEvent(smlEVENT_PRINT, printcb, NULL);
 		
 		string source = "source ";
 		source += argv[4];
