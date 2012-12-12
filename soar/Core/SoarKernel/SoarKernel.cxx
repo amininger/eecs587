@@ -40,5 +40,5 @@
 #include "src/extension/epmem_sql_containers.cpp"
 #include "src/extension/epmem_query.cpp"
 // E587: JK: Include
-//#include "src/extension/epmem_manager.cpp"
-//#include "src/extension/emp_mpi.cpp"
+#include "src/extension/epmem_manager.cpp"
+#include "src/extension/emp_mpi.cpp"

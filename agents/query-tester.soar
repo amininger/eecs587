@@ -1,0 +1,348 @@
+epmem --set learning on
+epmem --set trigger dc
+epmem --set phase output
+
+w 0
+
+### Initialization
+
+sp {simple*propose*init-simple
+   (state <s> ^superstate nil
+             -^name)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name init-simple)
+}
+
+# Basic initialization
+sp {simple*apply*init-simple
+   (state <s> ^operator.name init-simple)
+-->
+   (<s> ^name simple
+        ^time 2
+		^divisors <divs>)
+	(<divs> ^one 1
+			^two 10
+			^three 100
+			^four 1000
+			^five 10000
+			^six 100000)
+}
+
+# Set parameters
+sp {simple*apply*init-simple*parameters
+	(state <s> ^operator.name init-simple)
+-->
+	(<s> ^min-perc .25			# min percentile to retrieve from
+		 ^max-perc .75			# max percentile to retrieve from
+		 ^query-time 100		# time of the first query 
+		 ^query-interval 100	# time between queries
+		 ^stop-time 10000)		# time to stop
+}
+
+# Initialize the digits structure
+sp {simple*apply*init-simple*digits
+   (state <s> ^operator.name init-simple)
+-->
+   (<s> ^digits <d>)
+   (<d> ^digit <d0> <d1> <d2> <d3> <d4> <d5> <d6> <d7> <d8> <d9>)
+   (<d0> ^prev 0
+         ^next <d1>
+         ^digit 0
+         ^word zero)
+   (<d1> ^prev <d0>
+         ^next <d2>
+         ^digit 1
+         ^word one)
+   (<d2> ^prev <d1>
+         ^next <d3>
+         ^digit 2
+         ^word two)
+   (<d3> ^prev <d2>
+         ^next <d4>
+         ^digit 3
+         ^word three)
+   (<d4> ^prev <d3>
+         ^next <d5>
+         ^digit 4
+         ^word four)
+   (<d5> ^prev <d4>
+         ^next <d6>
+         ^digit 5
+         ^word five)
+   (<d6> ^prev <d5>
+         ^next <d7>
+         ^digit 6
+         ^word six)
+   (<d7> ^prev <d6>
+         ^next <d8>
+         ^digit 7
+         ^word seven)
+   (<d8> ^prev <d7>
+         ^next <d9>
+         ^digit 8
+         ^word eight)
+   (<d9> ^prev <d8>
+         ^next 0
+         ^digit 9
+         ^word nine)
+}
+
+# Initialize the current-number (to 1)
+sp {simple*apply*init-simple*current-number
+   (state <s> ^operator.name init-simple)
+-->
+   (<s>^current-number <c>)
+   (<c> ^one <c1>
+        ^two <c2>
+        ^three <c3>
+        ^four <c4>
+        ^five <c5>
+        ^size <c6>)
+   (<c1> ^digit 1
+         ^word one)
+   (<c2> ^digit 0
+         ^word zero)
+   (<c3> ^digit 0
+         ^word zero)
+   (<c4> ^digit 0
+         ^word zero)
+   (<c5> ^digit 0
+         ^word zero)
+   (<c6> ^digit 0
+         ^word zero)
+}
+
+### Step operator
+# Simple step operator that advances time
+sp {propose*step*operator
+   (state <s> ^name simple
+              ^time <t>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name step
+        ^time <t>)
+   #(write (crlf) |Starting step | <t>)
+}
+
+# Increment the time
+sp {apply*step*operator
+   (state <s> ^name simple
+              ^operator.name step
+              ^time <t>)
+-->
+   (<s> ^time <t> -
+        ^time (+ <t> 1))
+}
+
+
+### Changing the number structure
+# Increments the current-number
+
+# Always change the lowest digit (digit one)
+sp {elaborate*step*changes*one
+   (state <s> ^name simple
+              ^operator <o> +
+              ^current-number.one <one>)
+   (<o> ^name step)
+-->
+   (<s> ^change <one>)
+}
+
+# If the lower digit is a 9 and will be changed, 
+# then the next digit is also changed (carry)
+sp {elaborate*step*changes*carry
+   (state <s> ^name simple
+              ^operator <o> +
+              ^digits.digit <d>
+              ^current-number.<higher-place> <higher>
+			  ^current-number.<lower-place> <lower>
+              ^change <lower>)
+   (<o> ^name step)
+   (<lower> ^digit 9)
+   (<d> ^word <lower-place>
+        ^next.word <higher-place>)
+-->
+   (<s> ^change <higher>)
+}
+
+# Increment the digits marked as changed (all but 9)
+sp {apply*step*increment*current-digit
+   (state <s> ^name simple
+              ^operator.name step
+              ^digits.digit <d>
+              ^change <digit>)
+   (<digit> ^digit <old-d>
+            ^word <old-w>)
+   (<d> ^digit <old-d>
+        ^next <next-d>)
+   (<next-d> ^digit <new-d>
+             ^word <new-w>)
+-->
+   (<digit> ^digit <old-d> -
+            ^digit <new-d>
+            ^word <old-w> -
+            ^word <new-w>)
+   (<s> ^change <digit> -)
+}
+
+# Roll a digit from 9 back to 0
+sp {apply*step*overflow*digit
+   (state <s> ^name simple
+              ^operator.name step
+              ^change <digit>)
+   (<digit> ^digit 9
+            ^word nine)
+-->
+   (<digit> ^digit 9 -
+            ^digit 0
+            ^word nine -
+            ^word zero)
+   (<s> ^change <digit> -)
+}
+
+# Prints the number of the current episode
+sp {apply*step*print*number
+   (state <s> ^name simple
+              ^current-number <cd>)
+   (<cd> ^one.digit <d1>
+         ^two.digit <d2>
+         ^three.digit <d3>
+         ^four.digit <d4>
+         ^five.digit <d5>
+         ^size.digit <d6>)
+-->
+   #(write (crlf) |Episode: | <d6> <d5> <d4> <d3> <d2> <d1>)
+}
+
+
+### Comping a random episode to retrieve
+
+# Computes the episode bounds for the retrieval
+sp {elaborate*state*max*episode
+	(state <s> ^name simple
+				^time <t>
+				^min-perc <min>
+				^max-perc <max>)
+-->
+	(<s> ^min-ep (int (* <t> <min>))
+		 ^max-ep (int (* <t> <max>))
+		 ^ep-diff (int (* <t> (- <max> <min>))))
+}
+
+# Randomly chooses an episode in the valid range
+sp {elaborate*state*random*episode
+	(state <s> ^name simple
+				^min-ep <min>
+				^max-ep <max>
+				^ep-diff <diff>)
+-->
+	(<s> ^random-ep <rand>)
+	(<rand> ^number (+ (+ <min> (int (cmd |rand | <diff>))) 1))
+}
+
+# Creates the digits structure for that random episode
+sp {elaborate*random-ep*digits
+	(state <s> ^name simple
+				^random-ep <rand>
+				^divisors <divs>)
+	(<divs> ^<digit> <pow10>)
+	(<rand> ^number <rand-num>)
+-->
+	(<rand> ^digit.<digit> (mod (div <rand-num> <pow10>) 10))
+}
+
+# Writes the random digit
+sp {write*random-ep
+	(state <s> ^name simple
+			   ^operator.name step
+				^random-ep.number <ep>)
+-->
+	# (write  (crlf) |Random: | <ep>)
+}
+
+### Queries
+# when time = query-time, do a query
+
+sp {apply*step*do-query
+	(state <s> ^operator.name step
+				^epmem.command <cmd>
+				^time <t>
+				^query-time <t>
+				^query-interval <dt>
+				^random-ep <ep>)
+	(<ep> ^digit.one <d1>
+		  ^digit.two <d2>
+		  ^digit.three <d3>
+		  ^digit.four <d4>
+		  ^digit.five <d5>
+		  ^digit.six <d6>
+		  ^number <n>)
+-->
+	(<cmd> ^query.current-number <num>)
+	(<num> ^one.digit <d1>
+			^two.digit <d2>
+			^three.digit <d3>
+			^four.digit <d4>
+			^five.digit <d5>
+			^six.digit <d6>)
+	(<s> ^query-time <t> -
+		^query-time (+ <t> <dt>))
+	(write (crlf) |Finding Episode: | <n>)
+}
+	
+# Remove a query when the result is gotten
+sp {apply*step*remove*queries
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem <epmem>)
+   (<epmem> ^command <cmd>
+            ^result <res>)
+   (<cmd> ^query <q>)
+   (<res> ^{<< success failure >>} <q>)
+-->
+   (<cmd> ^query <q> -)
+}
+
+
+sp {apply*step*query*success
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem.result <res>)
+   (<res> ^success 
+          ^memory-id <id>)
+-->
+   (write (crlf) |EPMEM QUERY SUCCESS: | <id>)
+}
+
+#sp {apply*step*query*stats
+#   (state <s> ^name simple
+#              ^operator.name step
+#              ^epmem.result <res>)
+#   (<res> ^success 
+#          ^match-cardinality <card>
+#          ^normalized-match-score <score>
+#          ^graph-match <graph>)
+#-->
+#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|)
+#}
+#
+
+#
+#sp {apply*step*query*failure
+#   (state <s> ^name simple
+#              ^operator.name step
+#              ^epmem.result.failure)
+#-->
+#   (write (crlf) |EPMEM QUERY FAILURE|)
+#}
+
+### Halts when it reaches the end
+sp {apply*step*halt
+	(state <s> ^operator.name step
+			^time <t>
+			^stop-time <t>)
+-->
+	(halt)
+}
+
