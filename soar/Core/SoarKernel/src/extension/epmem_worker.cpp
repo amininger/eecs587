@@ -772,13 +772,14 @@ void epmem_worker::remove_old_edges(epmem_episode_diff* episode){
 }
 
 epmem_episode_diff* epmem_worker::remove_oldest_episode(){
-	if(epmem_stmts_common->get_min_time->execute() != soar_module::row || 
-        epmem_stmts_common->get_max_time->execute() != soar_module::row){
-		// No episodes are stored in the database
-        epmem_stmts_common->get_min_time->reinitialize();
-        epmem_stmts_common->get_max_time->reinitialize();
+	if(epmem_stmts_common->get_min_time->execute() != soar_module::row){
+		epmem_stmts_common->get_min_time->reinitialize();
 		return NIL;
-	} 
+	}
+	if(epmem_stmts_common->get_max_time->execute() != soar_module::row){
+		epmem_stmts_common->get_max_time->reinitialize();
+		return NIL;
+	}
 
 	// Min and max times in the times table
 	epmem_time_id min_time = epmem_stmts_common->get_min_time->column_int(0);
@@ -854,6 +855,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 		while(epmem_stmts_removal->get_edge_now->execute() == soar_module::row){
 			edges_to_add.push_back(epmem_edge_unique(epmem_stmts_removal->get_edge_now));
 		}
+		epmem_stmts_removal->get_edge_now->reinitialize();
 
 		// Update the starting values of all old edge_nows to that of the episode being removed
 		epmem_stmts_removal->update_edge_now_start->bind_int(1, min_time);
@@ -1873,7 +1875,7 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 						uedge->pedges.insert(pedge);
 						uedge_cache->insert(std::make_pair(triple, uedge));
 					} else {
-						uedge->pedges.~epmem_pedge_set();
+						//uedge->pedges.~epmem_pedge_set();
                         delete uedge;
 					}
 				} else {
