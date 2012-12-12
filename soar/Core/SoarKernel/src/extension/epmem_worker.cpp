@@ -790,7 +790,6 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
     if(max_time == 0){
         return NIL;
     }
-
 	// Building up the diff structure to return
 	std::vector<epmem_node_unique> nodes_to_remove;
 	std::vector<epmem_node_unique> nodes_to_add;
@@ -953,7 +952,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
         epmem_stmts_removal->remove_node_points->execute(soar_module::op_reinit);
 
 		// Check to see if the node_unique still exists somewhere, if not, delete it
-        epmem_stmts_removal->remove_unused_nodes->execute(soar_module::op_reinit);
+        //epmem_stmts_removal->remove_unused_nodes->execute(soar_module::op_reinit);
 	}
 
 	// edges_to_remove
@@ -964,7 +963,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
         epmem_stmts_removal->remove_edge_points->execute(soar_module::op_reinit);
 
 		// Check to see if the edge_unique still exists somewhere, if not, delete it
-        epmem_stmts_removal->remove_unused_edges->execute(soar_module::op_reinit);
+        //epmem_stmts_removal->remove_unused_edges->execute(soar_module::op_reinit);
 	}
 		
 	// update times table
@@ -1714,6 +1713,7 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
         if(epmem_stmts_common->get_min_time->execute() == soar_module::row){
 			min_time = epmem_stmts_common->get_min_time->column_int(0);
         }
+	epmem_stmts_common->get_min_time->reinitialize();
 
 		// create dummy edges and intervals
 		{
