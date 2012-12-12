@@ -1521,37 +1521,37 @@ epmem_literal* epmem_worker::epmem_build_dnf(epmem_query* query, epmem_cue_wme* 
 
 	cue_wmes.insert(cue_wme);
 	epmem_cue_symbol* value = cue_wme->value;
-	epmem_literal* literal = reinterpret_cast<epmem_literal*>(malloc(sizeof(epmem_literal)));
-	new(&(literal->parents)) epmem_literal_set();
-	new(&(literal->children)) epmem_literal_set();
+	epmem_literal* ep_literal = reinterpret_cast<epmem_literal*>(malloc(sizeof(epmem_literal)));
+	new(&(ep_literal->parents)) epmem_literal_set();
+	new(&(ep_literal->children)) epmem_literal_set();
 
     if (!value->is_id) { // WME is a value
-		literal->value_is_id = EPMEM_RIT_STATE_NODE;
-		literal->is_leaf = true;
-		literal->q1 = value->id;
-        literal->is_lti = false;
-		leaf_literals.insert(literal);
+		ep_literal->value_is_id = EPMEM_RIT_STATE_NODE;
+		ep_literal->is_leaf = true;
+		ep_literal->q1 = value->id;
+        ep_literal->is_lti = false;
+		leaf_literals.insert(ep_literal);
 	} else if (value->is_lti) { // WME is an LTI
 		// E587: AM:
 		// if we can find the LTI node id, cache it; otherwise, return failure
-		literal->value_is_id = EPMEM_RIT_STATE_EDGE;
-		literal->is_leaf = true;
-		literal->q1 = value->id;
-        literal->is_lti = true;
-        literal->promotion_time = value->promotion_time;
+		ep_literal->value_is_id = EPMEM_RIT_STATE_EDGE;
+		ep_literal->is_leaf = true;
+		ep_literal->q1 = value->id;
+        ep_literal->is_lti = true;
+        ep_literal->promotion_time = value->promotion_time;
 	} else { // WME is a normal identifier
 		// we determine whether it is a leaf by checking for children
 		epmem_cue_wme_list* children = value->children;
-		literal->value_is_id = EPMEM_RIT_STATE_EDGE;
-		literal->q1 = EPMEM_NODEID_BAD;
-        literal->is_lti = false;
+		ep_literal->value_is_id = EPMEM_RIT_STATE_EDGE;
+		ep_literal->q1 = EPMEM_NODEID_BAD;
+        ep_literal->is_lti = false;
 
 		// if the WME has no children, then it's a leaf
 		// otherwise, we recurse for all children
 		if (children->empty()) {
-			literal->is_leaf = true;
-			leaf_literals.insert(literal);
-			delete children;
+			ep_literal->is_leaf = true;
+			leaf_literals.insert(ep_literal);
+			//delete children;
 		} else {
 			bool cycle = false;
 			visiting.insert(cue_wme->value);
@@ -1560,24 +1560,24 @@ epmem_literal* epmem_worker::epmem_build_dnf(epmem_query* query, epmem_cue_wme* 
 				// if it does, we skip over it
 				epmem_literal* child = epmem_build_dnf(query, *wme_iter, literal_cache, leaf_literals, symbol_num_incoming, gm_ordering, query_type, visiting, currents, cue_wmes);
 				if (child) {
-					child->parents.insert(literal);
-					literal->children.insert(child);
+					child->parents.insert(ep_literal);
+					ep_literal->children.insert(child);
 				} else {
 					cycle = true;
 				}
 			}
-			delete children;
+			//delete children;
 			visiting.erase(cue_wme->value);
 			// if all children of this WME lead to cycles, then we don't need to walk this path
 			// in essence, this forces the DNF graph to be acyclic
 			// this results in savings in not walking edges and intervals
-			if (cycle && literal->children.empty()) {
-				literal->parents.~epmem_literal_set();
-				literal->children.~epmem_literal_set();
-                delete literal;
+			if (cycle && ep_literal->children.empty()) {
+				ep_literal->parents.~epmem_literal_set();
+				ep_literal->children.~epmem_literal_set();
+                delete ep_literal;
 				return NULL;
 			}
-			literal->is_leaf = false;
+			ep_literal->is_leaf = false;
 			epmem_symbol_int_map::iterator rem_iter = symbol_num_incoming.find(value);
 			if (rem_iter == symbol_num_incoming.end()) {
 				symbol_num_incoming[value] = 1;
@@ -1588,22 +1588,22 @@ epmem_literal* epmem_worker::epmem_build_dnf(epmem_query* query, epmem_cue_wme* 
 	}
 
 	if (!query_type) {
-		gm_ordering.push_front(literal);
+		gm_ordering.push_front(ep_literal);
 	}
 
-	literal->id_sym = cue_wme->id;
-	literal->value_sym = cue_wme->value;
-	literal->is_current = (currents.count(value) > 0);
-	literal->w = cue_wme->attr->id;
-	literal->is_neg_q = query_type;
+	ep_literal->id_sym = cue_wme->id;
+	ep_literal->value_sym = cue_wme->value;
+	ep_literal->is_current = (currents.count(value) > 0);
+	ep_literal->w = cue_wme->attr->id;
+	ep_literal->is_neg_q = query_type;
     // E587: AM: XXX: HACK, want real value here
     double balance = 1;
-	literal->weight = (literal->is_neg_q ? -1 : 1) * (balance >= 1.0 - 1.0e-8 ? 1.0 : cue_wme->activation);
-	new(&(literal->matches)) epmem_node_pair_set();
-	new(&(literal->values)) epmem_node_int_map();
+	ep_literal->weight = (ep_literal->is_neg_q ? -1 : 1) * (balance >= 1.0 - 1.0e-8 ? 1.0 : cue_wme->activation);
+	new(&(ep_literal->matches)) epmem_node_pair_set();
+	new(&(ep_literal->values)) epmem_node_int_map();
 
-	literal_cache[cue_wme] = literal;
-	return literal;
+	literal_cache[cue_wme] = ep_literal;
+	return ep_literal;
 }
 
 query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
