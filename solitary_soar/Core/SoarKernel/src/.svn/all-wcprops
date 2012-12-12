@@ -1,0 +1,467 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src
+END
+callback.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/12999/trunk/SoarSuite/Core/SoarKernel/src/callback.cpp
+END
+init_soar.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/12226/trunk/SoarSuite/Core/SoarKernel/src/init_soar.h
+END
+episodic_memory.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/13424/trunk/SoarSuite/Core/SoarKernel/src/episodic_memory.h
+END
+agent.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/13408/trunk/SoarSuite/Core/SoarKernel/src/agent.cpp
+END
+symtab.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/13457/trunk/SoarSuite/Core/SoarKernel/src/symtab.cpp
+END
+osupport.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/osupport.h
+END
+prefmem.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/12906/trunk/SoarSuite/Core/SoarKernel/src/prefmem.h
+END
+explain.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/explain.h
+END
+consistency.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/consistency.h
+END
+io.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/12226/trunk/SoarSuite/Core/SoarKernel/src/io.cpp
+END
+exploration.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/13088/trunk/SoarSuite/Core/SoarKernel/src/exploration.h
+END
+rhsfun.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/rhsfun.h
+END
+gsysparam.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/gsysparam.h
+END
+instantiations.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/12165/trunk/SoarSuite/Core/SoarKernel/src/instantiations.h
+END
+soar_rand.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/13266/trunk/SoarSuite/Core/SoarKernel/src/soar_rand.h
+END
+chunk.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/12164/trunk/SoarSuite/Core/SoarKernel/src/chunk.h
+END
+mem.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/12372/trunk/SoarSuite/Core/SoarKernel/src/mem.h
+END
+reinforcement_learning.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/13404/trunk/SoarSuite/Core/SoarKernel/src/reinforcement_learning.h
+END
+episodic_memory.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/13524/trunk/SoarSuite/Core/SoarKernel/src/episodic_memory.cpp
+END
+init_soar.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/init_soar.cpp
+END
+wma.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/12878/trunk/SoarSuite/Core/SoarKernel/src/wma.h
+END
+sqlite3.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/12670/trunk/SoarSuite/Core/SoarKernel/src/sqlite3.h
+END
+prefmem.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/prefmem.cpp
+END
+osupport.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/osupport.cpp
+END
+semantic_memory.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/13457/trunk/SoarSuite/Core/SoarKernel/src/semantic_memory.h
+END
+consistency.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/consistency.cpp
+END
+callback.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/11864/trunk/SoarSuite/Core/SoarKernel/src/callback.h
+END
+agent.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/13457/trunk/SoarSuite/Core/SoarKernel/src/agent.h
+END
+rete.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/rete.h
+END
+rhsfun.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/12726/trunk/SoarSuite/Core/SoarKernel/src/rhsfun.cpp
+END
+wmem.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/wmem.h
+END
+soarkernel.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/soarkernel.h
+END
+soar_db.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/13408/trunk/SoarSuite/Core/SoarKernel/src/soar_db.h
+END
+reinforcement_learning.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/13428/trunk/SoarSuite/Core/SoarKernel/src/reinforcement_learning.cpp
+END
+utilities.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/12617/trunk/SoarSuite/Core/SoarKernel/src/utilities.h
+END
+decide.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/decide.h
+END
+backtrace.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/12165/trunk/SoarSuite/Core/SoarKernel/src/backtrace.h
+END
+production.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/13404/trunk/SoarSuite/Core/SoarKernel/src/production.cpp
+END
+semantic_memory.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/13457/trunk/SoarSuite/Core/SoarKernel/src/semantic_memory.cpp
+END
+print.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/print.cpp
+END
+parser.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/parser.cpp
+END
+trace.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/12173/trunk/SoarSuite/Core/SoarKernel/src/trace.cpp
+END
+rete.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/13479/trunk/SoarSuite/Core/SoarKernel/src/rete.cpp
+END
+io_soar.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/io_soar.h
+END
+xml.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/12169/trunk/SoarSuite/Core/SoarKernel/src/xml.cpp
+END
+reorder.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/reorder.cpp
+END
+tempmem.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/tempmem.cpp
+END
+wmem.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/13408/trunk/SoarSuite/Core/SoarKernel/src/wmem.cpp
+END
+recmem.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/recmem.cpp
+END
+utilities.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/12617/trunk/SoarSuite/Core/SoarKernel/src/utilities.cpp
+END
+gdatastructs.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/gdatastructs.h
+END
+decide.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/decide.cpp
+END
+soar_module.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/13428/trunk/SoarSuite/Core/SoarKernel/src/soar_module.h
+END
+rhsfun_math.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/13013/trunk/SoarSuite/Core/SoarKernel/src/rhsfun_math.cpp
+END
+backtrace.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/backtrace.cpp
+END
+decision_manipulation.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/12028/trunk/SoarSuite/Core/SoarKernel/src/decision_manipulation.h
+END
+lexer.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/lexer.h
+END
+production.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/13404/trunk/SoarSuite/Core/SoarKernel/src/production.h
+END
+explain.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/explain.cpp
+END
+parser.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/parser.h
+END
+print.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/13272/trunk/SoarSuite/Core/SoarKernel/src/print.h
+END
+trace.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/trace.h
+END
+symtab.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/12586/trunk/SoarSuite/Core/SoarKernel/src/symtab.h
+END
+exploration.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/13088/trunk/SoarSuite/Core/SoarKernel/src/exploration.cpp
+END
+xml.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/xml.h
+END
+reorder.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/reorder.h
+END
+chunk.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/13026/trunk/SoarSuite/Core/SoarKernel/src/chunk.cpp
+END
+soar_rand.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/soar_rand.cpp
+END
+soar_module.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/soar_module.cpp
+END
+tempmem.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/tempmem.h
+END
+recmem.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/recmem.h
+END
+decision_manipulation.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/12168/trunk/SoarSuite/Core/SoarKernel/src/decision_manipulation.cpp
+END
+mem.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/12372/trunk/SoarSuite/Core/SoarKernel/src/mem.cpp
+END
+lexer.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/12352/trunk/SoarSuite/Core/SoarKernel/src/lexer.cpp
+END
+rhsfun_math.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/11608/trunk/SoarSuite/Core/SoarKernel/src/rhsfun_math.h
+END
+wma.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/12842/trunk/SoarSuite/Core/SoarKernel/src/wma.cpp
+END
+kernel.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/13602/trunk/SoarSuite/Core/SoarKernel/src/kernel.h
+END
