@@ -7,6 +7,6 @@
 class EXPORT emp_mpi {
 public:
     emp_mpi();
-    void init();
+    void init(int startWindowSize, bool evenDivFlag);
 };
 #endif

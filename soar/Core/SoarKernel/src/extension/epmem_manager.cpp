@@ -33,10 +33,12 @@
  * @Author   : 
  * @Notes    : Construct intializes currentSize to 0, create epmem_worker
  **************************************************************************/
-epmem_manager::epmem_manager()
+epmem_manager::epmem_manager(int startWindowSize, bool evenDivFlag)
 {
     currentSize = 0;
 	totalEpCnt = 0;
+	windowSize = startWindowSize;
+	evenDiv = evenDivFlag;
 	msgCount = 1;
 	sendEpNextTime = false;
     epmem_worker_p = new epmem_worker();
@@ -71,7 +73,7 @@ void epmem_manager::initialize()
 		break;
     }
     default:
-		windowSize = DEFAULT_WINDOW_SIZE + (id-2)*WINDOW_SIZE_GROWTH_RATE;
+		//windowSize = DEFAULT_WINDOW_SIZE + (id-2)*WINDOW_SIZE_GROWTH_RATE;
 		if (id < FIRST_WORKER_ID)
 		{
 			ERROR("Invalid id");
@@ -535,6 +537,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			if (!worker_active)
 				break;
+			std::cout << id << " new window size " << windowSize << std::endl;
 			DEBUG("Received search request");
 			msgCount = msg->count;
 			epmem_query* query = new epmem_query();
@@ -576,12 +579,18 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 	}
 	//if received more episodes than could be evenly held increase window size
 	// assumes even window sizes among processors
-	if (totalEpCnt > ((numProc-id)*windowSize))
-	{
-		windowSize++;
-		//std::cout << id << " new window size " << windowSize << std::endl;
-	}
 	totalEpCnt++;
+	
+	if (!evenDiv)
+	{
+		int k = (numProc-id);
+		int div = pow(2, k) -1;
+		if ((totalEpCnt % div) == 0)
+			windowSize++;
+	}
+	else if (totalEpCnt > ((numProc-id)*windowSize))
+		windowSize++;
+		
 	//handle adding episode and shift last episode if needed
 	received_episode(episode);
 	delete episode;
