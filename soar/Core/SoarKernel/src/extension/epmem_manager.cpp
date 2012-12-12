@@ -529,7 +529,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			//int * newsize = (int*) (&msg->data);
 			update_windowSize(INCR_AMNT);//*newsize);
-			std::cout << id << " new window size " << windowSize << std::endl;
+			//std::cout << id << " new window size " << windowSize << std::endl;
 			break;
 		}
 
@@ -537,7 +537,7 @@ void epmem_manager::worker_msg_handler()
 		{
 			if (!worker_active)
 				break;
-			std::cout << id << " new window size " << windowSize << std::endl;
+			//std::cout << id << " new window size " << windowSize << std::endl;
 			DEBUG("Received search request");
 			msgCount = msg->count;
 			epmem_query* query = new epmem_query();

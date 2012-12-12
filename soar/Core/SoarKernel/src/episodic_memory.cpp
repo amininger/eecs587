@@ -1895,6 +1895,7 @@ void epmem_new_episode( agent *my_agent )
 	////////////////////////////////////////////////////////////////////////////
 
 	epmem_time_id time_counter = my_agent->epmem_stats->time->get_value();
+	double start_time = MPI_Wtime();
 
 	// provide trace output
 	if ( my_agent->sysparams[ TRACE_EPMEM_SYSPARAM ] )
@@ -2174,6 +2175,9 @@ void epmem_new_episode( agent *my_agent )
 		delete episode;
 	}
 	
+	if(time_counter % 1000 == 0){
+		std::cout << "Storing " << time_counter << " time(" << (MPI_Wtime() - start_time) << ")" << std::endl;
+	}
 	////////////////////////////////////////////////////////////////////////////
 	my_agent->epmem_timers->storage->stop();
 	////////////////////////////////////////////////////////////////////////////
@@ -4359,6 +4363,7 @@ void inline _epmem_exp( agent* my_agent )
  **************************************************************************/
 void epmem_go( agent *my_agent, bool allow_store )
 {
+	double start_time = MPI_Wtime();
 
 	my_agent->epmem_timers->total->start();
 
@@ -4380,6 +4385,7 @@ void epmem_go( agent *my_agent, bool allow_store )
 #endif // EPMEM_EXPERIMENT
 
 	my_agent->epmem_timers->total->stop();
+	std::cout << "ELAPSED: " << MPI_Wtime() - start_time << std::endl;
 
 }
 

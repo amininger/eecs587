@@ -1,4 +1,4 @@
-file /home/mininger/solitary_soar/soar/SConstruct,line 122:
+file /home/mininger/eecs587/solitary_soar/SConstruct,line 122:
 	Configure(confdir = .sconf_temp)
 scons: Configure: ".sconf_temp/conftest_0.cpp" is up to date.
 scons: Configure: The original builder output was:
