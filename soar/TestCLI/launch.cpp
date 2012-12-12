@@ -22,12 +22,13 @@ int main(int argc, char** argv){
     int id = MPI::COMM_WORLD.Get_rank();
 		
 	int window = atoi(argv[1]);
-	bool evenDiv = (atoi(argv[2]) == 1);
+	int div = atoi(argv[2]);
+	double tune = atof(argv[3]);
 	if (id > 0)//AGENT_ID)
     {
 		cout << "Processor " << id << " online" << endl;
 		emp_mpi* em = new emp_mpi();
-		em->init(window, evenDiv);
+		em->init(window, div, tune);
 		//epmem_manager * ep_man = new epmem_manager();
 		//start processing
 		//ep_man->initialize(); 
@@ -42,10 +43,9 @@ int main(int argc, char** argv){
 		Kernel* kernel = Kernel::CreateKernelInNewThread();
 		Agent* agent = kernel->CreateAgent("HelloSoar");
 		
-		agent->RegisterForPrintEvent(smlEVENT_PRINT, printcb, NULL);
+		//agent->RegisterForPrintEvent(smlEVENT_PRINT, printcb, NULL);
 		
-		cout << agent->ExecuteCommandLine("source ../agents/worstcase2.soar") << endl;
-	
+		agent->ExecuteCommandLine("source ../agents/long.soar");
 		agent->ExecuteCommandLine("run");	
 	//	cout << agent->ExecuteCommandLine("source ../agents/simple.soar") << endl;
 		

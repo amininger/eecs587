@@ -20,8 +20,8 @@
 //#define DEBUG(a) printf("PROC %d:: %s. File: %s, Line: %d\n\n", id, a, __FILE__,__LINE__) 
 #define DEBUG(a) ;
 
-//#define DYNAMIC_WINDOW_1 1
 #define INCR_AMNT 2
+
 #include <list>
 
 #include "epmem_manager.h"
@@ -33,12 +33,21 @@
  * @Author   : 
  * @Notes    : Construct intializes currentSize to 0, create epmem_worker
  **************************************************************************/
-epmem_manager::epmem_manager(int startWindowSize, bool evenDivFlag)
+epmem_manager::epmem_manager(int startWindowSize, EPMEM_DIV_TYPE divType,
+	double tuningParam)
 {
     currentSize = 0;
 	totalEpCnt = 0;
 	windowSize = startWindowSize;
-	evenDiv = evenDivFlag;
+	divisionType = divType;
+	tuning = tuningParam;
+	if (divisionType == EXP_DIV)
+		split = 1.0;
+	else if (divisionType == EVEN_DIV)
+		split = 0.0;
+	else // DYNAMIC_DIV
+		split = 0.5;
+	//evenDiv = evenDivFlag;
 	msgCount = 1;
 	sendEpNextTime = false;
     epmem_worker_p = new epmem_worker();
@@ -273,8 +282,7 @@ void epmem_manager::manager_message_handler()
 		{
 			if (msg->count != msgCount) //dont process old results
 				break;
-			int underUtilized = -1; // mark a processor if being unutilized
-			
+						
 			DEBUG("Received search result");
 			//first search results, set as temporary best
 			int best_size = buffSize;
@@ -287,10 +295,7 @@ void epmem_manager::manager_message_handler()
 			query_rsp_data *rsp;
 			bool do_graph_match = true; //default always true
 
-			//first processor did not respond first
-			if (best_msg->source != 2)
-				underUtilized = best_msg->source;
-			
+						
 			//if graph match found by first worker, this is best
 			if (best_msg->source == 2 && best_rsp->best_graph_matched && 
 				do_graph_match)
@@ -394,19 +399,31 @@ void epmem_manager::manager_message_handler()
 			//respond with data to agent
 			msgCount++;
 			DEBUG("Responding with best result");
+			///qqq
+			
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
-			delete best_msg;
+			
 
-#ifdef DYNAMIC_WINDOW_1
-			if (underUtilized != -1)
+			if (divisionType == DYNAMIC_DIV)
 			{
-				msg->type = RESIZE_WINDOW;
-				msg->source = id;
-				msg->size = sizeof(epmem_msg);
-				MPI::COMM_WORLD.Send(msg, sizeof(epmem_msg), MPI::CHAR, 
-									 underUtilized, 1);
+				double epLocPercentile = 1.0 - (((double)best_msg->source - 2.0)/((double)(numProc)-3.0));
+				//use the location of result to update split value
+				
+				split = split*tuning + epLocPercentile*(1-tuning);
+				//message new split value to all workers
+				// TODO May have deadlock msg issue
+				epmem_msg *smsg = (epmem_msg*)malloc(sizeof(epmem_msg) + sizeof(double));
+				std::cout << "New split: " << split << std::endl;
+				smsg->source = id;
+				smsg->size = sizeof(epmem_msg) + sizeof(double);
+				smsg->type = UPDATE_SPLIT;
+				memcpy(&(smsg->data), &split, sizeof(double));
+				for (int i = id+1; i < numProc; i++)
+					MPI::COMM_WORLD.Send(smsg, smsg->size, MPI::CHAR, i, 1);
+				
 			}
-#endif
+			
+			delete best_msg;
 			break;
 		}
 		default:
@@ -525,6 +542,11 @@ void epmem_manager::worker_msg_handler()
 			worker_active = true;
 			break;
 		}
+		case UPDATE_SPLIT:
+		{
+			memcpy(&split, &(msg->data), sizeof(double)); 
+			break;
+		}
 		case RESIZE_WINDOW:
 		{
 			//int * newsize = (int*) (&msg->data);
@@ -562,7 +584,8 @@ void epmem_manager::worker_msg_handler()
 			ERROR("Message type unknown");
 			break;
 		}
-	}   
+	}
+	
 	delete msg;	
 	
 }
@@ -577,20 +600,14 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 		ERROR("Msg data size for new episode incorrect");
 		return;
 	}
-	//if received more episodes than could be evenly held increase window size
-	// assumes even window sizes among processors
-	totalEpCnt++;
+	// determine if this episode addition also needs a window size increase
 	
-	if (!evenDiv)
-	{
-		int k = (numProc-id);
-		int div = pow(2, k) -1;
-		if ((totalEpCnt % div) == 0)
-			windowSize++;
-	}
-	else if (totalEpCnt > ((numProc-id)*windowSize))
+	totalEpCnt++;
+	int mod = (int) ((pow(2, (numProc-id)) -1)*split + (numProc-id)*(1-split));
+	
+	if ((totalEpCnt % mod) == 0)
 		windowSize++;
-		
+			
 	//handle adding episode and shift last episode if needed
 	received_episode(episode);
 	delete episode;

@@ -24,20 +24,36 @@ class epmem_manager;
 #include "../episodic_memory.h"
 #include "epmem_worker.h"
 
+
+typedef enum
+{
+	EXP_DIV = 0,
+	EVEN_DIV,
+	DYNAMIC_DIV
+} EPMEM_DIV_TYPE;
+
+
 class epmem_manager {
 public:
-    epmem_manager(int startWindowSize, bool evenDivFlag);
+    epmem_manager(int startWindowSize, EPMEM_DIV_TYPE divType,
+		double tuningParam);
     void initialize();
      
 private:
-    int numProc;
+    
+	int numProc;
 	int msgCount;
     int id;
-	bool evenDiv;
+	
 	int totalEpCnt;
     int windowSize;
     int currentSize;
 	bool sendEpNextTime;
+	
+	double split;
+	int divisionType;
+	double tuning;
+	
     epmem_worker *epmem_worker_p;
 	bool worker_active;
     void update_windowSize(int sizeIncr);
@@ -69,6 +85,7 @@ typedef enum
 	NEW_EP_NOTIFY,
 	NEW_EP_EMPTY,
 	INIT_WORKER,
+	UPDATE_SPLIT,
     RESIZE_WINDOW,
     RESIZE_REQUEST,
     SEARCH,
@@ -76,6 +93,7 @@ typedef enum
     TERMINATE_SEARCH,
     EXIT
 } EPMEM_MSG_TYPE;
+
 
 //message structure
 typedef struct epmem_msg_struct
@@ -96,40 +114,5 @@ typedef struct epmem_worker_init_data_struct
 	char str;
 }epmem_worker_init_data;
 
-/*
-typedef struct query_data_struct
-{
-    bool graph_match;
-    epmem_param_container::gm_ordering_choices gm_order;
-    epmem_time_id before_time;
-    double balance;
-    Symbol pos_query;
-    Symbol neg_query;
-    epmem_time_id before;
-    epmem_time_id after;
-    //TODO serialize
-    //epmem_time_list  prohibits;
-    //epmem_symbol_set  currents;
-    //soar_module::wme_set  cue_wmes;
-} query_data;
-*/
-  /*
-typedef struct query_rsp_data_struct
-{
-    epmem_time_id best_episode;
-    Symbol pos_query;
-    Symbol neg_query;
-    int leaf_literals_size;
-    double best_score;
-    bool best_graph_matched;
-    long int best_cardinality;
-    double perfect_score;
-    bool do_graph_match;
-    //TODO serialize
-    //epmem_literal_node_pair_map best_bindings;
-    //soar_module::symbol_triple_list meta_wmes;
-    //soar_module::symbol_triple_list retrieval_wmes;
-} query_rsp_data;
-  */
 
 #endif
