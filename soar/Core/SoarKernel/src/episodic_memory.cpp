@@ -2154,6 +2154,7 @@ void epmem_new_episode( agent *my_agent )
 
 #ifdef USE_MPI
         send_new_episode(episode);
+		MPI::COMM_WORLD.Barrier();
 #else
         //STORE
 		my_agent->epmem_worker_p->add_epmem_episode_diff(episode);
@@ -2849,6 +2850,7 @@ void epmem_process_query(agent *my_agent, Symbol *state, Symbol *pos_query, Symb
 	
 
 #ifdef USE_MPI
+	//MPI::COMM_WORLD.Barrier();
 	double wtime = MPI::Wtime ();	
 	query_rsp_data* response = send_epmem_query_message(query);
 	std::cout << "Query time: " << MPI::Wtime() - wtime << std::endl;

@@ -42,7 +42,7 @@ int main(int argc, char** argv){
 		
 		agent->RegisterForPrintEvent(smlEVENT_PRINT, printcb, NULL);
 		
-		cout << agent->ExecuteCommandLine("source ../agents/worstcase.soar") << endl;
+		cout << agent->ExecuteCommandLine("source ../agents/worstcase2.soar") << endl;
 	
 		agent->ExecuteCommandLine("run");	
 	//	cout << agent->ExecuteCommandLine("source ../agents/simple.soar") << endl;
