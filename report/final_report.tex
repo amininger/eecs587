@@ -9,6 +9,9 @@
 \usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
 
 \usepackage{amssymb,amsmath}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 
 %%% Examples of Article customizations
 % These packages are optional, depending whether you want the features they provide.
@@ -325,21 +328,30 @@ other episode addition is quicker. The offset ensures that we get an even
 sampling of the addition times for comparison.
 
 
+
+
 \subsection{Long Retrievals}
-Description of the test case
-\begin{figure}[h]
-\caption{Results for long retrievals and equal episode distribution}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+Our first trial was to cover the worst case in retrieval time: when the episode is at the beginning of the agent's history or there are no exact matches. In this case the agent must search through all the episodes to find the one to return. This represents the greatest opportunity for us to take advantage of the parallelism. For this test we had the agent retrieve episodes in the first ten percent of its history. We also varied the number of worker processors from 1 to 32 and compared the results with the unmodified Soar version (UM) and a version with our modifications but with everything running on a single thread (ST). 
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.55\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/ret_worst_eq}
+                \label{fig:retleq}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.55\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/ret_long_exp}
+                \label{fig:retlexp}
+        \end{subfigure}
+        \caption{Running time for long retrievals}\label{fig:animals}
+	\label{fig:long}
 \end{figure}
 
-\begin{figure}[h]
-\caption{Results for long retrievals and exponential episode distribution}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
-\end{figure}
-
-Discussion of results
+The results as shown in figure \ref{fig:long} show that our version with 1 worker performs as well as the unmodified Soar version (UM). This gives good support that our modifications have not slowed down the retrieval processes in the serialized case. The single thread (ST) case was a bit slower than the case with 1 worker, but it has to manage two databases on the same processor. The retrieval time shows linear growth as expected, since the agent has to search through all of the linearly episodes to find a match. For the results on the left with an equal distribution of episodes, we get an improvement of performance until about 16 processors. This represents the greatest possibility for speedup because all the episodes need to be searched, and they are distributed evenly among the processors. For the results on the right with an exponential distributino of processors, after 8 processors adding any more does not improve speedup. In addition, the times are slower than for the equal distribution. This is to be expected, since some processors have many more episodes than others, and so take much longer to do the search. 
 
 
 \subsection{Short Retrievals}
