@@ -33,8 +33,8 @@ sp {simple*apply*init-simple
 sp {simple*apply*init-simple*parameters
 	(state <s> ^operator.name init-simple)
 -->
-	(<s> ^min-perc 0			# min percentile to retrieve from
-		 ^max-perc .10			# max percentile to retrieve from
+	(<s> ^min-perc .9			# min percentile to retrieve from
+		 ^max-perc 1.0			# max percentile to retrieve from
 		 ^query-time 1000		# time of the first query 
 		 ^query-interval 1000	# time between queries
 		 ^stop-time 100000)		# time to stop
