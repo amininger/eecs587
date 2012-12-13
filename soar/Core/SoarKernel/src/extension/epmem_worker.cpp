@@ -788,6 +788,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
     epmem_stmts_common->get_min_time->reinitialize();
     epmem_stmts_common->get_max_time->reinitialize();
 
+	double start_time = MPI_Wtime();
     if(max_time == 0){
         return NIL;
     }
@@ -891,8 +892,9 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 			epmem_stmts_graph->add_node_point->bind_int(2, min_time);
 			epmem_stmts_graph->add_node_point->execute(soar_module::op_reinit);
 		}
-		
+
 		// Update the starting values of all node_ranges with start values in the last_removal
+		//
 		epmem_stmts_removal->update_node_range_start->bind_int(1, min_time);
 		epmem_stmts_removal->update_node_range_start->bind_int(2, last_removal);
 		epmem_stmts_removal->update_node_range_start->execute(soar_module::op_reinit);
@@ -975,7 +977,6 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
         epmem_stmts_common->remove_time->bind_int(1, min_time);
         epmem_stmts_common->remove_time->execute(soar_module::op_reinit);
 	}
-
 	return episode;
 }
 

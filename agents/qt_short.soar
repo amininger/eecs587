@@ -98,7 +98,7 @@ sp {simple*apply*init-simple*current-number
         ^three <c3>
         ^four <c4>
         ^five <c5>
-        ^size <c6>)
+        ^six <c6>)
    (<c1> ^digit 1
          ^word one)
    (<c2> ^digit 0
@@ -210,7 +210,7 @@ sp {apply*step*print*number
          ^three.digit <d3>
          ^four.digit <d4>
          ^five.digit <d5>
-         ^size.digit <d6>)
+         ^six.digit <d6>)
 -->
 #   (write (crlf) |Episode: | <d6> <d5> <d4> <d3> <d2> <d1>)
 }
