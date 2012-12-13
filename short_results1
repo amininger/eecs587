@@ -1,0 +1,2617 @@
+I ran on:
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5383
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5428
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+nyx5430
+
+
+==================
+original soar test
+Agent Processor 0 online
+---- SOURCING (../../agents/qt_short.soar) ----
+********************
+Total: 20 productions sourced.
+
+---- RUNNING ----
+Finding Episode: 962
+Storing 1000 time (0.00061512)
+QUERY TIME: 0.00133801
+  (ep, score, gm)
+  (962, 1, 1)
+Finding Episode: 1974
+Storing 2000 time (0.000633001)
+QUERY TIME: 0.000311852
+  (ep, score, gm)
+  (1974, 1, 1)
+Finding Episode: 2861
+Storing 3000 time (0.000577927)
+QUERY TIME: 0.000334978
+  (ep, score, gm)
+  (2861, 1, 1)
+Finding Episode: 3643
+Storing 4000 time (0.000613928)
+QUERY TIME: 0.000442982
+  (ep, score, gm)
+  (3643, 1, 1)
+Finding Episode: 4683
+Storing 5000 time (0.000608921)
+QUERY TIME: 0.000371933
+  (ep, score, gm)
+  (4683, 1, 1)
+Finding Episode: 5560
+Storing 6000 time (0.000675917)
+QUERY TIME: 0.000454187
+  (ep, score, gm)
+  (5560, 1, 1)
+Finding Episode: 6916
+Storing 7000 time (0.000569105)
+QUERY TIME: 0.000334024
+  (ep, score, gm)
+  (6916, 1, 1)
+Finding Episode: 7336
+Storing 8000 time (0.000629902)
+QUERY TIME: 0.000419855
+  (ep, score, gm)
+  (7336, 1, 1)
+Finding Episode: 8844
+Storing 9000 time (0.000577927)
+QUERY TIME: 0.000348091
+  (ep, score, gm)
+  (8844, 1, 1)
+Finding Episode: 9099
+Storing 10000 time (0.000784159)
+QUERY TIME: 0.000468969
+  (ep, score, gm)
+  (9099, 1, 1)
+Finding Episode: 10915
+Storing 11000 time (0.000567913)
+QUERY TIME: 0.000337839
+  (ep, score, gm)
+  (10915, 1, 1)
+Finding Episode: 11849
+Storing 12000 time (0.00063014)
+QUERY TIME: 0.000350952
+  (ep, score, gm)
+  (11849, 1, 1)
+Finding Episode: 12567
+Storing 13000 time (0.000579834)
+QUERY TIME: 0.00040102
+  (ep, score, gm)
+  (12567, 1, 1)
+Finding Episode: 13666
+Storing 14000 time (0.000640869)
+QUERY TIME: 0.000384092
+  (ep, score, gm)
+  (13666, 1, 1)
+Finding Episode: 13754
+Storing 15000 time (0.000598192)
+QUERY TIME: 0.000511169
+  (ep, score, gm)
+  (13754, 1, 1)
+Finding Episode: 15763
+Storing 16000 time (0.000674963)
+QUERY TIME: 0.000378847
+  (ep, score, gm)
+  (15763, 1, 1)
+Finding Episode: 16949
+Storing 17000 time (0.000643969)
+QUERY TIME: 0.000344038
+  (ep, score, gm)
+  (16949, 1, 1)
+Finding Episode: 17817
+Storing 18000 time (0.000586987)
+QUERY TIME: 0.000355005
+  (ep, score, gm)
+  (17817, 1, 1)
+Finding Episode: 17155
+Storing 19000 time (0.000638008)
+QUERY TIME: 0.000596046
+  (ep, score, gm)
+  (17155, 1, 1)
+Finding Episode: 19815
+Storing 20000 time (0.000699997)
+QUERY TIME: 0.000454903
+  (ep, score, gm)
+  (19815, 1, 1)
+Finding Episode: 19055
+Storing 21000 time (0.000584126)
+QUERY TIME: 0.000613928
+  (ep, score, gm)
+  (19055, 1, 1)
+Finding Episode: 21659
+Storing 22000 time (0.000662088)
+QUERY TIME: 0.000392914
+  (ep, score, gm)
+  (21659, 1, 1)
+Finding Episode: 20881
+Storing 23000 time (0.000705957)
+QUERY TIME: 0.000653028
+  (ep, score, gm)
+  (20881, 1, 1)
+Finding Episode: 22849
+Storing 24000 time (0.000597)
+QUERY TIME: 0.000499964
+  (ep, score, gm)
+  (22849, 1, 1)
+Finding Episode: 23298
+Storing 25000 time (0.000664949)
+QUERY TIME: 0.000571966
+  (ep, score, gm)
+  (23298, 1, 1)
+Finding Episode: 25676
+Storing 26000 time (0.000612974)
+QUERY TIME: 0.000380039
+  (ep, score, gm)
+  (25676, 1, 1)
+Finding Episode: 26814
+Storing 27000 time (0.000687122)
+QUERY TIME: 0.000363111
+  (ep, score, gm)
+  (26814, 1, 1)
+Finding Episode: 25534
+Storing 28000 time (0.000628948)
+QUERY TIME: 0.000705004
+  (ep, score, gm)
+  (25534, 1, 1)
+Finding Episode: 27604
+Storing 29000 time (0.000603199)
+QUERY TIME: 0.000535965
+  (ep, score, gm)
+  (27604, 1, 1)
+Finding Episode: 28455
+Storing 30000 time (0.00066185)
+QUERY TIME: 0.000567913
+  (ep, score, gm)
+  (28455, 1, 1)
+Finding Episode: 28863
+Storing 31000 time (0.000633955)
+QUERY TIME: 0.000662088
+  (ep, score, gm)
+  (28863, 1, 1)
+Finding Episode: 29794
+Storing 32000 time (0.000648022)
+QUERY TIME: 0.000672817
+  (ep, score, gm)
+  (29794, 1, 1)
+Finding Episode: 30438
+Storing 33000 time (0.000730991)
+QUERY TIME: 0.000697851
+  (ep, score, gm)
+  (30438, 1, 1)
+Finding Episode: 30737
+Storing 34000 time (0.000626087)
+QUERY TIME: 0.000806808
+  (ep, score, gm)
+  (30737, 1, 1)
+Finding Episode: 31834
+Storing 35000 time (0.00058198)
+QUERY TIME: 0.00080514
+  (ep, score, gm)
+  (31834, 1, 1)
+Finding Episode: 35419
+Storing 36000 time (0.000566006)
+QUERY TIME: 0.000430107
+  (ep, score, gm)
+  (35419, 1, 1)
+Finding Episode: 35492
+Storing 37000 time (0.000561953)
+QUERY TIME: 0.000555038
+  (ep, score, gm)
+  (35492, 1, 1)
+Finding Episode: 37429
+Storing 38000 time (0.000687122)
+QUERY TIME: 0.000437021
+  (ep, score, gm)
+  (37429, 1, 1)
+Finding Episode: 37532
+Storing 39000 time (0.000668049)
+QUERY TIME: 0.00054121
+  (ep, score, gm)
+  (37532, 1, 1)
+Finding Episode: 39619
+Storing 40000 time (0.000674009)
+QUERY TIME: 0.000400066
+  (ep, score, gm)
+  (39619, 1, 1)
+Finding Episode: 40635
+Storing 41000 time (0.000669956)
+QUERY TIME: 0.00039196
+  (ep, score, gm)
+  (40635, 1, 1)
+Finding Episode: 41933
+Storing 42000 time (0.000657082)
+QUERY TIME: 0.000348091
+  (ep, score, gm)
+  (41933, 1, 1)
+Finding Episode: 41107
+Storing 43000 time (0.000684977)
+QUERY TIME: 0.00061202
+  (ep, score, gm)
+  (41107, 1, 1)
+Finding Episode: 43643
+Storing 44000 time (0.000689983)
+QUERY TIME: 0.000390053
+  (ep, score, gm)
+  (43643, 1, 1)
+Finding Episode: 41451
+Storing 45000 time (0.000656843)
+QUERY TIME: 0.000859976
+  (ep, score, gm)
+  (41451, 1, 1)
+Finding Episode: 44154
+Storing 46000 time (0.00062108)
+QUERY TIME: 0.000610113
+  (ep, score, gm)
+  (44154, 1, 1)
+Finding Episode: 46522
+Storing 47000 time (0.00070405)
+QUERY TIME: 0.000404119
+  (ep, score, gm)
+  (46522, 1, 1)
+Finding Episode: 47190
+Storing 48000 time (0.000652075)
+QUERY TIME: 0.000473976
+  (ep, score, gm)
+  (47190, 1, 1)
+Finding Episode: 48434
+Storing 49000 time (0.000646114)
+QUERY TIME: 0.000421047
+  (ep, score, gm)
+  (48434, 1, 1)
+System halted.
+Interrupt received.This Agent halted.
+
+
+==================
+solitary soar test
+Agent Processor 0 online
+---- SOURCING (../../agents/qt_short.soar) ----
+********************
+Total: 20 productions sourced.
+
+---- RUNNING ----
+Finding Episode: 944
+Storing 1000 time (0.000762939)
+Query time: 0.00136805
+Finding Episode: 1947
+Storing 2000 time (0.000844955)
+Query time: 0.000504017
+Finding Episode: 2780
+Storing 3000 time (0.000797987)
+Query time: 0.000432968
+Finding Episode: 3873
+Storing 4000 time (0.00075984)
+Query time: 0.000427008
+Finding Episode: 4623
+Storing 5000 time (0.000828981)
+Query time: 0.00046587
+Finding Episode: 5674
+Storing 6000 time (0.000809908)
+Query time: 0.000457048
+Finding Episode: 6869
+Storing 7000 time (0.000814915)
+Query time: 0.000428915
+Finding Episode: 7373
+Storing 8000 time (0.000825882)
+Query time: 0.000504971
+Finding Episode: 8575
+Storing 9000 time (0.000864983)
+Query time: 0.000478029
+Finding Episode: 9868
+Storing 10000 time (0.000926018)
+Query time: 0.000432014
+Finding Episode: 10242
+Storing 11000 time (0.000813961)
+Query time: 0.000544071
+Finding Episode: 11230
+Storing 12000 time (0.000828028)
+Query time: 0.000604868
+Finding Episode: 12297
+Storing 13000 time (0.000803947)
+Query time: 0.000567913
+Finding Episode: 13456
+Storing 14000 time (0.000885963)
+Query time: 0.000504971
+Finding Episode: 14592
+Storing 15000 time (0.000952005)
+Query time: 0.000498056
+Finding Episode: 15114
+Storing 16000 time (0.000864029)
+Query time: 0.000574112
+Finding Episode: 15622
+Storing 17000 time (0.000936031)
+Query time: 0.000648975
+Finding Episode: 16264
+Storing 18000 time (0.000900984)
+Query time: 0.000713825
+Finding Episode: 18774
+Storing 19000 time (0.000847101)
+Query time: 0.000475883
+Finding Episode: 19134
+Storing 20000 time (0.000961065)
+Query time: 0.000653982
+Finding Episode: 20794
+Storing 21000 time (0.000852108)
+Query time: 0.00047493
+Finding Episode: 20979
+Storing 22000 time (0.00085187)
+Query time: 0.000581026
+Finding Episode: 21965
+Storing 23000 time (0.000790119)
+Query time: 0.000605106
+Finding Episode: 23061
+Storing 24000 time (0.000966072)
+Query time: 0.000591993
+Finding Episode: 22742
+Storing 25000 time (0.000893116)
+Query time: 0.00079608
+Finding Episode: 24706
+Storing 26000 time (0.000890017)
+Query time: 0.000653028
+Finding Episode: 25341
+Storing 27000 time (0.000867128)
+Query time: 0.000689983
+Finding Episode: 26372
+Storing 28000 time (0.000929117)
+Query time: 0.00067997
+Finding Episode: 26589
+Storing 29000 time (0.00105596)
+Query time: 0.000810146
+Finding Episode: 28499
+Storing 30000 time (0.000957966)
+Query time: 0.000666142
+Finding Episode: 28254
+Storing 31000 time (0.000756979)
+Query time: 0.000868797
+Finding Episode: 29872
+Storing 32000 time (0.000877857)
+Query time: 0.000769138
+Finding Episode: 32665
+Storing 33000 time (0.000895977)
+Query time: 0.000480175
+Finding Episode: 31550
+Storing 34000 time (0.00104189)
+Query time: 0.000813961
+Finding Episode: 32862
+Storing 35000 time (0.000860929)
+Query time: 0.000782013
+Finding Episode: 33196
+Storing 36000 time (0.000858068)
+Query time: 0.000874043
+Finding Episode: 34811
+Storing 37000 time (0.000825167)
+Query time: 0.000781059
+Finding Episode: 36751
+Storing 38000 time (0.00079298)
+Query time: 0.000641108
+Finding Episode: 35712
+Storing 39000 time (0.000892878)
+Query time: 0.000962973
+Finding Episode: 37117
+Storing 40000 time (0.000947952)
+Query time: 0.000902891
+Finding Episode: 40855
+Storing 41000 time (0.00095892)
+Query time: 0.000448942
+Finding Episode: 39494
+Storing 42000 time (0.000841856)
+Query time: 0.000837088
+Finding Episode: 40364
+Storing 43000 time (0.00101781)
+Query time: 0.000867844
+Finding Episode: 42884
+Storing 44000 time (0.000913143)
+Query time: 0.000632048
+Finding Episode: 40865
+Storing 45000 time (0.000813007)
+Query time: 0.00110507
+Finding Episode: 43570
+Storing 46000 time (0.000971079)
+Query time: 0.000842094
+Finding Episode: 44378
+Storing 47000 time (0.000952959)
+Query time: 0.000865936
+Finding Episode: 46424
+Storing 48000 time (0.000819921)
+Query time: 0.000700951
+Finding Episode: 46686
+Storing 49000 time (0.000833988)
+Query time: 0.00082612
+System halted.
+Interrupt received.This Agent halted.
+
+
+=================
+parallel soar test
+
+
+-- NP(3) Use_Var(0) --
+Processor 2 online
+Agent Processor 0 online
+Processor 1 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 966
+Query time: 0.00138497
+Storing 1001 time(0.000396013)
+Finding Episode: 1876
+Query time: 0.000483036
+Storing 2002 time(0.000387907)
+Finding Episode: 2999
+Query time: 0.000401974
+Storing 3003 time(0.000439882)
+Finding Episode: 3759
+Query time: 0.000370979
+Storing 4004 time(0.000426054)
+Finding Episode: 4781
+Query time: 0.000465155
+Storing 5005 time(0.000424862)
+Finding Episode: 5957
+Query time: 0.000404835
+Storing 6006 time(0.00041008)
+Finding Episode: 6348
+Query time: 0.00048995
+Storing 7007 time(0.000442982)
+Finding Episode: 7886
+Query time: 0.000418186
+Storing 8008 time(0.000450134)
+Finding Episode: 8526
+Query time: 0.000498056
+Storing 9009 time(0.000475883)
+Finding Episode: 9794
+Query time: 0.000438213
+Storing 10010 time(0.000492096)
+Finding Episode: 10879
+Query time: 0.000452995
+Storing 11011 time(0.0004251)
+Finding Episode: 11766
+Query time: 0.000442028
+Storing 12012 time(0.000509977)
+Finding Episode: 12276
+Query time: 0.000617027
+Storing 13013 time(0.000429153)
+Finding Episode: 13717
+Query time: 0.000500202
+Storing 14014 time(0.000479937)
+Finding Episode: 14525
+Query time: 0.000446081
+Storing 15015 time(0.000506163)
+Finding Episode: 14581
+Query time: 0.000526905
+Storing 16016 time(0.000433922)
+Finding Episode: 15847
+Query time: 0.000485897
+Storing 17017 time(0.000459909)
+Finding Episode: 17282
+Query time: 0.000553131
+Storing 18018 time(0.000466108)
+Finding Episode: 18903
+Query time: 0.000427008
+Storing 19019 time(0.000454187)
+Finding Episode: 19618
+Query time: 0.000496149
+Storing 20020 time(0.000560999)
+Finding Episode: 20410
+Query time: 0.000591993
+Storing 21021 time(0.000496149)
+Finding Episode: 21359
+Query time: 0.000511885
+Storing 22022 time(0.00049305)
+Finding Episode: 21531
+Query time: 0.000555992
+Storing 23023 time(0.00047493)
+Finding Episode: 23681
+Query time: 0.00036478
+Storing 24024 time(0.000419855)
+Finding Episode: 24643
+Query time: 0.000364065
+Storing 25025 time(0.000475883)
+Finding Episode: 25598
+Query time: 0.000380039
+Storing 26026 time(0.000432968)
+Finding Episode: 26301
+Query time: 0.000521183
+Storing 27027 time(0.000568151)
+Finding Episode: 25453
+Query time: 0.000777006
+Storing 28028 time(0.000438213)
+Finding Episode: 27561
+Query time: 0.000623941
+Storing 29029 time(0.000483036)
+Finding Episode: 28982
+Query time: 0.000555038
+Storing 30030 time(0.000607967)
+Finding Episode: 29369
+Query time: 0.000592947
+Storing 31031 time(0.000478029)
+Finding Episode: 29609
+Query time: 0.000751019
+Storing 32032 time(0.00048089)
+Finding Episode: 32502
+Query time: 0.000394106
+Storing 33033 time(0.000442982)
+Finding Episode: 30819
+Query time: 0.000771046
+Storing 34034 time(0.000468969)
+Finding Episode: 34228
+Query time: 0.000429153
+Storing 35035 time(0.000790119)
+Finding Episode: 34521
+Query time: 0.000624895
+Storing 36036 time(0.000427961)
+Finding Episode: 34001
+Query time: 0.000925064
+Storing 37037 time(0.000468969)
+Finding Episode: 37981
+Query time: 0.000427008
+Storing 38038 time(0.000479937)
+Finding Episode: 38080
+Query time: 0.00070405
+Storing 39039 time(0.000494957)
+Finding Episode: 39438
+Query time: 0.000422955
+Storing 40040 time(0.00059104)
+Finding Episode: 38079
+Query time: 0.000797033
+Storing 41041 time(0.000591993)
+Finding Episode: 39033
+Query time: 0.000838041
+Storing 42042 time(0.000520945)
+Finding Episode: 38998
+Query time: 0.000914097
+Storing 43043 time(0.00051403)
+Finding Episode: 42547
+Query time: 0.000539064
+Storing 44044 time(0.000482082)
+Finding Episode: 43897
+Query time: 0.000484943
+Storing 45045 time(0.000468016)
+Finding Episode: 42880
+Query time: 0.00086689
+Storing 46046 time(0.000442982)
+Finding Episode: 43068
+Query time: 0.00102687
+Storing 47047 time(0.000483036)
+Finding Episode: 44691
+Query time: 0.000895023
+Storing 48048 time(0.000738144)
+Finding Episode: 46596
+Query time: 0.000805855
+Storing 49049 time(0.000551939)
+System halted.
+Interrupt received.This Agent halted.
+Processor 2 online
+Processor 1 online
+
+
+-- NP(4) Use_Var(0) --
+Processor 1 online
+Processor 2 online
+Processor 3 online
+Agent Processor 0 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 923
+Query time: 0.00136495
+Storing 1001 time(0.00126481)
+Finding Episode: 1986
+Query time: 0.000401974
+Storing 2002 time(0.000427961)
+Finding Episode: 2933
+Query time: 0.000465155
+Storing 3003 time(0.00170588)
+Finding Episode: 3769
+Query time: 0.000396013
+Storing 4004 time(0.00198007)
+Finding Episode: 4528
+Query time: 0.000504017
+Storing 5005 time(0.000412941)
+Finding Episode: 5789
+Query time: 0.000385046
+Storing 6006 time(0.00231886)
+Finding Episode: 6911
+Query time: 0.000365973
+Storing 7007 time(0.00247407)
+Finding Episode: 7388
+Query time: 0.000402927
+Storing 8008 time(0.000406981)
+Finding Episode: 8747
+Query time: 0.000354052
+Storing 9009 time(0.00282502)
+Finding Episode: 9364
+Query time: 0.000411987
+Storing 10010 time(0.00312185)
+Finding Episode: 10127
+Query time: 0.000442982
+Storing 11011 time(0.000533104)
+Finding Episode: 11478
+Query time: 0.000439882
+Storing 12012 time(0.003685)
+Finding Episode: 12960
+Query time: 0.000325918
+Storing 13013 time(0.00399113)
+Finding Episode: 13868
+Query time: 0.000340939
+Storing 14014 time(0.000607014)
+Finding Episode: 13585
+Query time: 0.000535011
+Storing 15015 time(0.00439501)
+Finding Episode: 15413
+Query time: 0.000463963
+Storing 16016 time(0.00447416)
+Finding Episode: 15701
+Query time: 0.000632048
+Storing 17017 time(0.000425816)
+Finding Episode: 17989
+Query time: 0.000366926
+Storing 18018 time(0.00490618)
+Finding Episode: 17952
+Query time: 0.000519037
+Storing 19019 time(0.00511217)
+Finding Episode: 18882
+Query time: 0.000536919
+Storing 20020 time(0.000572205)
+Finding Episode: 19140
+Query time: 0.000638962
+Storing 21021 time(0.00560999)
+Finding Episode: 21283
+Query time: 0.000477076
+Storing 22022 time(0.00590897)
+Finding Episode: 21983
+Query time: 0.00052309
+Storing 23023 time(0.000543118)
+Finding Episode: 22746
+Query time: 0.000553846
+Storing 24024 time(0.00657988)
+Finding Episode: 24703
+Query time: 0.000421047
+Storing 25025 time(0.00652409)
+Finding Episode: 24254
+Query time: 0.000634909
+Storing 26026 time(0.000665903)
+Finding Episode: 25172
+Query time: 0.000639915
+Storing 27027 time(0.00701714)
+Finding Episode: 25911
+Query time: 0.000680208
+Storing 28028 time(0.0072031)
+Finding Episode: 28016
+Query time: 0.000522137
+Storing 29029 time(0.000584126)
+Finding Episode: 27575
+Query time: 0.000823975
+Storing 30030 time(0.00759101)
+Finding Episode: 30203
+Query time: 0.000496149
+Storing 31031 time(0.00787902)
+Finding Episode: 31644
+Query time: 0.000432968
+Storing 32032 time(0.000451803)
+Finding Episode: 32405
+Query time: 0.000495195
+Storing 33033 time(0.00819397)
+Finding Episode: 31549
+Query time: 0.000730991
+Storing 34034 time(0.00843692)
+Finding Episode: 32257
+Query time: 0.000778913
+Storing 35035 time(0.00050807)
+Finding Episode: 35707
+Query time: 0.000427008
+Storing 36036 time(0.00872803)
+Finding Episode: 35978
+Query time: 0.000535011
+Storing 37037 time(0.00891805)
+Finding Episode: 37279
+Query time: 0.00050211
+Storing 38038 time(0.000525951)
+Finding Episode: 36128
+Query time: 0.00079298
+Storing 39039 time(0.00931001)
+Finding Episode: 39405
+Query time: 0.000473976
+Storing 40040 time(0.00953102)
+Finding Episode: 38430
+Query time: 0.000748873
+Storing 41041 time(0.000466824)
+Finding Episode: 40703
+Query time: 0.000562906
+Storing 42042 time(0.0101509)
+Finding Episode: 39441
+Query time: 0.000893831
+Storing 43043 time(0.010505)
+Finding Episode: 41402
+Query time: 0.000757933
+Storing 44044 time(0.000511885)
+Finding Episode: 43753
+Query time: 0.000571012
+Storing 45045 time(0.0109382)
+Finding Episode: 45260
+Query time: 0.00049305
+Storing 46046 time(0.011023)
+Finding Episode: 43357
+Query time: 0.000870943
+Storing 47047 time(0.000504971)
+Finding Episode: 46150
+Query time: 0.000653028
+Storing 48048 time(0.0111139)
+Finding Episode: 45782
+Query time: 0.000838995
+Storing 49049 time(0.0112171)
+Processor 3 online
+Processor 1 online
+Processor 2 online
+System halted.
+Interrupt received.This Agent halted.
+
+
+-- NP(6) Use_Var(0) --
+Agent Processor 0 online
+Processor 1 online
+Processor 2 online
+Processor 4 online
+Processor 5 online
+Processor 3 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 908
+Query time: 0.001333
+Storing 1001 time(0.00116706)
+Finding Episode: 1895
+Query time: 0.000390053
+Storing 2002 time(0.00146484)
+Finding Episode: 2966
+Query time: 0.000407934
+Storing 3003 time(0.0012989)
+Finding Episode: 3817
+Query time: 0.000391006
+Storing 4004 time(0.00173497)
+Finding Episode: 4750
+Query time: 0.00045085
+Storing 5005 time(0.00190711)
+Finding Episode: 5918
+Query time: 0.000334978
+Storing 6006 time(0.00198388)
+Finding Episode: 6558
+Query time: 0.000383139
+Storing 7007 time(0.00215292)
+Finding Episode: 7749
+Query time: 0.000347137
+Storing 8008 time(0.00238419)
+Finding Episode: 8980
+Query time: 0.000344038
+Storing 9009 time(0.002527)
+Finding Episode: 9301
+Query time: 0.00106597
+Storing 10010 time(0.00204587)
+Finding Episode: 10439
+Query time: 0.00040102
+Storing 11011 time(0.00282907)
+Finding Episode: 11429
+Query time: 0.000396967
+Storing 12012 time(0.0021801)
+Finding Episode: 12069
+Query time: 0.00129914
+Storing 13013 time(0.00222802)
+Finding Episode: 13501
+Query time: 0.00039196
+Storing 14014 time(0.00181413)
+Finding Episode: 14761
+Query time: 0.000361919
+Storing 15015 time(0.00234604)
+Finding Episode: 15275
+Query time: 0.000426054
+Storing 16016 time(0.00185895)
+Finding Episode: 16513
+Query time: 0.000418186
+Storing 17017 time(0.00389194)
+Finding Episode: 16720
+Query time: 0.0017271
+Storing 18018 time(0.00266194)
+Finding Episode: 18156
+Query time: 0.000440121
+Storing 19019 time(0.00427794)
+Finding Episode: 18912
+Query time: 0.000498056
+Storing 20020 time(0.00439191)
+Finding Episode: 19319
+Query time: 0.00195384
+Storing 21021 time(0.00468493)
+Finding Episode: 20221
+Query time: 0.00205302
+Storing 22022 time(0.00474405)
+Finding Episode: 22790
+Query time: 0.000374794
+Storing 23023 time(0.00487304)
+Finding Episode: 22165
+Query time: 0.0022049
+Storing 24024 time(0.00510406)
+Finding Episode: 23135
+Query time: 0.00225282
+Storing 25025 time(0.00342607)
+Finding Episode: 25881
+Query time: 0.000346184
+Storing 26026 time(0.00555897)
+Finding Episode: 26322
+Query time: 0.000449181
+Storing 27027 time(0.00352693)
+Finding Episode: 25917
+Query time: 0.00250387
+Storing 28028 time(0.00355291)
+Finding Episode: 27664
+Query time: 0.000547886
+Storing 29029 time(0.00238895)
+Finding Episode: 27478
+Query time: 0.00262785
+Storing 30030 time(0.00359988)
+Finding Episode: 29559
+Query time: 0.000544071
+Storing 31031 time(0.00264096)
+Finding Episode: 29407
+Query time: 0.00278211
+Storing 32032 time(0.00682402)
+Finding Episode: 32860
+Query time: 0.000350952
+Storing 33033 time(0.00389814)
+Finding Episode: 30830
+Query time: 0.002949
+Storing 34034 time(0.00707388)
+Finding Episode: 32499
+Query time: 0.00307608
+Storing 35035 time(0.00707293)
+Finding Episode: 35527
+Query time: 0.000411987
+Storing 36036 time(0.00720692)
+Finding Episode: 33858
+Query time: 0.00322986
+Storing 37037 time(0.00735903)
+Finding Episode: 35232
+Query time: 0.00327611
+Storing 38038 time(0.00762606)
+Finding Episode: 37782
+Query time: 0.000536919
+Storing 39039 time(0.0080018)
+Finding Episode: 37332
+Query time: 0.000735044
+Storing 40040 time(0.00444198)
+Finding Episode: 40161
+Query time: 0.00047493
+Storing 41041 time(0.00818086)
+Finding Episode: 39023
+Query time: 0.00362515
+Storing 42042 time(0.00450611)
+Finding Episode: 42047
+Query time: 0.000488997
+Storing 43043 time(0.00452209)
+Finding Episode: 43159
+Query time: 0.000482082
+Storing 44044 time(0.00328302)
+Finding Episode: 42429
+Query time: 0.000720978
+Storing 45045 time(0.00489902)
+Finding Episode: 45068
+Query time: 0.00049305
+Storing 46046 time(0.00304389)
+Finding Episode: 43272
+Query time: 0.00407004
+Storing 47047 time(0.00900888)
+Finding Episode: 47851
+Query time: 0.000365973
+Storing 48048 time(0.00537992)
+Finding Episode: 46902
+Query time: 0.000663042
+Storing 49049 time(0.00937104)
+System halted.
+Interrupt received.This Agent halted.
+Processor 3 online
+Processor 1 online
+Processor 5 online
+Processor 2 online
+Processor 4 online
+
+
+-- NP(10) Use_Var(0) --
+Processor 7 online
+Processor 9 online
+Agent Processor 0 online
+Processor 1 online
+Processor 2 online
+Processor 3 online
+Processor 4 online
+Processor 5 online
+Processor 6 online
+Processor 8 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 947
+Query time: 0.00135016
+Storing 1001 time(0.00118995)
+Finding Episode: 1899
+Query time: 0.000586033
+Storing 2002 time(0.00120497)
+Finding Episode: 2738
+Query time: 0.000549078
+Storing 3003 time(0.001261)
+Finding Episode: 3624
+Query time: 0.00039506
+Storing 4004 time(0.00146198)
+Finding Episode: 4991
+Query time: 0.000384092
+Storing 5005 time(0.00183392)
+Finding Episode: 5894
+Query time: 0.0008111
+Storing 6006 time(0.00201201)
+Finding Episode: 6994
+Query time: 0.000431061
+Storing 7007 time(0.00137019)
+Finding Episode: 7910
+Query time: 0.000437975
+Storing 8008 time(0.00166702)
+Finding Episode: 8809
+Query time: 0.00100684
+Storing 9009 time(0.0023632)
+Finding Episode: 9994
+Query time: 0.000435114
+Storing 10010 time(0.00187802)
+Finding Episode: 10114
+Query time: 0.00117588
+Storing 11011 time(0.00261283)
+Finding Episode: 11382
+Query time: 0.000375032
+Storing 12012 time(0.00213289)
+Finding Episode: 12917
+Query time: 0.000358105
+Storing 13013 time(0.00295401)
+Finding Episode: 13251
+Query time: 0.000380039
+Storing 14014 time(0.00324202)
+Finding Episode: 14595
+Query time: 0.000487089
+Storing 15015 time(0.00339484)
+Finding Episode: 15592
+Query time: 0.000440121
+Storing 16016 time(0.00234699)
+Finding Episode: 16430
+Query time: 0.00171399
+Storing 17017 time(0.00242305)
+Finding Episode: 16669
+Query time: 0.00175214
+Storing 18018 time(0.00399995)
+Finding Episode: 17630
+Query time: 0.00183606
+Storing 19019 time(0.00418901)
+Finding Episode: 19743
+Query time: 0.00191212
+Storing 20020 time(0.00196981)
+Finding Episode: 19036
+Query time: 0.0020051
+Storing 21021 time(0.00278306)
+Finding Episode: 20416
+Query time: 0.00219202
+Storing 22022 time(0.00282311)
+Finding Episode: 22484
+Query time: 0.000375032
+Storing 23023 time(0.0046339)
+Finding Episode: 22984
+Query time: 0.000394106
+Storing 24024 time(0.00490594)
+Finding Episode: 24840
+Query time: 0.00232196
+Storing 25025 time(0.00501823)
+Finding Episode: 24834
+Query time: 0.000418186
+Storing 26026 time(0.00360179)
+Finding Episode: 24315
+Query time: 0.000495911
+Storing 27027 time(0.00537395)
+Finding Episode: 25525
+Query time: 0.000538111
+Storing 28028 time(0.00346708)
+Finding Episode: 28273
+Query time: 0.000396013
+Storing 29029 time(0.0058229)
+Finding Episode: 28818
+Query time: 0.000404835
+Storing 30030 time(0.00349307)
+Finding Episode: 27962
+Query time: 0.000525951
+Storing 31031 time(0.00626898)
+Finding Episode: 29515
+Query time: 0.00285697
+Storing 32032 time(0.00635815)
+Finding Episode: 32334
+Query time: 0.000390053
+Storing 33033 time(0.00250411)
+Finding Episode: 31545
+Query time: 0.00307488
+Storing 34034 time(0.00664115)
+Finding Episode: 33738
+Query time: 0.00304103
+Storing 35035 time(0.0039258)
+Finding Episode: 35024
+Query time: 0.000432014
+Storing 36036 time(0.00706697)
+Finding Episode: 34799
+Query time: 0.00053215
+Storing 37037 time(0.00719404)
+Finding Episode: 35395
+Query time: 0.00329804
+Storing 38038 time(0.0043869)
+Finding Episode: 36674
+Query time: 0.000535011
+Storing 39039 time(0.00736713)
+Finding Episode: 36198
+Query time: 0.000560999
+Storing 40040 time(0.00757909)
+Finding Episode: 39578
+Query time: 0.00358701
+Storing 41041 time(0.002702)
+Finding Episode: 39940
+Query time: 0.000487804
+Storing 42042 time(0.00451112)
+Finding Episode: 39747
+Query time: 0.00365806
+Storing 43043 time(0.00448513)
+Finding Episode: 42281
+Query time: 0.00376201
+Storing 44044 time(0.00819206)
+Finding Episode: 41284
+Query time: 0.00387383
+Storing 45045 time(0.00842285)
+Finding Episode: 45618
+Query time: 0.000374794
+Storing 46046 time(0.00325012)
+Finding Episode: 42598
+Query time: 0.00058794
+Storing 47047 time(0.00853896)
+Finding Episode: 44739
+Query time: 0.00409985
+Storing 48048 time(0.00500393)
+Finding Episode: 45231
+Query time: 0.00414085
+Storing 49049 time(0.008883)
+Processor 4 online
+Processor 5 online
+Processor 6 online
+Processor 7 online
+System halted.
+Interrupt received.This Agent halted.
+Processor 9 online
+Processor 8 online
+Processor 1 online
+Processor 2 online
+Processor 3 online
+
+
+-- NP(18) Use_Var(0) --
+Agent Processor 0 online
+Processor 1 online
+Processor 2 online
+Processor 7 online
+Processor 8 online
+Processor 9 online
+Processor 3 online
+Processor 5 online
+source ../../agents/qt_short.soar
+Processor 6 online
+Processor 12 online
+Processor 13 online
+Processor 14 online
+Processor 15 online
+Processor 16 online
+Processor 17 online
+Processor 4 online
+Processor 10 online
+Processor 11 online
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 983
+Query time: 0.00137997
+Storing 1001 time(0.00112319)
+Finding Episode: 1970
+Query time: 0.000461817
+Storing 2002 time(0.00140214)
+Finding Episode: 2836
+Query time: 0.000452995
+Storing 3003 time(0.001724)
+Finding Episode: 3855
+Query time: 0.000619173
+Storing 4004 time(0.00158691)
+Finding Episode: 4625
+Query time: 0.000481129
+Storing 5005 time(0.00185013)
+Finding Episode: 5901
+Query time: 0.000432968
+Storing 6006 time(0.00201106)
+Finding Episode: 6373
+Query time: 0.000372171
+Storing 7007 time(0.00156379)
+Finding Episode: 7250
+Query time: 0.000905037
+Storing 8008 time(0.00225902)
+Finding Episode: 8679
+Query time: 0.000607014
+Storing 9009 time(0.00185299)
+Finding Episode: 9291
+Query time: 0.00103903
+Storing 10010 time(0.00257397)
+Finding Episode: 9997
+Query time: 0.000498056
+Storing 11011 time(0.00197792)
+Finding Episode: 11939
+Query time: 0.00200891
+Storing 12012 time(0.00459099)
+Finding Episode: 12168
+Query time: 0.00133181
+Storing 13013 time(0.00299811)
+Finding Episode: 13389
+Query time: 0.001333
+Storing 14014 time(0.00175619)
+Finding Episode: 14159
+Query time: 0.00139499
+Storing 15015 time(0.00174618)
+Finding Episode: 14437
+Query time: 0.000431061
+Storing 16016 time(0.00371599)
+Finding Episode: 15391
+Query time: 0.000448942
+Storing 17017 time(0.0024662)
+Finding Episode: 16477
+Query time: 0.00158906
+Storing 18018 time(0.00412703)
+Finding Episode: 17827
+Query time: 0.000408173
+Storing 19019 time(0.00265193)
+Finding Episode: 19275
+Query time: 0.000401974
+Storing 20020 time(0.00434017)
+Finding Episode: 19817
+Query time: 0.0022819
+Storing 21021 time(0.005234)
+Finding Episode: 20717
+Query time: 0.000421047
+Storing 22022 time(0.00220299)
+Finding Episode: 21481
+Query time: 0.000464916
+Storing 23023 time(0.00220799)
+Finding Episode: 23687
+Query time: 0.00212693
+Storing 24024 time(0.00600791)
+Finding Episode: 23712
+Query time: 0.00212407
+Storing 25025 time(0.00499988)
+Finding Episode: 24286
+Query time: 0.00048089
+Storing 26026 time(0.00662708)
+Finding Episode: 24838
+Query time: 0.00223994
+Storing 27027 time(0.00355697)
+Finding Episode: 27774
+Query time: 0.00232196
+Storing 28028 time(0.00572705)
+Finding Episode: 26826
+Query time: 0.00239301
+Storing 29029 time(0.00351715)
+Finding Episode: 27060
+Query time: 0.000497818
+Storing 30030 time(0.00358915)
+Finding Episode: 30901
+Query time: 0.000344038
+Storing 31031 time(0.00359297)
+Finding Episode: 30067
+Query time: 0.000468016
+Storing 32032 time(0.00366378)
+Finding Episode: 29853
+Query time: 0.000602961
+Storing 33033 time(0.00255704)
+Finding Episode: 33793
+Query time: 0.00170207
+Storing 34034 time(0.00396705)
+Finding Episode: 34384
+Query time: 0.000441074
+Storing 35035 time(0.0068121)
+Finding Episode: 34768
+Query time: 0.00289202
+Storing 36036 time(0.00703406)
+Finding Episode: 34827
+Query time: 0.000488997
+Storing 37037 time(0.00425005)
+Finding Episode: 35805
+Query time: 0.000486851
+Storing 38038 time(0.00730705)
+Finding Episode: 38596
+Query time: 0.00308204
+Storing 39039 time(0.0076201)
+Finding Episode: 38881
+Query time: 0.000439882
+Storing 40040 time(0.00266504)
+Finding Episode: 39725
+Query time: 0.000447989
+Storing 41041 time(0.00495005)
+Finding Episode: 38697
+Query time: 0.00331807
+Storing 42042 time(0.00515223)
+Finding Episode: 42004
+Query time: 0.00335884
+Storing 43043 time(0.00802684)
+Finding Episode: 43698
+Query time: 0.00346994
+Storing 44044 time(0.00821996)
+Finding Episode: 41799
+Query time: 0.00403619
+Storing 45045 time(0.00627899)
+Finding Episode: 41753
+Query time: 0.00359797
+Storing 46046 time(0.00463986)
+Finding Episode: 46429
+Query time: 0.00365806
+Storing 47047 time(0.00857902)
+Finding Episode: 47580
+Query time: 0.00372481
+Storing 48048 time(0.00871897)
+Finding Episode: 48305
+Query time: 0.00379801
+Storing 49049 time(0.00907707)
+Processor 2 online
+Processor 7 online
+Processor 8 online
+Processor 4 online
+Processor 10 online
+System halted.
+Interrupt received.This Agent halted.
+Processor 5 online
+Processor 1 online
+Processor 9 online
+Processor 6 online
+Processor 3 online
+Processor 11 online
+Processor 17 online
+Processor 12 online
+Processor 13 online
+Processor 14 online
+Processor 15 online
+Processor 16 online
+
+
+-- NP(34) Use_Var(0) --
+Processor 24 online
+Processor 25 online
+Processor 26 online
+Processor 29 online
+Processor 31 online
+Processor 33 online
+Agent Processor 0 online
+Processor 8 online
+Processor 9 online
+Processor 10 online
+Processor 6 online
+Processor 1 online
+Processor 2 online
+Processor 4 online
+Processor 5 online
+Processor 11 online
+Processor 7 online
+Processor 21 online
+Processor 22 online
+Processor 23 online
+Processor 12 online
+Processor 13 online
+Processor 14 online
+Processor 16 online
+Processor 17 online
+Processor 18 online
+Processor 19 online
+Processor 20 online
+Processor 15 online
+source ../../agents/qt_short.soar
+Processor 3 online
+Processor 28 online
+Processor 27 online
+Processor 30 online
+Processor 32 online
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 977
+Query time: 0.00137997
+Storing 1001 time(0.00123787)
+Finding Episode: 1888
+Query time: 0.000663042
+Storing 2002 time(0.00156999)
+Finding Episode: 2813
+Query time: 0.00356317
+Storing 3003 time(0.00497389)
+Finding Episode: 3677
+Query time: 0.000605106
+Storing 4004 time(0.00185704)
+Finding Episode: 4591
+Query time: 0.000833988
+Storing 5005 time(0.00160408)
+Finding Episode: 5989
+Query time: 0.000365019
+Storing 6006 time(0.00349498)
+Finding Episode: 6678
+Query time: 0.000579119
+Storing 7007 time(0.0015049)
+Finding Episode: 7282
+Query time: 0.000586987
+Storing 8008 time(0.00180984)
+Finding Episode: 8805
+Query time: 0.00050807
+Storing 9009 time(0.00156808)
+Finding Episode: 9935
+Query time: 0.00041604
+Storing 10010 time(0.00252581)
+Finding Episode: 9978
+Query time: 0.00190496
+Storing 11011 time(0.00279999)
+Finding Episode: 11263
+Query time: 0.000566006
+Storing 12012 time(0.00214911)
+Finding Episode: 12189
+Query time: 0.00151706
+Storing 13013 time(0.00309396)
+Finding Episode: 13147
+Query time: 0.00156093
+Storing 14014 time(0.00259399)
+Finding Episode: 14164
+Query time: 0.0018189
+Storing 15015 time(0.00249004)
+Finding Episode: 14521
+Query time: 0.00259495
+Storing 16016 time(0.00378895)
+Finding Episode: 16804
+Query time: 0.000580072
+Storing 17017 time(0.00269198)
+Finding Episode: 17547
+Query time: 0.00192094
+Storing 18018 time(0.004076)
+Finding Episode: 18069
+Query time: 0.00198007
+Storing 19019 time(0.00427389)
+Finding Episode: 18220
+Query time: 0.00207901
+Storing 20020 time(0.00492811)
+Finding Episode: 19057
+Query time: 0.00477791
+Storing 21021 time(0.00286198)
+Finding Episode: 20439
+Query time: 0.000904083
+Storing 22022 time(0.00465703)
+Finding Episode: 22912
+Query time: 0.000367165
+Storing 23023 time(0.00302696)
+Finding Episode: 22167
+Query time: 0.00231481
+Storing 24024 time(0.00488687)
+Finding Episode: 24971
+Query time: 0.000359058
+Storing 25025 time(0.00525188)
+Finding Episode: 25089
+Query time: 0.000839949
+Storing 26026 time(0.00547695)
+Finding Episode: 24954
+Query time: 0.010592
+Storing 27027 time(0.00545907)
+Finding Episode: 27322
+Query time: 0.00261307
+Storing 28028 time(0.00570202)
+Finding Episode: 27885
+Query time: 0.000571966
+Storing 29029 time(0.00589204)
+Finding Episode: 27118
+Query time: 0.00258708
+Storing 30030 time(0.00628495)
+Finding Episode: 29615
+Query time: 0.00287414
+Storing 31031 time(0.00247717)
+Finding Episode: 31107
+Query time: 0.00300312
+Storing 32032 time(0.00876904)
+Finding Episode: 30524
+Query time: 0.00346303
+Storing 33033 time(0.00863409)
+Finding Episode: 32992
+Query time: 0.000532866
+Storing 34034 time(0.00688696)
+Finding Episode: 34026
+Query time: 0.0116789
+Storing 35035 time(0.00397301)
+Finding Episode: 34377
+Query time: 0.0032959
+Storing 36036 time(0.00703621)
+Finding Episode: 34080
+Query time: 0.00336623
+Storing 37037 time(0.00282383)
+Finding Episode: 34353
+Query time: 0.00344586
+Storing 38038 time(0.00457001)
+Finding Episode: 36100
+Query time: 0.00348186
+Storing 39039 time(0.00756788)
+Finding Episode: 37504
+Query time: 0.000638008
+Storing 40040 time(0.0076921)
+Finding Episode: 40431
+Query time: 0.00361705
+Storing 41041 time(0.00848889)
+Finding Episode: 38113
+Query time: 0.00367594
+Storing 42042 time(0.00800014)
+Finding Episode: 42261
+Query time: 0.00383401
+Storing 43043 time(0.0110378)
+Finding Episode: 41347
+Query time: 0.000701189
+Storing 44044 time(0.0116551)
+Finding Episode: 44397
+Query time: 0.00307393
+Storing 45045 time(0.00313997)
+Finding Episode: 42483
+Query time: 0.00401902
+Storing 46046 time(0.00465918)
+Finding Episode: 46897
+Query time: 0.00039196
+Storing 47047 time(0.00865889)
+Finding Episode: 43670
+Query time: 0.00418997
+Storing 48048 time(0.00896287)
+Finding Episode: 48742
+Query time: 0.000473976
+Storing 49049 time(0.0053041)
+Processor 9 online
+Processor 5 online
+System halted.
+Interrupt received.This Agent halted.
+Processor 6 online
+Processor 3 online
+Processor 2 online
+Processor 4 online
+Processor 10 online
+Processor 11 online
+Processor 7 online
+Processor 8 online
+Processor 1 online
+Processor 22 online
+Processor 15 online
+Processor 12 online
+Processor 13 online
+Processor 20 online
+Processor 14 online
+Processor 16 online
+Processor 17 online
+Processor 18 online
+Processor 19 online
+Processor 25 online
+Processor 28 online
+Processor 33 online
+Processor 26 online
+Processor 27 online
+Processor 29 online
+Processor 21 online
+Processor 30 online
+Processor 23 online
+Processor 31 online
+Processor 32 online
+Processor 24 online
+
+
+-- NP(3) Use_Var(1) --
+Agent Processor 0 online
+Processor 1 online
+Processor 2 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 902
+Query time: 0.00156784
+Storing 1001 time(0.000437975)
+Finding Episode: 1838
+Query time: 0.00039506
+Storing 2002 time(0.000433922)
+Finding Episode: 2754
+Query time: 0.000413895
+Storing 3003 time(0.000452995)
+Finding Episode: 3900
+Query time: 0.000414848
+Storing 4004 time(0.000403881)
+Finding Episode: 4959
+Query time: 0.000314951
+Storing 5005 time(0.000411034)
+Finding Episode: 5686
+Query time: 0.000349998
+Storing 6006 time(0.000422001)
+Finding Episode: 6936
+Query time: 0.000386953
+Storing 7007 time(0.000467777)
+Finding Episode: 7930
+Query time: 0.000358105
+Storing 8008 time(0.00041008)
+Finding Episode: 8286
+Query time: 0.000417948
+Storing 9009 time(0.000510931)
+Finding Episode: 9913
+Query time: 0.000402927
+Storing 10010 time(0.000557184)
+Finding Episode: 9982
+Query time: 0.00052309
+Storing 11011 time(0.000456095)
+Finding Episode: 11718
+Query time: 0.0004282
+Storing 12012 time(0.000447035)
+Finding Episode: 12007
+Query time: 0.000529051
+Storing 13013 time(0.000444889)
+Finding Episode: 13183
+Query time: 0.000426054
+Storing 14014 time(0.000478029)
+Finding Episode: 14947
+Query time: 0.000326872
+Storing 15015 time(0.000627995)
+Finding Episode: 14787
+Query time: 0.000567913
+Storing 16016 time(0.000447989)
+Finding Episode: 16654
+Query time: 0.000447989
+Storing 17017 time(0.000460863)
+Finding Episode: 17718
+Query time: 0.000448942
+Storing 18018 time(0.000424147)
+Finding Episode: 18883
+Query time: 0.000400782
+Storing 19019 time(0.000455856)
+Finding Episode: 18736
+Query time: 0.000595093
+Storing 20020 time(0.000585079)
+Finding Episode: 19298
+Query time: 0.000557184
+Storing 21021 time(0.000571012)
+Finding Episode: 20851
+Query time: 0.000496149
+Storing 22022 time(0.000540018)
+Finding Episode: 22116
+Query time: 0.000448942
+Storing 23023 time(0.000410795)
+Finding Episode: 23831
+Query time: 0.000405073
+Storing 24024 time(0.000429869)
+Finding Episode: 22884
+Query time: 0.000633955
+Storing 25025 time(0.000529051)
+Finding Episode: 23594
+Query time: 0.00067091
+Storing 26026 time(0.000406027)
+Finding Episode: 25688
+Query time: 0.000511885
+Storing 27027 time(0.000437975)
+Finding Episode: 25765
+Query time: 0.00063014
+Storing 28028 time(0.000427008)
+Finding Episode: 27380
+Query time: 0.00060606
+Storing 29029 time(0.000458002)
+Finding Episode: 29435
+Query time: 0.000414848
+Storing 30030 time(0.000576019)
+Finding Episode: 28927
+Query time: 0.000622034
+Storing 31031 time(0.000541925)
+Finding Episode: 30484
+Query time: 0.00067687
+Storing 32032 time(0.000422001)
+Finding Episode: 32616
+Query time: 0.000468969
+Storing 33033 time(0.000547886)
+Finding Episode: 33723
+Query time: 0.000458002
+Storing 34034 time(0.000409126)
+Finding Episode: 33956
+Query time: 0.000562906
+Storing 35035 time(0.000431776)
+Finding Episode: 34139
+Query time: 0.000682116
+Storing 36036 time(0.000473976)
+Finding Episode: 36980
+Query time: 0.0004251
+Storing 37037 time(0.000470877)
+Finding Episode: 37351
+Query time: 0.000513077
+Storing 38038 time(0.000449896)
+Finding Episode: 38504
+Query time: 0.000535011
+Storing 39039 time(0.000565052)
+Finding Episode: 37845
+Query time: 0.00072813
+Storing 40040 time(0.000627995)
+Finding Episode: 40318
+Query time: 0.000501871
+Storing 41041 time(0.00056386)
+Finding Episode: 39187
+Query time: 0.000809908
+Storing 42042 time(0.000437021)
+Finding Episode: 42018
+Query time: 0.000605106
+Storing 43043 time(0.000497103)
+Finding Episode: 42721
+Query time: 0.000597954
+Storing 44044 time(0.000480175)
+Finding Episode: 43014
+Query time: 0.000702858
+Storing 45045 time(0.000466108)
+Finding Episode: 43096
+Query time: 0.000829935
+Storing 46046 time(0.000614166)
+Finding Episode: 43095
+Query time: 0.00100994
+Storing 47047 time(0.000445843)
+Finding Episode: 43525
+Query time: 0.00106406
+Storing 48048 time(0.000550985)
+Finding Episode: 47364
+Query time: 0.000697851
+Storing 49049 time(0.000560045)
+Processor 1 online
+System halted.
+Interrupt received.This Agent halted.
+Processor 2 online
+
+
+-- NP(4) Use_Var(1) --
+Processor 1 online
+Processor 2 online
+Processor 3 online
+Agent Processor 0 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 937
+Query time: 0.00142193
+Storing 1001 time(0.000433922)
+Finding Episode: 1809
+Query time: 0.000571966
+Storing 2002 time(0.00165296)
+Finding Episode: 2940
+Query time: 0.00046587
+Storing 3003 time(0.00041914)
+Finding Episode: 3677
+Query time: 0.000411987
+Storing 4004 time(0.00239015)
+Finding Episode: 4585
+Query time: 0.000429153
+Storing 5005 time(0.000398874)
+Finding Episode: 5924
+Query time: 0.000385046
+Storing 6006 time(0.00275779)
+Finding Episode: 6501
+Query time: 0.000456095
+Storing 7007 time(0.000386953)
+Finding Episode: 7609
+Query time: 0.000433207
+Storing 8008 time(0.00329018)
+Finding Episode: 8973
+Query time: 0.000386953
+Storing 9009 time(0.000458956)
+Finding Episode: 9630
+Query time: 0.000438929
+Storing 10010 time(0.00408697)
+Finding Episode: 10401
+Query time: 0.000478983
+Storing 11011 time(0.00041914)
+Finding Episode: 11540
+Query time: 0.000452042
+Storing 12012 time(0.00472999)
+Finding Episode: 12583
+Query time: 0.000446081
+Storing 13013 time(0.000442028)
+Finding Episode: 13986
+Query time: 0.000398159
+Storing 14014 time(0.005445)
+Finding Episode: 14509
+Query time: 0.000473022
+Storing 15015 time(0.000410795)
+Finding Episode: 14823
+Query time: 0.000567913
+Storing 16016 time(0.00618601)
+Finding Episode: 16121
+Query time: 0.000483036
+Storing 17017 time(0.000404119)
+Finding Episode: 17371
+Query time: 0.000447035
+Storing 18018 time(0.0069778)
+Finding Episode: 18476
+Query time: 0.00043416
+Storing 19019 time(0.000491142)
+Finding Episode: 18441
+Query time: 0.000583887
+Storing 20020 time(0.007581)
+Finding Episode: 19096
+Query time: 0.000633955
+Storing 21021 time(0.000485897)
+Finding Episode: 21940
+Query time: 0.000371933
+Storing 22022 time(0.00808311)
+Finding Episode: 22744
+Query time: 0.000430107
+Storing 23023 time(0.000412941)
+Finding Episode: 23145
+Query time: 0.000488043
+Storing 24024 time(0.00868011)
+Finding Episode: 24698
+Query time: 0.00041008
+Storing 25025 time(0.000653028)
+Finding Episode: 25060
+Query time: 0.000541925
+Storing 26026 time(0.00929093)
+Finding Episode: 26183
+Query time: 0.000473022
+Storing 27027 time(0.000458956)
+Finding Episode: 26130
+Query time: 0.000658035
+Storing 28028 time(0.00992107)
+Finding Episode: 27298
+Query time: 0.000640869
+Storing 29029 time(0.000487804)
+Finding Episode: 27485
+Query time: 0.000735998
+Storing 30030 time(0.0105791)
+Finding Episode: 30084
+Query time: 0.000506163
+Storing 31031 time(0.000494003)
+Finding Episode: 31881
+Query time: 0.000422955
+Storing 32032 time(0.0113158)
+Finding Episode: 30662
+Query time: 0.000725031
+Storing 33033 time(0.000444889)
+Finding Episode: 31381
+Query time: 0.0007689
+Storing 34034 time(0.0120389)
+Finding Episode: 33354
+Query time: 0.000607014
+Storing 35035 time(0.000478983)
+Finding Episode: 34715
+Query time: 0.000560045
+Storing 36036 time(0.012574)
+Finding Episode: 35392
+Query time: 0.000616074
+Storing 37037 time(0.00047183)
+Finding Episode: 34745
+Query time: 0.000865936
+Storing 38038 time(0.013258)
+Finding Episode: 36856
+Query time: 0.000692129
+Storing 39039 time(0.000484943)
+Finding Episode: 36807
+Query time: 0.00087285
+Storing 40040 time(0.0140049)
+Finding Episode: 38340
+Query time: 0.000797033
+Storing 41041 time(0.000449896)
+Finding Episode: 39017
+Query time: 0.000836849
+Storing 42042 time(0.0142889)
+Finding Episode: 41413
+Query time: 0.000642061
+Storing 43043 time(0.000416994)
+Finding Episode: 40332
+Query time: 0.000929832
+Storing 44044 time(0.0150938)
+Finding Episode: 41344
+Query time: 0.000948191
+Storing 45045 time(0.000450134)
+Finding Episode: 42751
+Query time: 0.000926018
+Storing 46046 time(0.015543)
+Finding Episode: 43040
+Query time: 0.00106382
+Storing 47047 time(0.00046587)
+Finding Episode: 45090
+Query time: 0.000844955
+Storing 48048 time(0.016238)
+Finding Episode: 47220
+Query time: 0.000634193
+Storing 49049 time(0.000531912)
+Processor 3 online
+Processor 1 online
+Processor 2 online
+System halted.
+Interrupt received.This Agent halted.
+
+
+-- NP(6) Use_Var(1) --
+Agent Processor 0 online
+Processor 1 online
+Processor 2 online
+Processor 3 online
+Processor 4 online
+Processor 5 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 976
+Query time: 0.00135207
+Storing 1001 time(0.00118089)
+Finding Episode: 1876
+Query time: 0.000504017
+Storing 2002 time(0.00133419)
+Finding Episode: 2934
+Query time: 0.000366926
+Storing 3003 time(0.00150895)
+Finding Episode: 3842
+Query time: 0.000377893
+Storing 4004 time(0.001719)
+Finding Episode: 4744
+Query time: 0.000401974
+Storing 5005 time(0.00177407)
+Finding Episode: 5748
+Query time: 0.000393867
+Storing 6006 time(0.00198197)
+Finding Episode: 6955
+Query time: 0.000368118
+Storing 7007 time(0.00217414)
+Finding Episode: 7279
+Query time: 0.000518084
+Storing 8008 time(0.00232601)
+Finding Episode: 8595
+Query time: 0.000412941
+Storing 9009 time(0.00257421)
+Finding Episode: 9732
+Query time: 0.000405073
+Storing 10010 time(0.00261617)
+Finding Episode: 10170
+Query time: 0.000437021
+Storing 11011 time(0.00290012)
+Finding Episode: 11359
+Query time: 0.000463963
+Storing 12012 time(0.00328302)
+Finding Episode: 12678
+Query time: 0.000371933
+Storing 13013 time(0.00300193)
+Finding Episode: 12801
+Query time: 0.000490189
+Storing 14014 time(0.003438)
+Finding Episode: 13669
+Query time: 0.000519991
+Storing 15015 time(0.0034039)
+Finding Episode: 15544
+Query time: 0.000375032
+Storing 16016 time(0.003582)
+Finding Episode: 16961
+Query time: 0.000329018
+Storing 17017 time(0.0035069)
+Finding Episode: 17671
+Query time: 0.000364065
+Storing 18018 time(0.00402713)
+Finding Episode: 18475
+Query time: 0.000389099
+Storing 19019 time(0.0041852)
+Finding Episode: 19928
+Query time: 0.000325918
+Storing 20020 time(0.00444794)
+Finding Episode: 20008
+Query time: 0.000583887
+Storing 21021 time(0.00424385)
+Finding Episode: 20717
+Query time: 0.000529051
+Storing 22022 time(0.00494099)
+Finding Episode: 20817
+Query time: 0.000633955
+Storing 23023 time(0.00501013)
+Finding Episode: 21700
+Query time: 0.000730038
+Storing 24024 time(0.00528812)
+Finding Episode: 23705
+Query time: 0.000515938
+Storing 25025 time(0.00499701)
+Finding Episode: 25891
+Query time: 0.000344038
+Storing 26026 time(0.00556803)
+Finding Episode: 25926
+Query time: 0.000517845
+Storing 27027 time(0.00558782)
+Finding Episode: 26423
+Query time: 0.000573158
+Storing 28028 time(0.00571609)
+Finding Episode: 28037
+Query time: 0.000485897
+Storing 29029 time(0.00550199)
+Finding Episode: 27444
+Query time: 0.000799894
+Storing 30030 time(0.00581408)
+Finding Episode: 29307
+Query time: 0.000597954
+Storing 31031 time(0.00663805)
+Finding Episode: 29628
+Query time: 0.000687838
+Storing 32032 time(0.00644207)
+Finding Episode: 32357
+Query time: 0.000452042
+Storing 33033 time(0.00623202)
+Finding Episode: 33134
+Query time: 0.00047183
+Storing 34034 time(0.00684595)
+Finding Episode: 34397
+Query time: 0.000443935
+Storing 35035 time(0.00699592)
+Finding Episode: 35477
+Query time: 0.000443935
+Storing 36036 time(0.00699306)
+Finding Episode: 34017
+Query time: 0.000813007
+Storing 37037 time(0.0068531)
+Finding Episode: 34210
+Query time: 0.000899076
+Storing 38038 time(0.00725007)
+Finding Episode: 38873
+Query time: 0.000356913
+Storing 39039 time(0.00739908)
+Finding Episode: 39971
+Query time: 0.000354052
+Storing 40040 time(0.00766087)
+Finding Episode: 40511
+Query time: 0.000402927
+Storing 41041 time(0.00754213)
+Finding Episode: 40251
+Query time: 0.000583887
+Storing 42042 time(0.00781798)
+Finding Episode: 41904
+Query time: 0.00054884
+Storing 43043 time(0.00803804)
+Finding Episode: 42446
+Query time: 0.000565767
+Storing 44044 time(0.00826907)
+Finding Episode: 44414
+Query time: 0.00043416
+Storing 45045 time(0.00834608)
+Finding Episode: 43378
+Query time: 0.000751019
+Storing 46046 time(0.00841379)
+Finding Episode: 45314
+Query time: 0.000610113
+Storing 47047 time(0.00873899)
+Finding Episode: 47601
+Query time: 0.000432014
+Storing 48048 time(0.008816)
+Finding Episode: 44495
+Query time: 0.00100112
+Storing 49049 time(0.00893497)
+System halted.
+Interrupt received.This Agent halted.
+Processor 5 online
+Processor 1 online
+Processor 2 online
+Processor 3 online
+Processor 4 online
+
+
+-- NP(10) Use_Var(1) --
+Processor 4 online
+Processor 5 online
+Processor 6 online
+Processor 7 online
+Processor 8 online
+Processor 9 online
+Agent Processor 0 online
+Processor 1 online
+Processor 3 online
+Processor 2 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 908
+Query time: 0.00144005
+Storing 1001 time(0.00111699)
+Finding Episode: 1828
+Query time: 0.000380993
+Storing 2002 time(0.0012958)
+Finding Episode: 2946
+Query time: 0.000316858
+Storing 3003 time(0.00131488)
+Finding Episode: 3996
+Query time: 0.000318766
+Storing 4004 time(0.00143695)
+Finding Episode: 4662
+Query time: 0.000348091
+Storing 5005 time(0.00156999)
+Finding Episode: 5482
+Query time: 0.000381947
+Storing 6006 time(0.00158596)
+Finding Episode: 6416
+Query time: 0.000393867
+Storing 7007 time(0.00160408)
+Finding Episode: 7289
+Query time: 0.00041008
+Storing 8008 time(0.00173712)
+Finding Episode: 8829
+Query time: 0.000339031
+Storing 9009 time(0.00181389)
+Finding Episode: 9268
+Query time: 0.000421047
+Storing 10010 time(0.0019691)
+Finding Episode: 10437
+Query time: 0.000398159
+Storing 11011 time(0.0020659)
+Finding Episode: 11166
+Query time: 0.000425816
+Storing 12012 time(0.00216794)
+Finding Episode: 11841
+Query time: 0.000477076
+Storing 13013 time(0.00222588)
+Finding Episode: 13457
+Query time: 0.000397921
+Storing 14014 time(0.00221896)
+Finding Episode: 14579
+Query time: 0.000389099
+Storing 15015 time(0.00241995)
+Finding Episode: 15880
+Query time: 0.000411987
+Storing 16016 time(0.00240803)
+Finding Episode: 15370
+Query time: 0.000617027
+Storing 17017 time(0.00248599)
+Finding Episode: 16209
+Query time: 0.000645876
+Storing 18018 time(0.00261307)
+Finding Episode: 17119
+Query time: 0.000649929
+Storing 19019 time(0.00261211)
+Finding Episode: 19776
+Query time: 0.000436068
+Storing 20020 time(0.00277996)
+Finding Episode: 19027
+Query time: 0.000749111
+Storing 21021 time(0.00286603)
+Finding Episode: 20246
+Query time: 0.000641823
+Storing 22022 time(0.00332808)
+Finding Episode: 21273
+Query time: 0.000642776
+Storing 23023 time(0.00312901)
+Finding Episode: 22701
+Query time: 0.000566006
+Storing 24024 time(0.00321889)
+Finding Episode: 23375
+Query time: 0.000618935
+Storing 25025 time(0.00331903)
+Finding Episode: 25583
+Query time: 0.000446081
+Storing 26026 time(0.00317693)
+Finding Episode: 26467
+Query time: 0.000465155
+Storing 27027 time(0.00355911)
+Finding Episode: 26580
+Query time: 0.000575066
+Storing 28028 time(0.00343513)
+Finding Episode: 28582
+Query time: 0.000423908
+Storing 29029 time(0.00343704)
+Finding Episode: 28874
+Query time: 0.000524998
+Storing 30030 time(0.00377417)
+Finding Episode: 30350
+Query time: 0.000473022
+Storing 31031 time(0.00380397)
+Finding Episode: 29350
+Query time: 0.000729084
+Storing 32032 time(0.00384521)
+Finding Episode: 32576
+Query time: 0.000433922
+Storing 33033 time(0.00387812)
+Finding Episode: 31827
+Query time: 0.000669003
+Storing 34034 time(0.00420499)
+Finding Episode: 31929
+Query time: 0.000798941
+Storing 35035 time(0.00419688)
+Finding Episode: 33631
+Query time: 0.000690937
+Storing 36036 time(0.00407481)
+Finding Episode: 35909
+Query time: 0.000524044
+Storing 37037 time(0.00434494)
+Finding Episode: 36663
+Query time: 0.000556946
+Storing 38038 time(0.00436091)
+Finding Episode: 36262
+Query time: 0.000752926
+Storing 39039 time(0.00448895)
+Finding Episode: 37329
+Query time: 0.000751972
+Storing 40040 time(0.00451303)
+Finding Episode: 40286
+Query time: 0.00048399
+Storing 41041 time(0.00451803)
+Finding Episode: 38634
+Query time: 0.000838041
+Storing 42042 time(0.00465322)
+Finding Episode: 40530
+Query time: 0.000705004
+Storing 43043 time(0.0046711)
+Finding Episode: 42860
+Query time: 0.00061202
+Storing 44044 time(0.0048511)
+Finding Episode: 44421
+Query time: 0.000452042
+Storing 45045 time(0.00488591)
+Finding Episode: 45983
+Query time: 0.000378847
+Storing 46046 time(0.00498915)
+Finding Episode: 45611
+Query time: 0.000566959
+Storing 47047 time(0.00511885)
+Finding Episode: 44346
+Query time: 0.000882864
+Storing 48048 time(0.0048821)
+Finding Episode: 47179
+Query time: 0.000632048
+Storing 49049 time(0.00518394)
+System halted.
+Interrupt received.This Agent halted.
+Processor 9 online
+Processor 2 online
+Processor 3 online
+Processor 1 online
+Processor 4 online
+Processor 5 online
+Processor 6 online
+Processor 7 online
+Processor 8 online
+
+
+-- NP(18) Use_Var(1) --
+Processor 13 online
+Processor 14 online
+Processor 15 online
+Processor 16 online
+Processor 17 online
+Processor 12 online
+Processor 10 online
+Processor 11 online
+Agent Processor 0 online
+Processor 1 online
+Processor 2 online
+Processor 3 online
+Processor 6 online
+Processor 8 online
+Processor 9 online
+Processor 4 online
+Processor 5 online
+Processor 7 online
+source ../../agents/qt_short.soar
+********************
+Total: 20 productions sourced.
+
+Finding Episode: 955
+Query time: 0.00139213
+Storing 1001 time(0.00113988)
+Finding Episode: 1917
+Query time: 0.000347853
+Storing 2002 time(0.00116301)
+Finding Episode: 2745
+Query time: 0.00056982
+Storing 3003 time(0.00122499)
+Finding Episode: 3795
+Query time: 0.000334024
+Storing 4004 time(0.001297)
+Finding Episode: 4937
+Query time: 0.000382185
+Storing 5005 time(0.00147986)
+Finding Episode: 5804
+Query time: 0.000344038
+Storing 6006 time(0.00139284)
+Finding Episode: 6361
+Query time: 0.000371933
+Storing 7007 time(0.00142097)
+Finding Episode: 7876
+Query time: 0.000333786
+Storing 8008 time(0.0015142)
+Finding Episode: 8494
+Query time: 0.000384092
+Storing 9009 time(0.00152612)
+Finding Episode: 9504
+Query time: 0.00061202
+Storing 10010 time(0.00185204)
+Finding Episode: 10661
+Query time: 0.000381947
+Storing 11011 time(0.0016849)
+Finding Episode: 11306
+Query time: 0.00138211
+Storing 12012 time(0.00166106)
+Finding Episode: 12704
+Query time: 0.000375032
+Storing 13013 time(0.00180888)
+Finding Episode: 12920
+Query time: 0.000466108
+Storing 14014 time(0.00185394)
+Finding Episode: 14066
+Query time: 0.000462055
+Storing 15015 time(0.00180697)
+Finding Episode: 15891
+Query time: 0.000368834
+Storing 16016 time(0.0018611)
+Finding Episode: 16671
+Query time: 0.000380993
+Storing 17017 time(0.00203419)
+Finding Episode: 16508
+Query time: 0.000605106
+Storing 18018 time(0.00202417)
+Finding Episode: 17901
+Query time: 0.000504017
+Storing 19019 time(0.00192881)
+Finding Episode: 19248
+Query time: 0.000457048
+Storing 20020 time(0.00262904)
+Finding Episode: 19644
+Query time: 0.000607014
+Storing 21021 time(0.00277495)
+Finding Episode: 20190
+Query time: 0.000550032
+Storing 22022 time(0.002213)
+Finding Episode: 22259
+Query time: 0.000445127
+Storing 23023 time(0.002285)
+Finding Episode: 23625
+Query time: 0.000413895
+Storing 24024 time(0.002244)
+Finding Episode: 23948
+Query time: 0.000496864
+Storing 25025 time(0.00259304)
+Finding Episode: 23904
+Query time: 0.000619888
+Storing 26026 time(0.00238609)
+Finding Episode: 25136
+Query time: 0.000673056
+Storing 27027 time(0.00241804)
+Finding Episode: 27862
+Query time: 0.000377178
+Storing 28028 time(0.0024879)
+Finding Episode: 27429
+Query time: 0.00056982
+Storing 29029 time(0.00308204)
+Finding Episode: 28640
+Query time: 0.00054884
+Storing 30030 time(0.002563)
+Finding Episode: 28656
+Query time: 0.000638962
+Storing 31031 time(0.00259185)
+Finding Episode: 30325
+Query time: 0.000588894
+Storing 32032 time(0.00303912)
+Finding Episode: 31030
+Query time: 0.000699997
+Storing 33033 time(0.00274611)
+Finding Episode: 31874
+Query time: 0.000635862
+Storing 34034 time(0.00271821)
+Finding Episode: 31643
+Query time: 0.00148892
+Storing 35035 time(0.00270414)
+Finding Episode: 34343
+Query time: 0.00057292
+Storing 36036 time(0.00289512)
+Finding Episode: 36055
+Query time: 0.00048399
+Storing 37037 time(0.00285506)
+Finding Episode: 37307
+Query time: 0.000457048
+Storing 38038 time(0.002918)
+Finding Episode: 38283
+Query time: 0.000451088
+Storing 39039 time(0.00295591)
+Finding Episode: 39109
+Query time: 0.000475883
+Storing 40040 time(0.00301409)
+Finding Episode: 39814
+Query time: 0.000514984
+Storing 41041 time(0.00279498)
+Finding Episode: 41091
+Query time: 0.00128484
+Storing 42042 time(0.00299001)
+Finding Episode: 40771
+Query time: 0.000658989
+Storing 43043 time(0.00339007)
+Finding Episode: 41001
+Query time: 0.00074482
+Storing 44044 time(0.00345397)
+Finding Episode: 41109
+Query time: 0.000845194
+Storing 45045 time(0.00493002)
+Finding Episode: 41780
+Query time: 0.000797987
+Storing 46046 time(0.00330305)
+Finding Episode: 44222
+Query time: 0.000737906
+Storing 47047 time(0.00332189)
+Finding Episode: 44893
+Query time: 0.00135398
+Storing 48048 time(0.00333714)
+Finding Episode: 46359
+Query time: 0.00289488
+Storing 49049 time(0.00355601)
+System halted.
+Interrupt received.This Agent halted.
+Processor 10 online
+Processor 2 online
+Processor 9 online
+Processor 4 online
+Processor 3 online
+Processor 5 online
+Processor 8 online
+Processor 11 online
+Processor 7 online
+Processor 1 online
+Processor 6 online
+Processor 12 online
+Processor 17 online
+Processor 13 online
+Processor 14 online
+Processor 15 online
+Processor 16 online
+
+
+-- NP(34) Use_Var(1) --
+Processor 11 online
+Processor 3 online
+Processor 6 online
+Processor 10 online
+Processor 12 online
+Processor 2 online
+Processor 7 online
+Processor 13 online
+Processor 14 online
+Processor 29 online
+Processor 16 online
+Processor 22 online
+Processor 30 online
+Processor 19 online
+Processor 31 online
+Processor 33 online
+Processor 25 online
+Processor 24 online
+Processor 4 online
+Agent Processor 0 online
+Processor 18 online
+Processor 23 online
+Processor 8 online
+Processor 9 online
+Processor 1 online
+Processor 15 online
+Processor 21 online
+Processor 5 online
+Processor 32 online
+Processor 26 online
+Processor 17 online
+source ../../agents/qt_short.soar
+Processor 20 online
+********************
+Total: 20 productions sourced.
+
+Processor 27 online
+Processor 28 online
+Finding Episode: 994
+Query time: 0.00139213
+Storing 1001 time(0.00121593)
+Finding Episode: 1834
+Query time: 0.00124907
+Storing 2002 time(0.00131989)
+Finding Episode: 2928
+Query time: 0.000468016
+Storing 3003 time(0.00128508)
+Finding Episode: 3758
+Query time: 0.000473022
+Storing 4004 time(0.0013411)
+Finding Episode: 4890
+Query time: 0.000473976
+Storing 5005 time(0.00135708)
+Finding Episode: 5699
+Query time: 0.000393152
+Storing 6006 time(0.00134301)
+Finding Episode: 6962
+Query time: 0.000359058
+Storing 7007 time(0.00140905)
+Finding Episode: 7633
+Query time: 0.00037694
+Storing 8008 time(0.00153995)
+Finding Episode: 8511
+Query time: 0.000399113
+Storing 9009 time(0.00143909)
+Finding Episode: 9385
+Query time: 0.004668
+Storing 10010 time(0.00149608)
+Finding Episode: 10657
+Query time: 0.000427008
+Storing 11011 time(0.0015049)
+Finding Episode: 11892
+Query time: 0.000380993
+Storing 12012 time(0.00144792)
+Finding Episode: 12243
+Query time: 0.000416994
+Storing 13013 time(0.00148392)
+Finding Episode: 13865
+Query time: 0.000400066
+Storing 14014 time(0.00176001)
+Finding Episode: 14128
+Query time: 0.000443935
+Storing 15015 time(0.00698805)
+Finding Episode: 14702
+Query time: 0.00048995
+Storing 16016 time(0.00163102)
+Finding Episode: 16024
+Query time: 0.00325489
+Storing 17017 time(0.00160289)
+Finding Episode: 16619
+Query time: 0.000616074
+Storing 18018 time(0.00159001)
+Finding Episode: 18117
+Query time: 0.000550032
+Storing 19019 time(0.00177598)
+Finding Episode: 19551
+Query time: 0.00484204
+Storing 20020 time(0.00195384)
+Finding Episode: 19696
+Query time: 0.000540972
+Storing 21021 time(0.0017581)
+Finding Episode: 21166
+Query time: 0.00291896
+Storing 22022 time(0.00174189)
+Finding Episode: 21073
+Query time: 0.000593185
+Storing 23023 time(0.00183201)
+Finding Episode: 23115
+Query time: 0.000571012
+Storing 24024 time(0.00185585)
+Finding Episode: 22712
+Query time: 0.00065589
+Storing 25025 time(0.00178289)
+Finding Episode: 24081
+Query time: 0.00131011
+Storing 26026 time(0.00181699)
+Finding Episode: 25106
+Query time: 0.000732899
+Storing 27027 time(0.00184798)
+Finding Episode: 25901
+Query time: 0.00355697
+Storing 28028 time(0.0018971)
+Finding Episode: 28206
+Query time: 0.00223398
+Storing 29029 time(0.0019691)
+Finding Episode: 27217
+Query time: 0.000627995
+Storing 30030 time(0.00196886)
+Finding Episode: 28526
+Query time: 0.000825167
+Storing 31031 time(0.00200415)
+Finding Episode: 31388
+Query time: 0.000452042
+Storing 32032 time(0.00201392)
+Finding Episode: 31953
+Query time: 0.00791216
+Storing 33033 time(0.00204897)
+Finding Episode: 32486
+Query time: 0.000715017
+Storing 34034 time(0.00200391)
+Finding Episode: 33732
+Query time: 0.000634909
+Storing 35035 time(0.00205398)
+Finding Episode: 34680
+Query time: 0.000662804
+Storing 36036 time(0.00211)
+Finding Episode: 34205
+Query time: 0.000662088
+Storing 37037 time(0.00342798)
+Finding Episode: 34503
+Query time: 0.000648022
+Storing 38038 time(0.00219989)
+Finding Episode: 38406
+Query time: 0.000469923
+Storing 39039 time(0.00209308)
+Finding Episode: 36701
+Query time: 0.000806093
+Storing 40040 time(0.00771379)
+Finding Episode: 39777
+Query time: 0.000540972
+Storing 41041 time(0.00219893)
+Finding Episode: 38337
+Query time: 0.00250983
+Storing 42042 time(0.00226998)
+Finding Episode: 42263
+Query time: 0.00049305
+Storing 43043 time(0.00220919)
+Finding Episode: 40071
+Query time: 0.00103211
+Storing 44044 time(0.00256681)
+Finding Episode: 40594
+Query time: 0.000677824
+Storing 45045 time(0.00607109)
+Finding Episode: 44697
+Query time: 0.00056386
+Storing 46046 time(0.00248694)
+Finding Episode: 45354
+Query time: 0.000674963
+Storing 47047 time(0.00240684)
+Finding Episode: 45747
+Query time: 0.000682831
+Storing 48048 time(0.00240707)
+Finding Episode: 48280
+Query time: 0.000476122
+Storing 49049 time(0.00244904)
+System halted.
+Interrupt received.This Agent halted.
+Processor 4 online
+Processor 9 online
+Processor 10 online
+Processor 11 online
+Processor 7 online
+Processor 1 online
+Processor 3 online
+Processor 2 online
+Processor 5 online
+Processor 8 online
+Processor 6 online
+Processor 12 online
+Processor 26 online
+Processor 13 online
+Processor 27 online
+Processor 23 online
+Processor 29 online
+Processor 14 online
+Processor 30 online
+Processor 21 online
+Processor 24 online
+Processor 19 online
+Processor 31 online
+Processor 22 online
+Processor 28 online
+Processor 17 online
+Processor 25 online
+Processor 15 online
+Processor 33 online
+Processor 16 online
+Processor 32 online
+Processor 18 online
+Processor 20 online
