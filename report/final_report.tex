@@ -158,47 +158,36 @@ sections describe how the episodes are stored and retrieved on each worker.
 
 \subsubsection{Storage}
 
-Each worker holds a window of episodes that is some subinterval of the agent's history. 
+Each worker has its own database that contains some window or subinterval of the agent's history. 
+The workers form a chain from lowest to highest, with more recent episodes at the 
+lower processors and the oldest episodes at the highest ones. No two workers have
+overlapping windows, and taken all together they form the entire history. 
 This window's size can be adjusted per worker dynamically as
 the agent accumulates new episodes and conducts queries of episodic memory. 
+When a worker hits its cap of episodes, it will generate an episode-diff structure
+from its local database and send it to its immediate neighbor down the chain, 
+which will then add the episode. The last worker in the chain will not remove any episodes. 
 
-This
-division of episodes, and the number of episodes allowed on each worker, load
-balances the work to be done. When a worker hits its cap of episodes, it will
-remove its oldest episode from its graph and database to send to its immediate
-neighbor. The neighbor will add the episode. Again what is being sent is not
-actually episodes, but diff structure contain the nodes and edges of the graph
-that were added or removed.
-
-The last worker in the chain will not remove any episodes. The earlier workers
-contain the most recent episodes. For example, running with 8 processors,
-processor 0 is the agent, processor 1 is the manager, processor 2 receives the
-newest episodes from the manager, and processor 7 contains the oldest episodes.
-
-When the agent creates another episode this new episode is messaged to the
-Manager. The Manager notifies all worker processors that it has received a new
-episode. If the Worker has an episode to send, meaning that it contains at least
-as many episodes as its window size, it will immediately remove the oldest
-episode to send to its neighbor. The first worker processor then receives the
-new episode from the Manager. It is possible that a worker that removed and sent
-an episode will not actually receive a new one, temporarily under filling its
-episode allocation by 1.
-
-This prevents a linear problem that occurred on the first implementation of
-episode addition. If a worker waits to see if he will receive a new episode from
-his neighbor, you have to wait potentially O(p) time, where p is the number of
-processors, for the episode addition to propagate to the last worker. The
-process to remove the oldest episode is the most expensive computation wise in
-the storage of new episodes, so this linear delay significantly slowed down the
-storage process of episodes.
+When the agent creates another episode, this new episode is sent to the
+manager. The manager notifies all worker processors that it has received a new
+episode. If the worker has an episode to send (meaning that it contains at least
+as many episodes as its window size), it will immediately send it to its neighbor. 
+The first worker processor then receives the new episode from the manager. 
+Thus every worker does one send and one receive, and those do not depend
+on the other processors. This prevents a linear problem that occurred on the
+first implementation of episode addition. If the addition of a new episode needs
+to propagate down the entire chain, the last worker has to wait potentially O(p) time, 
+where p is the number of processors. Removing an episode is an expensive operation, 
+so this linear delay was signficant. By having each worker make a local decision
+about whether to send to the next, we sped up episode storage dramatically. 
 
 
 \subsection{Retrieval}
 When the agent wants to retrieve an episode it sends this request and the cue in
-a message to the Manager. The Manager broadcasts the search request message to
+a message to the manager. The manager broadcasts the search request message to
 all worker processes. Once a worker receives a search request it performs an
-identical search algorithm as done in the serial version, only on its partition
-of the episode data that it has. Each episode will return its best match, if it
+identical search algorithm as done in the serial version, only on its local portion
+of the history. Each worker will return its best match, if it
 has a match, in a message to the manager.
 
 The manager selects the best episode matching from the responses. If it receives
@@ -207,7 +196,7 @@ is still waiting on, such as getting a full graph match on the first worker, the
 manager will immediately send this response back to the agent. As is done in the
 serial version, the manager selects the best match based on, in order of
 importance, full graph matching, the match score, and if a tie recency. The
-division of episodes insures that if a worker processor has a lower id than
+division of episodes ensures that if a worker processor has a lower id than
 another, it episodes will always be more recent.
 
 \subsection{Dynamic Load Balancing}
@@ -225,7 +214,9 @@ has received it can calculate when it needs to increase its window size without
 messaging any other processors. The equation for determining if the window size
 needs to be increased is shown below in equation 1.
 
-\begin{equation}incrWindow? = ((count  \bmod  (2^{(P-i)} -1) ) == 0)\end{equation}
+\begin{equation}
+incrWindow? = ((count  \bmod  (2^{(P-i)} -1) ) == 0)
+\end{equation}
 
 The $count$ is the total number of episodes this worker has received, $P$ is the
 number of processors, and $i$ is the id of the worker processor. Every time the
@@ -280,9 +271,9 @@ effect on window size growth and distribution.
 \section{Experimental Results}
 \subsection{Evaluation Specifics}
 
-To evaluate the new episodic memory a variety of agents with different epmem
-behaviors were tested. The number of episodes, number of processors, and size
-and complexity of cues were all varied to analyze the timing behavior of the new
+To evaluate the new episodic memory a variety of retrieval behaviors were tested. 
+The number of episodes, number of processors, and distance of cues
+ were all varied to analyze the timing behavior of the new
 code, compared against the serial version. The results were evaluated with the
 different strategies for load balancing episodes among the worker processors as
 well. It is important not only to analyze the timing differences in retrievals,
@@ -323,7 +314,12 @@ sampling of the addition times for comparison.
 
 
 \subsection{Long Retrievals}
-Our first trial was to cover the worst case in retrieval time: when the episode is at the beginning of the agent's history or there are no exact matches. In this case the agent must search through all the episodes to find the one to return. This represents the greatest opportunity for us to take advantage of the parallelism. For this test we had the agent retrieve episodes in the first ten percent of its history. We also varied the number of worker processors from 1 to 32 and compared the results with the unmodified Soar version (UM) and a version with our modifications but with everything running on a single thread (ST). 
+Our first trial was to cover the worst case in retrieval time: when the episode is at the beginning of 
+the agent's history or there are no exact matches. In this case the agent must search through all 
+the episodes to find the one to return. This represents the greatest opportunity for us to take advantage 
+of the parallelism. For this test we had the agent retrieve episodes in the first ten percent of its history. 
+We also varied the number of worker processors from 1 to 32 and compared the results with the unmodified 
+Soar version (UM) and a version with our modifications but with everything running on a single thread (ST). 
 
 \begin{figure}
         \centering
@@ -343,7 +339,15 @@ Our first trial was to cover the worst case in retrieval time: when the episode 
 	\label{fig:long}
 \end{figure}
 
-The results as shown in figure \ref{fig:long} show that our version with 1 worker performs as well as the unmodified Soar version (UM). This gives good support that our modifications have not slowed down the retrieval processes in the serialized case. The single thread (ST) case was a bit slower than the case with 1 worker, but it has to manage two databases on the same processor. The retrieval time shows linear growth as expected, since the agent has to search through all of the linearly episodes to find a match. For the results on the left with an equal distribution of episodes, we get an improvement of performance until about 16 processors. This represents the greatest possibility for speedup because all the episodes need to be searched, and they are distributed evenly among the processors. For the results on the right with an exponential distributino of processors, after 8 processors adding any more does not improve speedup. In addition, the times are slower than for the equal distribution. This is to be expected, since some processors have many more episodes than others, and so take much longer to do the search. 
+The results as shown in figure \ref{fig:long} show that our version with 1 worker performs as well as the unmodified Soar version (UM). 
+This gives good support that our modifications have not slowed down the retrieval processes in the serialized case. 
+The single thread (ST) case was a bit slower than the case with 1 worker, but it has to manage two databases on the same processor. 
+The retrieval time shows linear growth as expected, since the agent has to search linearly through all of the episodes to find a match. 
+For the results on the left with an equal distribution of episodes, we get an improvement of performance until about 16 processors. 
+This represents the greatest possibility for speedup because all the episodes need to be searched, and they are distributed evenly 
+among the processors. For the results on the right with an exponential distribution of processors, after 8 processors adding any more 
+does not improve performance. In addition, the times are slower than for the equal distribution. This is to be expected, since some 
+processors have many more episodes than others, and so take much longer to do the search. 
 
 
 \subsection{Short Retrievals}
