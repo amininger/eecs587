@@ -59,7 +59,7 @@
 
 %%% The "real" document content comes below...
 
-\title{Parallel Work}
+\title{Super Awesome Parallel Work}
 \author{Aaron Mininger and James Kirk}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
@@ -80,12 +80,36 @@ through time and stores them for later retrievals. The agent can then construct
 a cue to use to search through episodic memory and find an episode that matches.
 
 It is important for the agent to be reactive, which means that each decision cycle
-should be as quick as possible. This places strict constraints on the
+should be as quick as possible. This places very strict constraints on the
 efficiency of any memories to be utilized. The current implementation of Soar’s
 episodic memory has a number of efficient ways of performing a retrieval. However,
 in the worst case (the cue does not have a match or only matches the oldest
 episode) a search must be done through all of the episodes, which can be quite a
-large number as the lifetime of the agent increases. Our goal for this project is to implement
+large number as the lifetime of the agent increases.
+ 
+There are many challenges to implementing a parallel version of this mechanism.
+ When a retrieval happens it must search over N episodes, but N is constantly 
+increasing, likely every decision cycle. Each time a new episode is added, the 
+episodes need to be rebalanced, but in an efficient manner without substantial 
+amounts of shuffling and messaging and without disturbing the strict ordering
+ of episodes. Messaging time is likely to be a bottleneck, especially as the 
+number of processors and episodes increase. It is also unknown if the agent is 
+likely to be retrieving from recent memory, from old memory, or some mix in 
+between.  Efficient load balancing strategies for such behaviors would be 
+different and the episodic memory mechanism should be general enough to handle 
+them all efficiently.
+
+Another challenge, although not directly related parallelizing work, is the difficulty in 
+modifying a large code base, the Soar kernel, without damaging any 
+functionality and maintaining preexisting efficiencies.  In the serial version,
+ all episode data is held in one database and will need to be split into 
+smaller databases on each processor.  There is currently no theory for breaking
+ the episode history into smaller chunks of episodes. Work must be done to add 
+the capability to remove the oldest episode, so that it can be moved to a 
+different processor, a nontrivial task that will also likely be a bottleneck.  It is critical for Soar to run quick decision cycles, so 
+any overhead must be minimal for a parallel implementation to be useful.
+
+Our goal for this project is to implement
 a parallel version of episodic memory and decrease the time needed to perform
 retrievals, while keeping the overhead and storage times low. This will extend the timescales
 that reactive agents can be run on and hopefully lead to longer-lived agents. 
