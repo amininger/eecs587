@@ -228,7 +228,9 @@ another, it episodes will always be more recent.
 
 \subsection{Dynamic Load Balancing}
 
-The window size of each worker determines the overall load balancing of the
+As mentioned before, our implementation requires some form of load balancing
+because new episodes keep coming, and they need to be spread out over
+the processors. The window size of each worker determines the overall load balancing of the
 retrieval process. The window size does not need to be fixed, and as we are
 continuously adding episodes, we can increase the window size for each agent to
 scale with the number of episodes. There are a few different window size scaling
@@ -242,13 +244,35 @@ messaging any other processors. The equation for determining if the window size
 needs to be increased is shown below in equation 1.
 
 \begin{equation}
-incrWindow? = ((count  \bmod  (2^{(P-i)} -1) ) == 0)
+incrWindow? = (count  \% (P - i )) == 0)
 \end{equation}
 
 The $count$ is the total number of episodes this worker has received, $P$ is the
 number of processors, and $i$ is the id of the worker processor. Every time the
-worker has received another $ 2^(P-i) -1 $ episodes it should increment its window
+worker has received another $ (P-i) $ episodes it should increment its window
 size by 1.
+
+Another strategy is to have more worker processors share the more recent episodes
+and let the distant past be stored on the last processor. This of course will slow down
+long retreivals, but if the agent is only doing short ones it will be a net gain. We designate 
+this the \emph{shift} strategy, where the last processor has some ratio $r$ of the total
+history and the rest have an even distribution of the $(1-r)$ portion. Thus the 
+last worker always keeps an episode and increments its window size, and the others 
+have the following equation: 
+
+\begin{equation}
+\begin{split}
+frac := \frac{1-r}{p-1} \\
+keep\_freq := \frac{frac(p - i -1) + r}{frac}
+\end{split}
+\end{equation}
+
+Where $frac$ is the fraction of the history processor $i$ should have, and $keep\_freq$
+is the number of episodes to receive before keeping one. This is estimated by the fraction
+of the history contained by itself and all the following processors $frac(p - i - 1) + r$ then 
+dividing by $frac$. Notice the only non-local piece of information it needs is the
+size of the last processor $r$. This information is broadcast to each worker 
+by the master when it changes. 
 
 Another strategy is to have the size of the window increase exponential from the
 first worker to the last worker, which holds the oldest episodes. For example
@@ -261,7 +285,7 @@ from the previous strategy. In this case if the matching episode is in the first
 even window strategy. Similar to the equation for the previous strategy, the
 worker can determine when to increase its window size.
 
-\begin{equation}incrWindow? = ((count  \bmod  (P-i) ) == 0)\label{eq.1}\end{equation}
+\begin{equation}incrWindow? = (count  \bmod  (P-i)  == 0)\label{eq.1}\end{equation}
 
 However, the idea of Soar is to have general purpose mechanisms like episodic
 memory that are useful for agents. When developing an agent, there should not be
@@ -271,29 +295,30 @@ episodic memory retrievals, whether they are mostly in recent memory or older
 memory or some mix. Even with a given agent this behavior could differ depending
 on the situation the agent is in.
 
-To address this situation a third strategy was developed to split the difference
-between the above strategies and to dynamically alter behavior based on
-retrievals. The difference between above strategies number of episodes received
-before a window size increase, $2^(P-i) -1$ in the first case and $P-i$ in the
-second case. In the dynamic version we select a value between these two by means
-of a split variable between 0 and 1.0. The equations for this algorithm can be
-seen below.
+To address this situation we wished to develop a way for episodic memory
+to automatically tune itself and split the difference
+between the above strategies. This allows it to dynamically alter behavior based on
+retrievals. This is performed by adjusting the fraction of the history the last processor
+has to between $1/p$ and $1$ exclusive. If a lot of long retrievals occur within that
+last processor then it is too big and it decreases its fraction. On the other hand, 
+if a lot of short retrievals occur that land in other processors, it can increase its fraction to
+compress those other ones more. Formally for the first case (decrease fraction) the equation is:
+\begin{equation}
+frac = max(frac * (1 - tuning/2), 1/p)
+\end{equation}
+And the equation for the second case (increase fraction) is:
+\begin{equation}
+frac = frac + (1 - frac) * tuning * (p - ret\_owner)/(p-1)
+\end{equation}
+Where $ret\_owner$ is the processor id that contained the retrieved episode, and $tuning$
+is a parameter that controls how quickly the fraction changes. In our results, we compare
+the dynamic version to the static ones and see how performance changes. 
 
-\begin{equation}x = (2^(P-i) -1)*split + (P-i) *(1-split)\end{equation}
-\begin{equation}incrWindow? = ((count \bmod x) == 0)\end{equation}
-
-The value of split is initially set to 0.5, splitting the difference evenly so
-that the episode allocation is not even, but also less than exponential in
-increase. Every time a retrieval occurs, the worker episode that returned the
-best result is used to update the split value, a global value the is calculated
-by the manager and broadcast to all workers. An update split value can be
-calculated by the percentile that the best response came from. If the best
-response comes from the earliest worker, processor 2, the update value will be
-1, and if from the oldest worker the update value will be 0. The split value is
-averaged with this update value using a tuning parameter. If the parameter is
-0.5 then the update value contributes to half of the new split value. In
-experimentation this parameter was varied over a few different values to see the
-effect on window size growth and distribution.
+We did experiment with another distribution scheme which was based on storing the
+episodes on processors with exponentially increasing sizes. So processor $p_i$ would store $\alpha2^i$ episodes 
+where $\alpha$ was gradually increased to make sure the entire history could fit across the processors. 
+We did not get good results with this version, probably because even for the short term case we could 
+get at most a factor of 2 improvement, which was not discernable from noise for the cases tested. 
 
 \section{Experimental Results}
 This section describes our experimental process and how data was collected. 
@@ -375,8 +400,7 @@ Soar version (UM) and a version with our modifications but with everything runni
                 \includegraphics[width=\textwidth]{images/ret_long_shift}
                 \label{fig:retlexp}
         \end{subfigure}
-        \caption{Running time for long retrievals}\label{fig:animals}
-	\label{fig:long}
+        \caption{Running time for long retrievals}\label{fig:long}
 \end{figure}
 
 The results as shown in figure \ref{fig:long} show that our version with 1 worker performs as well as the unmodified Soar version (UM). 
@@ -492,29 +516,36 @@ Discussion of histograms
 Discussion of results
 
 \begin{table}[h]
-\caption{Table of speedup}
+\caption{Table of speedup (average over last 5 queries)}
 \centering
     \begin{tabular}{|l|r|r|r|r|r|r|r|r|r|}
         \hline
-        ~  & Equal Long & Equal Short & Equal Rand & Exp Long & Exp Short & Exp Rand & Dyn Long & Dyn Short & Dyn Rand \\ \hline
-        1  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\  \hline
-        2  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
-        4  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
-        8  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
-        16 & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
-        32 & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\
+        ~  & Equal Long & Equal Short & Equal Rand & Shift Long & Shift Short & Shift Rand & Dyn Long & Dyn Short & Dyn Rand \\ \hline
+        1  & 1          & 1                  & 1               & 1            & 1        & 1      & ~          & ~         & ~        \\  \hline
+        2  & 1.83          & 1.12           & 1.65           & 1.37         & 1.02       & 1.65         & ~        & ~         & ~        \\ \hline
+        4  & 3.16          & 2.84           & 4.05           & 1.28         & 1.16        & 4.06        & ~        & ~         & ~        \\ \hline
+        8  & 5.37          & 4.18          & 3.02         & 1.34         & 1.65        & 3.02        & ~        & ~         & ~        \\ \hline
+        16 & 7.99          & 5.11           & 1.65          & 1.39         & 2.08       & 1.65         & ~        & ~         & ~        \\ \hline
+        32 & 9.43          & 6.83          & 5.12          & 1.27         & .40        & 5.12        & ~        & ~         & ~        \\
         \hline
     \end{tabular}
 \end{table}
 
 \subsection{Storage}
 
-What's going on with storage
+During a storage phase, each processor does at most an addition and a removal. The time
+to do an addition does not scale with the number of episodes, so it is very efficient. However, 
+a removal requires searching over all edges in the database, so it does grow with the number of 
+episodes. Thus as the number of episodes increases, removal times will dominate storage times. 
+This can be shown in figure \ref{fig:storage}, where the storage time with one processor is very flat, since
+no removals are performed. But when multiple processors are added, the removals increase the
+storage time. We believe that there are more efficient ways to remove an episode and that a 
+good future work would be to improve removals. 
 
 \begin{figure}[h]
-\caption{Comparison of Storing times}
+\caption{Comparison of storage times}\label{fig:storage}
 \centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\includegraphics[width=0.75\textwidth]{images/storage_even}
 \end{figure}
 
 Description of results
