@@ -41,12 +41,6 @@ epmem_manager::epmem_manager(int startWindowSize, EPMEM_DIV_TYPE divType,
 	windowSize = startWindowSize;
 	divisionType = divType;
 	tuning = tuningParam;
-	if (divisionType == EXP_DIV)
-		split = 1.0;
-	else if (divisionType == EVEN_DIV)
-		split = 0.0;
-	else // DYNAMIC_DIV
-		split = 0.5;
 	//evenDiv = evenDivFlag;
 	msgCount = 1;
 	sendEpNextTime = false;
@@ -65,7 +59,18 @@ void epmem_manager::initialize()
     numProc = MPI::COMM_WORLD.Get_size();
     id = MPI::COMM_WORLD.Get_rank();
       
-    
+	if(numProc == 3){
+		divisionType = EVEN_DIV;
+	}
+   if(divisionType == EXP_DIV){
+	split = .75;
+	tuning = 0; 
+   } else if(divisionType == EVEN_DIV){
+	split = 1.0/(numProc-2);
+	tuning = 0;
+   } else {
+        split = 1.0/(numProc-2);
+   } 
     
     // launch appropraite handler function for processor/role
     switch(id)
@@ -407,10 +412,20 @@ void epmem_manager::manager_message_handler()
 
 			if (divisionType == DYNAMIC_DIV)
 			{
-				double epLocPercentile = 1.0 - (((double)best_msg->source - 2.0)/((double)(numProc)-3.0));
+				double p = (double)numProc;
+				if(best_msg->source == p - 1 || (do_graph_match && !best_rsp->best_graph_matched)){
+					split *= (1 - tuning * .5);
+					if(split < 1.0/(p-2)){
+						split = 1.0/(p - 2);
+					}
+				} else {	
+					split += (1 - split) * tuning * (p - best_msg->source - 1)/(p - 3);
+				}
+					
+				//double epLocPercentile = 1.0 - (((double)best_msg->source - 2.0)/((double)(numProc)-3.0));
 				//use the location of result to update split value
 				
-				split = split*tuning + epLocPercentile*(1-tuning);
+				//split = split*tuning + epLocPercentile*(1-tuning);
 				//message new split value to all workers
 				// TODO May have deadlock msg issue
 				epmem_msg *smsg = (epmem_msg*)malloc(sizeof(epmem_msg) + sizeof(double));
@@ -575,7 +590,7 @@ void epmem_manager::worker_msg_handler()
 			rspMsg->count = msgCount;
 			DEBUG("Responding with search result");
 			MPI::COMM_WORLD.Send(rspMsg, rspMsg->size, MPI::CHAR, MANAGER_ID, 1);	
-			if (divisionType == DYNAMIC_DIV)
+			//if (divisionType == DYNAMIC_DIV)
 			{
 				std::cout << id << " Window size " << windowSize << std::endl;
 			}
@@ -607,13 +622,18 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 	}
 	// determine if this episode addition also needs a window size increase
 	///qqqqqq
-	totalEpCnt++;
-	double mod = ((double)(pow(2, (numProc-id)) -1.0)*split + (double)(numProc-id)*(1.0-split));
-	
-	if (totalEpCnt > mod)
-	{
+	if(id == numProc - 1){
 		windowSize++;
-		totalEpCnt -=mod;
+	} else {
+		double ratio = (1-split)/(static_cast<double>(numProc) - 3);
+		double mod = (ratio * ((double)numProc - id - 1) + split) / ratio;
+		totalEpCnt++;
+	
+		if (totalEpCnt > mod)
+		{
+			windowSize++;
+			totalEpCnt -=mod;
+		}
 	}		
 	//handle adding episode and shift last episode if needed
 	received_episode(episode);

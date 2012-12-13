@@ -33,11 +33,11 @@ sp {simple*apply*init-simple
 sp {simple*apply*init-simple*parameters
 	(state <s> ^operator.name init-simple)
 -->
-	(<s> ^min-perc .90			# min percentile to retrieve from
-		 ^max-perc 1.0			# max percentile to retrieve from
-		 ^query-time 1000		# time of the first query 
-		 ^query-interval 1000	# time between queries
-		 ^stop-time 50000)		# time to stop
+	(<s> ^min-perc .895		# min percentile to retrieve from
+		 ^max-perc .905			# max percentile to retrieve from
+		 ^query-time 500		# time of the first query 
+		 ^query-interval 500	# time between queries
+		 ^stop-time 50050)		# time to stop
 }
 
 # Initialize the digits structure
@@ -315,17 +315,17 @@ sp {apply*step*query*success
 #   (write (crlf) |EPMEM QUERY SUCCESS: | <id>)
 }
 
-#sp {apply*step*query*stats
-#   (state <s> ^name simple
-#              ^operator.name step
-#              ^epmem.result <res>)
-#   (<res> ^success 
-#          ^match-cardinality <card>
-#          ^normalized-match-score <score>
-#          ^graph-match <graph>)
-#-->
-#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|#)
-#}
+sp {apply*step*query*stats
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem.result <res>)
+   (<res> ^success 
+          ^match-cardinality <card>
+          ^normalized-match-score <score>
+          ^graph-match <graph>)
+-->
+#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|)
+}
 
 
 #

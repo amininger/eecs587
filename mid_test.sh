@@ -1,7 +1,7 @@
 #!/bin/sh
 #PBS -S /bin/sh
 #PBS -N AM-mid
-#PBS -l feature=xeon5650,qos=flux,nodes=3:ppn=12,walltime=1:00:00,mem=4gb
+#PBS -l feature=xeon5650,qos=flux,nodes=3:ppn=12,walltime=1:30:00,mem=4gb
 #PBS -M mininger@umich.edu
 #PBS -q flux
 #PBS -A eecs587f12_flux
@@ -35,7 +35,7 @@ do
   for np in 3 4 6 10 18 34  
   do
     echo -e "\n\n-- NP($np) Use_Var($use_var) --"
-    mpirun -np $np launch 10 $use_var 1 ../../agents/qt_mid.soar
+    mpirun -np $np launch 10 $use_var 0 ../../agents/qt_mid.soar
   done
 done
 
