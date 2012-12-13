@@ -325,9 +325,117 @@ other episode addition is quicker. The offset ensures that we get an even
 sampling of the addition times for comparison.
 
 
-\subsection{Data Results}
+\subsection{Long Retrievals}
+Description of the test case
+\begin{figure}[h]
+\caption{Results for long retrievals and equal episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
 
-\section{Analysis}
+\begin{figure}[h]
+\caption{Results for long retrievals and exponential episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of results
+
+
+\subsection{Short Retrievals}
+Description of the test case
+\begin{figure}[h]
+\caption{Results for short retrievals and equal episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Results for short retrievals and exponential episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of results
+
+\subsection{Random Retrievals}
+Description of the test case
+\begin{figure}[h]
+\caption{Results for random retrievals and equal episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Results for random retrievals and exponential episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\subsection{Dynamic Partitioning}
+Description of the modifications
+\begin{figure}[h]
+\caption{Histogram with long retrievals}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Histogram with short retrievals}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Histogram with random retrievals}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of histograms
+
+\begin{figure}[h]
+\caption{Performance for short retrievals and parameter tuning}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Performance for random retrievals and parameter tuning}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of results
+
+\begin{table}[h]
+\caption{Table of speedup}
+\centering
+    \begin{tabular}{|l|r|r|r|r|r|r|r|r|r|}
+        \hline
+        ~  & Equal Long & Equal Short & Equal Rand & Exp Long & Exp Short & Exp Rand & Dyn Long & Dyn Short & Dyn Rand \\ \hline
+        1  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\  \hline
+        2  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        4  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        8  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        16 & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        32 & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Storage}
+
+What's going on with storage
+
+\begin{figure}[h]
+\caption{Comparison of Storing times}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Description of results
+
 
 \section{Conclusions}
 
