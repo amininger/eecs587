@@ -33,8 +33,8 @@ sp {simple*apply*init-simple
 sp {simple*apply*init-simple*parameters
 	(state <s> ^operator.name init-simple)
 -->
-	(<s> ^min-perc .90			# min percentile to retrieve from
-		 ^max-perc 1.0			# max percentile to retrieve from
+	(<s> ^min-perc .895		# min percentile to retrieve from
+		 ^max-perc .905			# max percentile to retrieve from
 		 ^query-time 500		# time of the first query 
 		 ^query-interval 500	# time between queries
 		 ^stop-time 50050)		# time to stop
@@ -252,14 +252,6 @@ sp {elaborate*random-ep*digits
 	(<rand> ^digit.<digit> (mod (div <rand-num> <pow10>) 10))
 }
 
-# creates the upper bound
-sp {elaborate*query*upper-bound
-	(state <s> ^name simple
-		^query-time <t>)
--->
-	(<s> ^query-bound (+ <t> 10))
-}
-
 # Writes the random digit
 sp {write*random-ep
 	(state <s> ^name simple
@@ -272,23 +264,11 @@ sp {write*random-ep
 ### Queries
 # when time = query-time, do a query
 
-sp {apply*step*update*query
-	(state <s> ^operator.name step
-			^time <t>
-			^query-bound <t>
-			^query-interval <dt>
-			^query-time <qt>)
--->
-	(<s> ^query-time (+ <qt> <dt>)
-		^query-time <qt> -)
-}
-
 sp {apply*step*do-query
 	(state <s> ^operator.name step
 				^epmem.command <cmd>
 				^time <t>
-				^query-time <= <t>
-				^query-bound > <t>
+				^query-time <t>
 				^query-interval <dt>
 				^random-ep <ep>)
 	(<ep> ^digit.one <d1>
@@ -306,6 +286,9 @@ sp {apply*step*do-query
 			^four.digit <d4>
 			^five.digit <d5>
 			^six.digit <d6>)
+	(<s> ^query-time <t> -
+		^query-time (+ <t> <dt>))
+	(write (crlf) |Finding Episode: | <n>)
 }
 	
 # Remove a query when the result is gotten
@@ -332,17 +315,17 @@ sp {apply*step*query*success
 #   (write (crlf) |EPMEM QUERY SUCCESS: | <id>)
 }
 
-#sp {apply*step*query*stats
-#   (state <s> ^name simple
-#              ^operator.name step
-#              ^epmem.result <res>)
-#   (<res> ^success 
-#          ^match-cardinality <card>
-#          ^normalized-match-score <score>
-#          ^graph-match <graph>)
-#-->
-#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|#)
-#}
+sp {apply*step*query*stats
+   (state <s> ^name simple
+              ^operator.name step
+              ^epmem.result <res>)
+   (<res> ^success 
+          ^match-cardinality <card>
+          ^normalized-match-score <score>
+          ^graph-match <graph>)
+-->
+#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|)
+}
 
 
 #

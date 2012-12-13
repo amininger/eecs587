@@ -35,9 +35,9 @@ sp {simple*apply*init-simple*parameters
 -->
 	(<s> ^min-perc 0			# min percentile to retrieve from
 		 ^max-perc .10			# max percentile to retrieve from
-		 ^query-time 1000		# time of the first query 
-		 ^query-interval 1000	# time between queries
-		 ^stop-time 50000)		# time to stop
+		 ^query-time 500		# time of the first query 
+		 ^query-interval 500	# time between queries
+		 ^stop-time 50050)		# time to stop
 }
 
 # Initialize the digits structure
