@@ -324,9 +324,9 @@ sp {apply*step*query*success
 #          ^normalized-match-score <score>
 #          ^graph-match <graph>)
 #-->
-#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|)
+#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|#)
 #}
-#
+
 
 #
 #sp {apply*step*query*failure
