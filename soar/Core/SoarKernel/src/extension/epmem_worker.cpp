@@ -772,13 +772,14 @@ void epmem_worker::remove_old_edges(epmem_episode_diff* episode){
 }
 
 epmem_episode_diff* epmem_worker::remove_oldest_episode(){
-	if(epmem_stmts_common->get_min_time->execute() != soar_module::row || 
-        epmem_stmts_common->get_max_time->execute() != soar_module::row){
-		// No episodes are stored in the database
-        epmem_stmts_common->get_min_time->reinitialize();
-        epmem_stmts_common->get_max_time->reinitialize();
+	if(epmem_stmts_common->get_min_time->execute() != soar_module::row){
+		epmem_stmts_common->get_min_time->reinitialize();
 		return NIL;
-	} 
+	}
+	if(epmem_stmts_common->get_max_time->execute() != soar_module::row){
+		epmem_stmts_common->get_max_time->reinitialize();
+		return NIL;
+	}
 
 	// Min and max times in the times table
 	epmem_time_id min_time = epmem_stmts_common->get_min_time->column_int(0);
@@ -787,6 +788,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
     epmem_stmts_common->get_min_time->reinitialize();
     epmem_stmts_common->get_max_time->reinitialize();
 
+	double start_time = MPI_Wtime();
     if(max_time == 0){
         return NIL;
     }
@@ -854,6 +856,7 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 		while(epmem_stmts_removal->get_edge_now->execute() == soar_module::row){
 			edges_to_add.push_back(epmem_edge_unique(epmem_stmts_removal->get_edge_now));
 		}
+		epmem_stmts_removal->get_edge_now->reinitialize();
 
 		// Update the starting values of all old edge_nows to that of the episode being removed
 		epmem_stmts_removal->update_edge_now_start->bind_int(1, min_time);
@@ -889,8 +892,9 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
 			epmem_stmts_graph->add_node_point->bind_int(2, min_time);
 			epmem_stmts_graph->add_node_point->execute(soar_module::op_reinit);
 		}
-		
+
 		// Update the starting values of all node_ranges with start values in the last_removal
+		//
 		epmem_stmts_removal->update_node_range_start->bind_int(1, min_time);
 		epmem_stmts_removal->update_node_range_start->bind_int(2, last_removal);
 		epmem_stmts_removal->update_node_range_start->execute(soar_module::op_reinit);
@@ -973,7 +977,6 @@ epmem_episode_diff* epmem_worker::remove_oldest_episode(){
         epmem_stmts_common->remove_time->bind_int(1, min_time);
         epmem_stmts_common->remove_time->execute(soar_module::op_reinit);
 	}
-
 	return episode;
 }
 
