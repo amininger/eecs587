@@ -37,7 +37,7 @@ sp {simple*apply*init-simple*parameters
 		 ^max-perc 1.0			# max percentile to retrieve from
 		 ^query-time 1000		# time of the first query 
 		 ^query-interval 1000	# time between queries
-		 ^stop-time 100000)		# time to stop
+		 ^stop-time 50000)		# time to stop
 }
 
 # Initialize the digits structure
@@ -324,9 +324,9 @@ sp {apply*step*query*success
 #          ^normalized-match-score <score>
 #          ^graph-match <graph>)
 #-->
-#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|)
+#   (write (crlf) |(card, score, graph): (| <card> |, | <score> |, | <graph> |)|#)
 #}
-#
+
 
 #
 #sp {apply*step*query*failure

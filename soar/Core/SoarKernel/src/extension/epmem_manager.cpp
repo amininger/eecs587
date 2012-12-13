@@ -276,13 +276,13 @@ void epmem_manager::manager_message_handler()
 			int received = 1;
 			query_rsp_data *rsp;
 			bool do_graph_match = true; //default always true
-
-						
+									
 			//if graph match found by first worker, this is best
 			if (best_msg->source == 2 && best_rsp->best_graph_matched && 
 				do_graph_match)
+			{
 				best_found = true;
-			
+			}
 			std::list<int> notrec;
 			for (int i = FIRST_WORKER_ID; i < numProc; i++)
 				notrec.push_back(i);
@@ -337,7 +337,27 @@ void epmem_manager::manager_message_handler()
 					best_rsp = rsp;
 					break;
 				}
+
 				
+				if (best_rsp->best_graph_matched)
+				{
+					best_found = true;
+					std::list<int>::const_iterator it;
+					for(it=notrec.begin(); it!=notrec.end(); it++)
+					{
+						if (*it < best_msg->source)
+						{
+							best_found = false;
+							break;
+						}
+					}
+					if (best_found)
+					{
+						free(rsp);
+						break;
+					}
+				}
+								
                 // result is better if:
 				//     first to find episode
 				//     score is better
@@ -381,7 +401,7 @@ void epmem_manager::manager_message_handler()
 			//respond with data to agent
 			msgCount++;
 			DEBUG("Responding with best result");
-						
+			
 			MPI::COMM_WORLD.Send(best_msg, best_size, MPI::CHAR, AGENT_ID, 1);
 			
 
@@ -586,13 +606,15 @@ void epmem_manager::receive_new_episode(int64_t *ep_buffer, int dataSize)
 		return;
 	}
 	// determine if this episode addition also needs a window size increase
-	
+	///qqqqqq
 	totalEpCnt++;
-	int mod = (int) ((double)(pow(2, (numProc-id)) -1.0)*split + (double)(numProc-id)*(1.0-split));
+	double mod = ((double)(pow(2, (numProc-id)) -1.0)*split + (double)(numProc-id)*(1.0-split));
 	
-	if ((totalEpCnt % mod) == 0)
+	if (totalEpCnt > mod)
+	{
 		windowSize++;
-			
+		totalEpCnt -=mod;
+	}		
 	//handle adding episode and shift last episode if needed
 	received_episode(episode);
 	delete episode;

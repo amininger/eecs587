@@ -45,7 +45,7 @@ private:
 	int msgCount;
     int id;
 	
-	int totalEpCnt;
+	double totalEpCnt;
     int windowSize;
     int currentSize;
 	bool sendEpNextTime;
