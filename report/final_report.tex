@@ -83,7 +83,7 @@ in the worst case (the cue does not have a match or only a match in the oldest
 episode) a search must be done through all of the episodes, which can be quite a
 large number depending on the lifetime of the agent.
 
-\subsection{Episodic Memory in Soar}
+\section{Episodic Memory in Soar}
 Working memory is represented as a directed (possibly cyclic) graph. It consists
 of a list of working memory elements (wme’s) that represent an edge in the graph
 (starting node, edge name, ending node). During the storage of the current state
@@ -161,9 +161,9 @@ sections describe how the episodes are stored and retrieved on each worker.
 
 \subsection{Storage}
 
-Kernel modifications and Database allocation
+\subsubsection{Kernel modifications and Database allocation}
 
-Adding new episodes
+\subsubsection{Adding new episodes}
 
 Each worker holds a section of episodes. This size is determined by the window
 size of each episode. This window size can be adjusted per worker dynamically as
@@ -230,10 +230,11 @@ has received it can calculate when it needs to increase its window size without
 messaging any other processors. The equation for determining if the window size
 needs to be increased is shown below in equation 1.
 
-$incrWindow? = ((count \%  2^(P_i) -1 ) == 0)$
-Where count is the total number of episodes this worker has received, P is the
-number of processors, and i is the id of the worker processor. Every time the
-worker has received another $ 2^(P_i) -1 $ episodes it should increment its window
+\begin{equation}incrWindow? = ((count  \bmod  (2^{(P-i)} -1) ) == 0)\end{equation}
+
+The $count$ is the total number of episodes this worker has received, $P$ is the
+number of processors, and $i$ is the id of the worker processor. Every time the
+worker has received another $ 2^(P-i) -1 $ episodes it should increment its window
 size by 1.
 
 Another strategy is to have the size of the window increase exponential from the
@@ -245,9 +246,9 @@ agent is always retrieving recent episode this will likely be an improvement
 from the previous strategy. In this case if the matching episode is in the first
 70 episodes, the exponential window size strategy will likely finish before an
 even window strategy. Similar to the equation for the previous strategy, the
-worker can determine when to increase its window size. (equation 2)
+worker can determine when to increase its window size.
 
-$incrWindow? = ((count \%  P_i ) == 0)$
+\begin{equation}incrWindow? = ((count  \bmod  (P-i) ) == 0)\label{eq.1}\end{equation}
 
 However, the idea of Soar is to have general purpose mechanisms like episodic
 memory that are useful for agents. When developing an agent, there should not be
@@ -260,12 +261,13 @@ on the situation the agent is in.
 To address this situation a third strategy was developed to split the difference
 between the above strategies and to dynamically alter behavior based on
 retrievals. The difference between above strategies number of episodes received
-before a window size increase, $2^(P_i) -1$ in the first case and $P_i$ in the
+before a window size increase, $2^(P-i) -1$ in the first case and $P-i$ in the
 second case. In the dynamic version we select a value between these two by means
 of a split variable between 0 and 1.0. The equations for this algorithm can be
 seen below.
 
-$mod = (2^(P_i) -1)*split + (P_i) *(1-split) incrWindow? = ((count \%  mod ) == 0)$
+\begin{equation}x = (2^(P-i) -1)*split + (P-i) *(1-split)\end{equation}
+\begin{equation}incrWindow? = ((count \bmod x) == 0)\end{equation}
 
 The value of split is initially set to 0.5, splitting the difference evenly so
 that the episode allocation is not even, but also less than exponential in
@@ -298,8 +300,8 @@ graph match and all episodes must be searched to determine best score, or when
 the graph match is on the earliest episode. The latter condition was implemented
 for the worst case agent. The second agent always was designed to retrieve
 recent episodes. The agent will issue a cue that will have a match in the most
-recent 10% of episode history. The agent will randomly generate a cue that will
-match an episode anywhere between 0 and 10% of the episode history. The final
+recent 10\% of episode history. The agent will randomly generate a cue that will
+match an episode anywhere between 0 and 10\% of the episode history. The final
 agent issues random retrievals that should have a complete graph match, but will
 not be in a designated area of the episode history.
 
@@ -323,9 +325,117 @@ other episode addition is quicker. The offset ensures that we get an even
 sampling of the addition times for comparison.
 
 
-\subsection{Data Results}
+\subsection{Long Retrievals}
+Description of the test case
+\begin{figure}[h]
+\caption{Results for long retrievals and equal episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
 
-\section{Analysis}
+\begin{figure}[h]
+\caption{Results for long retrievals and exponential episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of results
+
+
+\subsection{Short Retrievals}
+Description of the test case
+\begin{figure}[h]
+\caption{Results for short retrievals and equal episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Results for short retrievals and exponential episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of results
+
+\subsection{Random Retrievals}
+Description of the test case
+\begin{figure}[h]
+\caption{Results for random retrievals and equal episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Results for random retrievals and exponential episode distribution}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\subsection{Dynamic Partitioning}
+Description of the modifications
+\begin{figure}[h]
+\caption{Histogram with long retrievals}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Histogram with short retrievals}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Histogram with random retrievals}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of histograms
+
+\begin{figure}[h]
+\caption{Performance for short retrievals and parameter tuning}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Performance for random retrievals and parameter tuning}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Discussion of results
+
+\begin{table}[h]
+\caption{Table of speedup}
+\centering
+    \begin{tabular}{|l|r|r|r|r|r|r|r|r|r|}
+        \hline
+        ~  & Equal Long & Equal Short & Equal Rand & Exp Long & Exp Short & Exp Rand & Dyn Long & Dyn Short & Dyn Rand \\ \hline
+        1  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\  \hline
+        2  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        4  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        8  & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        16 & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\ \hline
+        32 & ~          & ~           & ~          & ~        & ~         & ~        & ~        & ~         & ~        \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Storage}
+
+What's going on with storage
+
+\begin{figure}[h]
+\caption{Comparison of Storing times}
+\centering
+\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\end{figure}
+
+Description of results
+
 
 \section{Conclusions}
 
@@ -334,8 +444,6 @@ sampling of the addition times for comparison.
 Derbinsky, N., and Laird, J. E. (2009). Efficiently Implementing Episodic
 Memory. Proceedings of the International Conference on Case-based Reasoning.
 
-
-\subsection {Subsection}
 
 
 \end{document}

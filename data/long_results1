@@ -1,44 +1,7 @@
-I ran on:
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5044
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5059
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-nyx5105
-
 
 ==================
 original soar test
+-- NP(1) Use_Var(2) --
 Agent Processor 0 online
 ---- SOURCING (../../agents/qt_long.soar) ----
 ********************
@@ -47,247 +10,247 @@ Total: 20 productions sourced.
 ---- RUNNING ----
 Finding Episode: 57
 Storing 1000 time (0.000538111)
-QUERY TIME: 0.0014739
+Query time: 0.0014739
   (ep, score, gm)
   (57, 1, 1)
 Finding Episode: 80
 Storing 2000 time (0.000416994)
-QUERY TIME: 0.000610113
+Query time: 0.000610113
   (ep, score, gm)
   (80, 1, 1)
 Finding Episode: 178
 Storing 3000 time (0.000418186)
-QUERY TIME: 0.000808001
+Query time: 0.000808001
   (ep, score, gm)
   (178, 1, 1)
 Finding Episode: 207
 Storing 4000 time (0.000418901)
-QUERY TIME: 0.00089097
+Query time: 0.00089097
   (ep, score, gm)
   (207, 1, 1)
 Finding Episode: 390
 Storing 5000 time (0.000492811)
-QUERY TIME: 0.000996113
+Query time: 0.000996113
   (ep, score, gm)
   (390, 1, 1)
 Finding Episode: 600
 Storing 6000 time (0.000509977)
-QUERY TIME: 0.00112987
+Query time: 0.00112987
   (ep, score, gm)
   (600, 1, 1)
 Finding Episode: 22
 Storing 7000 time (0.000428915)
-QUERY TIME: 0.00136709
+Query time: 0.00136709
   (ep, score, gm)
   (22, 1, 1)
 Finding Episode: 736
 Storing 8000 time (0.000427008)
-QUERY TIME: 0.00139499
+Query time: 0.00139499
   (ep, score, gm)
   (736, 1, 1)
 Finding Episode: 532
 Storing 9000 time (0.000375032)
-QUERY TIME: 0.00158286
+Query time: 0.00158286
   (ep, score, gm)
   (532, 1, 1)
 Finding Episode: 130
 Storing 10000 time (0.000486135)
-QUERY TIME: 0.00181794
+Query time: 0.00181794
   (ep, score, gm)
   (130, 1, 1)
 Finding Episode: 168
 Storing 11000 time (0.00043416)
-QUERY TIME: 0.00202799
+Query time: 0.00202799
   (ep, score, gm)
   (168, 1, 1)
 Finding Episode: 1170
 Storing 12000 time (0.000416994)
-QUERY TIME: 0.00194001
+Query time: 0.00194001
   (ep, score, gm)
   (1170, 1, 1)
 Finding Episode: 1043
 Storing 13000 time (0.000530005)
-QUERY TIME: 0.00212193
+Query time: 0.00212193
   (ep, score, gm)
   (1043, 1, 1)
 Finding Episode: 1152
 Storing 14000 time (0.000466108)
-QUERY TIME: 0.00223494
+Query time: 0.00223494
   (ep, score, gm)
   (1152, 1, 1)
 Finding Episode: 723
 Storing 15000 time (0.000497103)
-QUERY TIME: 0.00243711
+Query time: 0.00243711
   (ep, score, gm)
   (723, 1, 1)
 Finding Episode: 741
 Storing 16000 time (0.000458956)
-QUERY TIME: 0.00258207
+Query time: 0.00258207
   (ep, score, gm)
   (741, 1, 1)
 Finding Episode: 456
 Storing 17000 time (0.000475883)
-QUERY TIME: 0.00281692
+Query time: 0.00281692
   (ep, score, gm)
   (456, 1, 1)
 Finding Episode: 1037
 Storing 18000 time (0.000387907)
-QUERY TIME: 0.0028801
+Query time: 0.0028801
   (ep, score, gm)
   (1037, 1, 1)
 Finding Episode: 768
 Storing 19000 time (0.000427961)
-QUERY TIME: 0.00304508
+Query time: 0.00304508
   (ep, score, gm)
   (768, 1, 1)
 Finding Episode: 1916
 Storing 20000 time (0.000641823)
-QUERY TIME: 0.00300598
+Query time: 0.00300598
   (ep, score, gm)
   (1916, 1, 1)
 Finding Episode: 2076
 Storing 21000 time (0.000542879)
-QUERY TIME: 0.00314498
+Query time: 0.00314498
   (ep, score, gm)
   (2076, 1, 1)
 Finding Episode: 1121
 Storing 22000 time (0.000426054)
-QUERY TIME: 0.00340891
+Query time: 0.00340891
   (ep, score, gm)
   (1121, 1, 1)
 Finding Episode: 465
 Storing 23000 time (0.000475168)
-QUERY TIME: 0.00366688
+Query time: 0.00366688
   (ep, score, gm)
   (465, 1, 1)
 Finding Episode: 2293
 Storing 24000 time (0.000475883)
-QUERY TIME: 0.00354791
+Query time: 0.00354791
   (ep, score, gm)
   (2293, 1, 1)
 Finding Episode: 1082
 Storing 25000 time (0.000380993)
-QUERY TIME: 0.0038631
+Query time: 0.0038631
   (ep, score, gm)
   (1082, 1, 1)
 Finding Episode: 2118
 Storing 26000 time (0.000458002)
-QUERY TIME: 0.00383186
+Query time: 0.00383186
   (ep, score, gm)
   (2118, 1, 1)
 Finding Episode: 428
 Storing 27000 time (0.000380993)
-QUERY TIME: 0.00422502
+Query time: 0.00422502
   (ep, score, gm)
   (428, 1, 1)
 Finding Episode: 2492
 Storing 28000 time (0.0003829)
-QUERY TIME: 0.00414014
+Query time: 0.00414014
   (ep, score, gm)
   (2492, 1, 1)
 Finding Episode: 1819
 Storing 29000 time (0.000383854)
-QUERY TIME: 0.00429606
+Query time: 0.00429606
   (ep, score, gm)
   (1819, 1, 1)
 Finding Episode: 712
 Storing 30000 time (0.000501156)
-QUERY TIME: 0.00466108
+Query time: 0.00466108
   (ep, score, gm)
   (712, 1, 1)
 Finding Episode: 2611
 Storing 31000 time (0.000390053)
-QUERY TIME: 0.00455999
+Query time: 0.00455999
   (ep, score, gm)
   (2611, 1, 1)
 Finding Episode: 1631
 Storing 32000 time (0.000378847)
-QUERY TIME: 0.0048039
+Query time: 0.0048039
   (ep, score, gm)
   (1631, 1, 1)
 Finding Episode: 834
 Storing 33000 time (0.000465155)
-QUERY TIME: 0.00506592
+Query time: 0.00506592
   (ep, score, gm)
   (834, 1, 1)
 Finding Episode: 1884
 Storing 34000 time (0.000498056)
-QUERY TIME: 0.00506902
+Query time: 0.00506902
   (ep, score, gm)
   (1884, 1, 1)
 Finding Episode: 440
 Storing 35000 time (0.000387192)
-QUERY TIME: 0.00541282
+Query time: 0.00541282
   (ep, score, gm)
   (440, 1, 1)
 Finding Episode: 2670
 Storing 36000 time (0.000472069)
-QUERY TIME: 0.00523615
+Query time: 0.00523615
   (ep, score, gm)
   (2670, 1, 1)
 Finding Episode: 1961
 Storing 37000 time (0.00045681)
-QUERY TIME: 0.00548792
+Query time: 0.00548792
   (ep, score, gm)
   (1961, 1, 1)
 Finding Episode: 2206
 Storing 38000 time (0.000400066)
-QUERY TIME: 0.00559902
+Query time: 0.00559902
   (ep, score, gm)
   (2206, 1, 1)
 Finding Episode: 3383
 Storing 39000 time (0.000423908)
-QUERY TIME: 0.00556993
+Query time: 0.00556993
   (ep, score, gm)
   (3383, 1, 1)
 Finding Episode: 3265
 Storing 40000 time (0.000539064)
-QUERY TIME: 0.00574303
+Query time: 0.00574303
   (ep, score, gm)
   (3265, 1, 1)
 Finding Episode: 1715
 Storing 41000 time (0.000424147)
-QUERY TIME: 0.00609684
+Query time: 0.00609684
   (ep, score, gm)
   (1715, 1, 1)
 Finding Episode: 359
 Storing 42000 time (0.000432968)
-QUERY TIME: 0.00645304
+Query time: 0.00645304
   (ep, score, gm)
   (359, 1, 1)
 Finding Episode: 3208
 Storing 43000 time (0.000468016)
-QUERY TIME: 0.00615716
+Query time: 0.00615716
   (ep, score, gm)
   (3208, 1, 1)
 Finding Episode: 1204
 Storing 44000 time (0.000440121)
-QUERY TIME: 0.00659013
+Query time: 0.00659013
   (ep, score, gm)
   (1204, 1, 1)
 Finding Episode: 2847
 Storing 45000 time (0.000436068)
-QUERY TIME: 0.00657105
+Query time: 0.00657105
   (ep, score, gm)
   (2847, 1, 1)
 Finding Episode: 1193
 Storing 46000 time (0.000442028)
-QUERY TIME: 0.00696802
+Query time: 0.00696802
   (ep, score, gm)
   (1193, 1, 1)
 Finding Episode: 3398
 Storing 47000 time (0.000400066)
-QUERY TIME: 0.00678802
+Query time: 0.00678802
   (ep, score, gm)
   (3398, 1, 1)
 Finding Episode: 2490
 Storing 48000 time (0.000721931)
-QUERY TIME: 0.00703001
+Query time: 0.00703001
   (ep, score, gm)
   (2490, 1, 1)
 Finding Episode: 2368
 Storing 49000 time (0.000472069)
-QUERY TIME: 0.00721121
+Query time: 0.00721121
   (ep, score, gm)
   (2368, 1, 1)
 System halted.
@@ -296,6 +259,7 @@ Interrupt received.This Agent halted.
 
 ==================
 solitary soar test
+-- NP(1) Use_Var(3) --
 Agent Processor 0 online
 ---- SOURCING (../../agents/qt_long.soar) ----
 ********************
