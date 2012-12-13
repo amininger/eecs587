@@ -411,37 +411,47 @@ This range still makes parallelization a challenge, but it is possible to get so
                 \includegraphics[width=\textwidth]{images/ret_short_shift}
                 \label{fig:retsshift}
         \end{subfigure}
-        \caption{Running time for short retrievals}
-	\label{fig:short}
+        \caption{Running time for short retrievals}\label{fig:short}
+	
 \end{figure}
 
 The results as shown in figure \ref{fig:short} show that indeed it is hard to parallelize short retrievals. As long as the episode is within the window 
-of the first processor (which occurs up through 8 processors) there is no benefit to having it parallelized. 
+of the first processor there is no benefit to having it parallelized. This is why there is no improvement until after 8 processors in the left figure, 
+and 4 in the right. Notice that the shifted strategy is able to start improving with fewer processors, 
+and gives faster retrieval times for the same number of processors (especially with the case of 8). 
 
-our version with 1 worker performs as well as the unmodified Soar version (UM). 
-This gives good support that our modifications have not slowed down the retrieval processes in the serialized case. 
-The single thread (ST) case was a bit slower than the case with 1 worker, but it has to manage two databases on the same processor. 
-The retrieval time shows linear growth with the number of episodes 
-as expected, since the agent has to search linearly through all of the episodes to find a match. 
-For the results on the left with an even distribution strategy, we get an improvement of performance until about 16 processors. 
-This case represents the greatest possibility for speedup because all the episodes need to be searched, and they are distributed evenly 
-among the processors. For the results on the right with a shifted distribution strategy, there is no benefit to having more than 2 workers.
-This is because $80\%$ of the episodes are being stored on the last processor. This is as expected, the shifted strategy does poorly for 
-queries with long retrieval times. 
+It is worth mentioning the spikes in the data. As these only happen with the 16 and 32 processor cases, we believe they are a result of 
+message passing latency once more than one board of 12 processors is used. The retrieval times are very small, usually under a millisecond, 
+so any communication disruption can have a large effect on the performance. 
 
 \subsection{Random Retrievals}
-Description of the test case
-\begin{figure}[h]
-\caption{Results for random retrievals and equal episode distribution}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+The next trial was to cover random retrievals: when the cue matches a recent episode anywhere in its history.
+Because the episode can be anywhere, the time varies wildly depending on its location. Again, 
+parallelization can't do much to lower to best case, but it can bring down the worst case significantly.   
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.55\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/ret_rand_eq}
+                \label{fig:retreq}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.55\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/ret_rand_shift}
+                \label{fig:retrshift}
+        \end{subfigure}
+        \caption{Running time for random retrievals}\label{fig:rand}
 \end{figure}
 
-\begin{figure}[h]
-\caption{Results for random retrievals and exponential episode distribution}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
-\end{figure}
+
+The results as shown in figure \ref{fig:rand} demonstrate the large variance in retrieval times for different lengths of queries.
+On the left with an even strategy, even though there is a wide variance in the data one can see that with more processors the slope of the upper bound
+decreases. So parallelization can help the average case. On the right with the shift strategy there is no such bound, 
+this is because one processor always has $80\%$ of the work and so it tends to get most of the queries. Thus
+adding more processors doesn't help the shift strategy for random retreivals. 
 
 \subsection{Dynamic Partitioning}
 Description of the modifications
