@@ -1,7 +1,7 @@
 #!/bin/sh
 #PBS -S /bin/sh
 #PBS -N AM-mid
-#PBS -l feature=xeon5650,qos=flux,nodes=3:ppn=12,walltime=3:00:00,mem=4gb
+#PBS -l feature=xeon5650,qos=flux,nodes=3:ppn=12,walltime=1:00:00,mem=4gb
 #PBS -M mininger@umich.edu
 #PBS -q flux
 #PBS -A eecs587f12_flux
