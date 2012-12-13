@@ -26,15 +26,15 @@ def parseFile(fin, fout, case):
 		
 		
 
-fin = open("long_results1", 'r')
-fout = open("long.store.csv", "w")
+fin = open("short_results1", 'r')
+fout = open("short.store.csv", "w")
 parseFile(fin, fout, STORING)
 
 fin.close()
 fout.close()
 
-fin = open("long_results1", "r")
-fout = open("long.retrieve.csv", "w")
+fin = open("short_results1", "r")
+fout = open("short.retrieve.csv", "w")
 parseFile(fin, fout, RETRIEVING)
 
 fin.close()
