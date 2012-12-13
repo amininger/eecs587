@@ -1873,7 +1873,7 @@ query_rsp_data* epmem_worker::epmem_perform_query(epmem_query* query){
 						uedge->pedges.insert(pedge);
 						uedge_cache->insert(std::make_pair(triple, uedge));
 					} else {
-						uedge->pedges.~epmem_pedge_set();
+						//uedge->pedges.~epmem_pedge_set();
                         delete uedge;
 					}
 				} else {

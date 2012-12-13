@@ -1,0 +1,341 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+\usepackage{amssymb,amsmath}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Parallel Work}
+\author{Aaron Mininger and James Kirk}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This paper focuses on the parallelization of episodic memory; particularly the
+episodic memory mechanism in Soar: a general cognitive architecture used and
+developed at Michigan by John Laird and his students. The goal of Soar is to
+support the capabilities required of a general intelligence agent by providing
+mechanisms for that agent to use. One of those mechanisms is episodic memory,
+which captures snapshots or episodes of the agent’s state (working memory)
+through time and stores them for later retrievals. The agent can then construct
+a cue to use to search through episodic memory and find an episode that matches.
+
+It is important for the agent to be reactive, which places strict constraints on
+efficiency in any memories utilized. The current implementation of Soar’s
+episodic memory has a number of efficient ways of performing a search. However,
+in the worst case (the cue does not have a match or only a match in the oldest
+episode) a search must be done through all of the episodes, which can be quite a
+large number depending on the lifetime of the agent.
+
+\subsection{Episodic Memory in Soar}
+Working memory is represented as a directed (possibly cyclic) graph. It consists
+of a list of working memory elements (wme’s) that represent an edge in the graph
+(starting node, edge name, ending node). During the storage of the current state
+of working memory as an episode, the entire graph is not saved. Instead, only
+the changes from the last episode (additions or deletions) are tracked and
+stored. This means that random access into the past is not a cheap operation, as
+the episode needs to be reconstructed from the data.
+
+The two main operations of Soar’s episodic memory mechanism are storing new
+episodes and retrieving the best match for a given cue. The following sections
+explain in some detail how these processes were made efficient in the existing
+serial version.
+
+\subsection{Storage}
+Episodic memory is stored inside an sqlite database. As mentioned before, the
+working memory graph is represented as a list of edges, or wme’s. Throughout the
+lifetime of the agent, individual wme’s may be added and removed a number of
+times. What is stored in the database is a list of all the wme’s that have
+existed in the agent’s past, plus the intervals for which they were active. The
+agent determines which working memory elements have changed since the last
+storage, and either ends an active interval (for deletions), or begins a new one
+(for additions). This process is very efficient, since the algorithm only has to
+consider currently active wme’s; the number of which remains relatively small
+and constant over the agent’s lifetime.
+
+\subsection {Retrieval}
+The agent initiates a retrieval by creating a cue to search with. The cue
+represents an acyclic subgraph of working memory and the goal is to find the
+episode that matches that subgraph the best. The agent does a walk backwards
+from the current episode and only searches those episodes that changed with
+regards to the cue. It first does a surface match based on the leaves of the
+cue. The leaves are considered independent, so the structure as a whole is not
+unified to the episode being considered. If it finds a matching containing all
+of the leaves it does a full graph match. This is expensive (NP-complete) so it
+is only done when absolutely necessary.
+
+Whenever it finds a graph match it stops the search and returns the result. This
+is because results are biased by recency; if two episodes are a perfect match
+the more recent one is returned. If no episode perfectly matches, then the
+entire contents of memory end up being searched. Partial matches are ranked and
+the highest one is returned. The ranking is calculated from the number of leaves
+that match and is again biased by recency.
+
+\section{Parallel Implementation}
+Our goal in parallelizing Soar’s episodic memory was to distribute the storage
+and search of episodic memory across a set of processors. Although the search
+process has been heavily optimized, it still grows over time with the number of
+episodes. Agents that run over hours and days are of interest to study, and
+eventually the cost of using episodic memory grows too large for the agent to be
+reactive. Our goal is to be able to reduce that cost by spreading it out over a
+number of processors. This can then extend the time that long-lived agents can
+remain reactive.
+
+We did not set out to change the behavior of episodic memory or re-implement the
+algorithms underlying the storage and retrievals. These have already been
+heavily optimized and tuned for performance and any work on our part would have
+had marginal effects.
+
+
+
+
+The goal of the parallel implementation is to not change the behavior of
+episodic memory, while paralleling the episodic search process. We have elected
+to implemented a Distributed memory system, as sharing the large database would
+cause lots of access problems. Each processor must therefore also store its own
+data to search through.
+
+The basic parallel structure of the implementation requires at least 3
+processors. The first processor is the Agent processor, which handles the Soar
+agent running process. The second processor is a Manager processor that handles
+queries and episode addition requests from the agent process and disperses the
+work to Worker processors, of which there must be at least one. The Manager must
+also arbitrate over the results it gets back from the workers. The following
+sections describe how the episodes are stored and retrieved on each worker.
+
+\subsection{Storage}
+
+Kernel modifications and Database allocation
+
+Adding new episodes
+
+Each worker holds a section of episodes. This size is determined by the window
+size of each episode. This window size can be adjusted per worker dynamically as
+the agent accumulates new episodes and conducts queries of episodic memory. This
+division of episodes, and the number of episodes allowed on each worker, load
+balances the work to be done. When a worker hits its cap of episodes, it will
+remove its oldest episode from its graph and database to send to its immediate
+neighbor. The neighbor will add the episode. Again what is being sent is not
+actually episodes, but diff structure contain the nodes and edges of the graph
+that were added or removed.
+
+The last worker in the chain will not remove any episodes. The earlier workers
+contain the most recent episodes. For example, running with 8 processors,
+processor 0 is the agent, processor 1 is the manager, processor 2 receives the
+newest episodes from the manager, and processor 7 contains the oldest episodes.
+
+When the agent creates another episode this new episode is messaged to the
+Manager. The Manager notifies all worker processors that it has received a new
+episode. If the Worker has an episode to send, meaning that it contains at least
+as many episodes as its window size, it will immediately remove the oldest
+episode to send to its neighbor. The first worker processor then receives the
+new episode from the Manager. It is possible that a worker that removed and sent
+an episode will not actually receive a new one, temporarily under filling its
+episode allocation by 1.
+
+This prevents a linear problem that occurred on the first implementation of
+episode addition. If a worker waits to see if he will receive a new episode from
+his neighbor, you have to wait potentially O(p) time, where p is the number of
+processors, for the episode addition to propagate to the last worker. The
+process to remove the oldest episode is the most expensive computation wise in
+the storage of new episodes, so this linear delay significantly slowed down the
+storage process of episodes.
+
+
+\subsection{Retrieval}
+When the agent wants to retrieve an episode it sends this request and the cue in
+a message to the Manager. The Manager broadcasts the search request message to
+all worker processes. Once a worker receives a search request it performs an
+identical search algorithm as done in the serial version, only on its partition
+of the episode data that it has. Each episode will return its best match, if it
+has a match, in a message to the manager.
+
+The manager selects the best episode matching from the responses. If it receives
+a response that is better than any it could possibly receive from the workers it
+is still waiting on, such as getting a full graph match on the first worker, the
+manager will immediately send this response back to the agent. As is done in the
+serial version, the manager selects the best match based on, in order of
+importance, full graph matching, the match score, and if a tie recency. The
+division of episodes insures that if a worker processor has a lower id than
+another, it episodes will always be more recent.
+
+\subsection{Dynamic Load Balancing}
+
+The window size of each worker determines the overall load balancing of the
+retrieval process. The window size does not need to be fixed, and as we are
+continuously adding episodes, we can increase the window size for each agent to
+scale with the number of episodes. There are a few different window size scaling
+strategies that could be beneficial for different agent behaviors.
+
+The most basic scaling strategy just keeps an even split of the data among the
+processors. If all episodes will need to be searched, as in the worst case, then
+this will be the best load balancing. Based on the number of episodes a worker
+has received it can calculate when it needs to increase its window size without
+messaging any other processors. The equation for determining if the window size
+needs to be increased is shown below in equation 1.
+
+$incrWindow? = ((count \%  2^(P_i) -1 ) == 0)$
+Where count is the total number of episodes this worker has received, P is the
+number of processors, and i is the id of the worker processor. Every time the
+worker has received another $ 2^(P_i) -1 $ episodes it should increment its window
+size by 1.
+
+Another strategy is to have the size of the window increase exponential from the
+first worker to the last worker, which holds the oldest episodes. For example
+for a small case with 5 workers and 310 episodes added so far, the workers would
+hold in order for youngest to oldest, 10, 20, 40, 80, and 160 episodes. This
+compares to the above strategy where each worker would hold 62 episodes. If the
+agent is always retrieving recent episode this will likely be an improvement
+from the previous strategy. In this case if the matching episode is in the first
+70 episodes, the exponential window size strategy will likely finish before an
+even window strategy. Similar to the equation for the previous strategy, the
+worker can determine when to increase its window size. (equation 2)
+
+$incrWindow? = ((count \%  P_i ) == 0)$
+
+However, the idea of Soar is to have general purpose mechanisms like episodic
+memory that are useful for agents. When developing an agent, there should not be
+required changes to the kernel to select the best episodic memory behavior.
+Additionally we should not require agent developers to characterize their
+episodic memory retrievals, whether they are mostly in recent memory or older
+memory or some mix. Even with a given agent this behavior could differ depending
+on the situation the agent is in.
+
+To address this situation a third strategy was developed to split the difference
+between the above strategies and to dynamically alter behavior based on
+retrievals. The difference between above strategies number of episodes received
+before a window size increase, $2^(P_i) -1$ in the first case and $P_i$ in the
+second case. In the dynamic version we select a value between these two by means
+of a split variable between 0 and 1.0. The equations for this algorithm can be
+seen below.
+
+$mod = (2^(P_i) -1)*split + (P_i) *(1-split) incrWindow? = ((count \%  mod ) == 0)$
+
+The value of split is initially set to 0.5, splitting the difference evenly so
+that the episode allocation is not even, but also less than exponential in
+increase. Every time a retrieval occurs, the worker episode that returned the
+best result is used to update the split value, a global value the is calculated
+by the manager and broadcast to all workers. An update split value can be
+calculated by the percentile that the best response came from. If the best
+response comes from the earliest worker, processor 2, the update value will be
+1, and if from the oldest worker the update value will be 0. The split value is
+averaged with this update value using a tuning parameter. If the parameter is
+0.5 then the update value contributes to half of the new split value. In
+experimentation this parameter was varied over a few different values to see the
+effect on window size growth and distribution.
+
+\section{Experimental Results}
+\subsection{Evaluation Specifics}
+
+To evaluate the new episodic memory a variety of agents with different epmem
+behaviors were tested. The number of episodes, number of processors, and size
+and complexity of cues were all varied to analyze the timing behavior of the new
+code, compared against the serial version. The results were evaluated with the
+different strategies for load balancing episodes among the worker processors as
+well. It is important not only to analyze the timing differences in retrievals,
+but also in the process of the parallelized episode storage.
+
+There were three different types of agents that were created to tests the
+different versions of the program. The first agent was designed to always do
+worst case retrievals. A worst case retrieval occurs when there is no complete
+graph match and all episodes must be searched to determine best score, or when
+the graph match is on the earliest episode. The latter condition was implemented
+for the worst case agent. The second agent always was designed to retrieve
+recent episodes. The agent will issue a cue that will have a match in the most
+recent 10% of episode history. The agent will randomly generate a cue that will
+match an episode anywhere between 0 and 10% of the episode history. The final
+agent issues random retrievals that should have a complete graph match, but will
+not be in a designated area of the episode history.
+
+For all of the agents, the retrievals and episode creation were setup as
+follows. At every time step the agent adds and removes elements from working
+memory, which will cause the addition of new episodes to episodic memory. Every
+1,000 times steps, or 1,000 episodes, the agent issues an epmem query. Depending
+on the agent this will be a long retrieval, a recent retrieval, or a random
+retrieval. The time is captured from right before the agent sends the query
+message, to when the agent receives the response. The serial timing is captured
+similarly, starting after the construction of the cue, and ending when a
+response is found.
+
+As well as doing a retrieval every 1000 time steps, the timing of episode
+storage is recorded every 1001 time steps. The offset is used so that a good
+representation of episode addition times is collected. We noticed during testing
+that some parallel episode storages take significantly longer than others. This
+is due to some storages not requiring any old episode removals, ie every worker
+is not full or not receiving a new episode. When there are only 2 workers, every
+other episode addition is quicker. The offset ensures that we get an even
+sampling of the addition times for comparison.
+
+
+\subsection{Data Results}
+
+\section{Analysis}
+
+\section{Conclusions}
+
+\section{References}
+
+Derbinsky, N., and Laird, J. E. (2009). Efficiently Implementing Episodic
+Memory. Proceedings of the International Conference on Case-based Reasoning.
+
+
+\subsection {Subsection}
+
+
+\end{document}
