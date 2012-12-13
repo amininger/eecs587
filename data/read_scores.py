@@ -17,8 +17,8 @@ def parseFile(fin, fout, case):
 			time = get_parens(line, 1)
 			fout.write(time + ",")
 		elif(case == RETRIEVING and line.find("Query") != -1): 
-			time = line[12:len(line)-1]
-			fout.write(time + ",")
+			time = float(line[12:len(line)-1])
+			fout.write(str(time) + ",")
 		elif(line.find("-- NP") != -1):
 			fout.write("\n")
 			fout.write(get_parens(line, 1))
@@ -26,17 +26,23 @@ def parseFile(fin, fout, case):
 		
 		
 
-fin = open("short_results1", 'r')
-fout = open("short.store.csv", "w")
-parseFile(fin, fout, STORING)
-
-fin.close()
-fout.close()
-
-fin = open("short_results1", "r")
-fout = open("short.retrieve.csv", "w")
+fin = open("long.data", 'r')
+fout = open("long.ret.csv", "w")
 parseFile(fin, fout, RETRIEVING)
 
 fin.close()
 fout.close()
 
+fin = open("short.data", 'r')
+fout = open("short.ret.csv", "w")
+parseFile(fin, fout, RETRIEVING)
+
+fin.close()
+fout.close()
+
+fin = open("rand.data", 'r')
+fout = open("rand.ret.csv", "w")
+parseFile(fin, fout, RETRIEVING)
+
+fin.close()
+fout.close()

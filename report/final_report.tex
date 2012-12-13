@@ -72,27 +72,35 @@
 \section{Introduction}
 This paper focuses on the parallelization of episodic memory; particularly the
 episodic memory mechanism in Soar: a general cognitive architecture used and
-developed at Michigan by John Laird and his students. The goal of Soar is to
+developed at Michigan by John Laird and his students. The purpose of Soar is to
 support the capabilities required of a generally intelligent agent by providing
 mechanisms for that agent to use. One of those mechanisms is episodic memory,
 which captures snapshots or episodes of the agent’s state (working memory)
 through time and stores them for later retrievals. The agent can then construct
 a cue to use to search through episodic memory and find an episode that matches.
 
-It is important for the agent to be reactive, which means that each decision cycle
+\subsection{Motivation and Challenges}
+The main motivation for our project is to speedup up the time it takes to search 
+through episodic memory by parallelizing this process. An important requirement
+for agents that are situated in a dynamic environment is for them to be reactive, 
+which means that each decision cycle
 should be as quick as possible. This places very strict constraints on the
 efficiency of any memories to be utilized. The current implementation of Soar’s
 episodic memory has a number of efficient ways of performing a retrieval. However,
 in the worst case (the cue does not have a match or only matches the oldest
 episode) a search must be done through all of the episodes, which can be quite a
-large number as the lifetime of the agent increases.
+large number as the lifetime of the agent increases. By parallelizing episodic memory,
+we aim to extend the viable lifetime of agents that use it. 
  
 There are many challenges to implementing a parallel version of this mechanism.
  When a retrieval happens it must search over N episodes, but N is constantly 
 increasing, likely every decision cycle. Each time a new episode is added, the 
 episodes need to be rebalanced, but in an efficient manner without substantial 
 amounts of shuffling and messaging and without disturbing the strict ordering
- of episodes. Messaging time is likely to be a bottleneck, especially as the 
+ of episodes. Any load balancing must not affect the reactivity of the agent; if 
+the agent has to stop every once in a while and do a major rebalancing of 
+its memory, this can severely harm its performance. 
+Messaging time is likely to be a bottleneck, especially as the 
 number of processors and episodes increase. It is also unknown if the agent is 
 likely to be retrieving from recent memory, from old memory, or some mix in 
 between.  Efficient load balancing strategies for such behaviors would be 
@@ -102,17 +110,12 @@ them all efficiently.
 Another challenge, although not directly related parallelizing work, is the difficulty in 
 modifying a large code base, the Soar kernel, without damaging any 
 functionality and maintaining preexisting efficiencies.  In the serial version,
- all episode data is held in one database and will need to be split into 
-smaller databases on each processor.  There is currently no theory for breaking
- the episode history into smaller chunks of episodes. Work must be done to add 
-the capability to remove the oldest episode, so that it can be moved to a 
-different processor, a nontrivial task that will also likely be a bottleneck.  It is critical for Soar to run quick decision cycles, so 
-any overhead must be minimal for a parallel implementation to be useful.
-
-Our goal for this project is to implement
-a parallel version of episodic memory and decrease the time needed to perform
-retrievals, while keeping the overhead and storage times low. This will extend the timescales
-that reactive agents can be run on and hopefully lead to longer-lived agents. 
+ all episode data is held in one database and needed to be split into 
+smaller databases on each processor.  There was no theory for how to divide
+the episode history into smaller chunks of episodes. We had to implement the ability
+for a processor to remove its oldest episode and pass it to the next processor. 
+This turns out to be less efficient than an addition, and is one place for further improvement
+of performance.
 
 \section{Episodic Memory in Soar}
 Working memory is represented as a directed (possibly cyclic) graph. It consists
@@ -293,34 +296,40 @@ experimentation this parameter was varied over a few different values to see the
 effect on window size growth and distribution.
 
 \section{Experimental Results}
-\subsection{Evaluation Specifics}
+This section describes our experimental process and how data was collected. 
+It also includes the presentation of the data and a discussion of its interpretation. 
 
-To evaluate the new episodic memory a variety of retrieval behaviors were tested. 
-The number of episodes, number of processors, and distance of cues
- were all varied to analyze the timing behavior of the new
-code, compared against the serial version. The results were evaluated with the
-different strategies for load balancing episodes among the worker processors as
-well. It is important not only to analyze the timing differences in retrievals,
-but also in the process of the parallelized episode storage.
+\subsection{Evaluation Methodology}
+Thorougly testing episodic memory is a challenging task, because there are a number
+of factors that can influence performance. Such factors include the number of processors,
+the type of agent, the agent's environment and working memory,  the types of queries the agent performs,
+ how long the agent has been running, and how the episodes are distributed. 
 
-There were three different types of agents that were created to tests the
-different versions of the program. The first agent was designed to always do
-worst case retrievals. A worst case retrieval occurs when there is no complete
-graph match and all episodes must be searched to determine best score, or when
-the graph match is on the earliest episode. The latter condition was implemented
-for the worst case agent. The second agent always was designed to retrieve
-recent episodes. The agent will issue a cue that will have a match in the most
-recent 10\% of episode history. The agent will randomly generate a cue that will
-match an episode anywhere between 0 and 10\% of the episode history. The final
-agent issues random retrievals that should have a complete graph match, but will
-not be in a designated area of the episode history.
+For all our tests, we compared the performance using different numbers of processors
+ranging from 1-32 by powers of two. This allowed us to get an estimation of the speedup
+achieved by the program. In addition, for some of the trials we compared against two 
+baseline versions. The one is an unmodified version of episodic memory (denoted UM) and
+the other is one with our modifications, but with everything happening on a single processor 
+(denoted ST). 
+
+Every agent is different, and each one has a different working memory and a different
+use pattern for episodic memory. We thus did not try to evaluate across different agents, 
+but instead desired to characterize the types of retrievals an agent could do and how those
+affect performance. For our agent we could specify an interval of where to do retrievals 
+in, and how often it does a retrieval. 
+\emph{Long retrievals} are those that either don't result in a graph match, or 
+result in an episode at the beginning of episodic memory. In those cases the agent has to 
+search through all the episodes. For this case the agent produces cues that resulted
+in episodes randomly within the first tenth of its history. \emph{Short retrievals} are those
+that result in a full graph match within the lastest tenth of its history. For this case the agent produces 
+cues that resulted in an episode about ten percent back in its history. \emph{Random retrievals} are
+those that result in a full graph match at a random episode in its history. 
 
 For all of the agents, the retrievals and episode creation were setup as
 follows. At every time step the agent adds and removes elements from working
-memory, which will cause the addition of new episodes to episodic memory. Every
-1,000 times steps, or 1,000 episodes, the agent issues an epmem query. Depending
-on the agent this will be a long retrieval, a recent retrieval, or a random
-retrieval. The time is captured from right before the agent sends the query
+memory, which will cause the addition of a new episode to episodic memory. Every
+1,000 times steps, or 1,000 episodes, the agent issues an epmem query. The type of
+query is dependent upon the particular test. The time is captured from right before the agent sends the query
 message, to when the agent receives the response. The serial timing is captured
 similarly, starting after the construction of the cue, and ending when a
 response is found.
@@ -329,12 +338,19 @@ As well as doing a retrieval every 1000 time steps, the timing of episode
 storage is recorded every 1001 time steps. The offset is used so that a good
 representation of episode addition times is collected. We noticed during testing
 that some parallel episode storages take significantly longer than others. This
-is due to some storages not requiring any old episode removals, ie every worker
+is due to some storages not requiring any old episode removals, i.e. every worker
 is not full or not receiving a new episode. When there are only 2 workers, every
 other episode addition is quicker. The offset ensures that we get an even
 sampling of the addition times for comparison.
 
-
+We also ran tests with different episode distribution strategies. An \emph{even strategy} was
+where the episodes were distributed evenly across the processors. This was designed to
+improve performance for agents that only do long retrievals. A \emph{shift strategy} was
+where the first $p-1$ workers were evenly distributed across the first $20\%$ of the episodes, and 
+the last worker has the rest. This was designed to improve performance for agents that only do
+short retrievals. A \emph{dynamic strategy} was a mixture of the two, where the proportion of the 
+history stored by the last worker would dynamically increase or decrease depending on the particular
+kinds of queries being executed. 
 
 
 \subsection{Long Retrievals}
@@ -349,14 +365,14 @@ Soar version (UM) and a version with our modifications but with everything runni
         \centering
         \begin{subfigure}[b]{0.55\textwidth}
                 \centering
-                \includegraphics[width=\textwidth]{images/ret_worst_eq}
+                \includegraphics[width=\textwidth]{images/ret_long_eq}
                 \label{fig:retleq}
         \end{subfigure}%
         ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
           %(or a blank line to force the subfigure onto a new line)
         \begin{subfigure}[b]{0.55\textwidth}
                 \centering
-                \includegraphics[width=\textwidth]{images/ret_long_exp}
+                \includegraphics[width=\textwidth]{images/ret_long_shift}
                 \label{fig:retlexp}
         \end{subfigure}
         \caption{Running time for long retrievals}\label{fig:animals}
@@ -366,29 +382,52 @@ Soar version (UM) and a version with our modifications but with everything runni
 The results as shown in figure \ref{fig:long} show that our version with 1 worker performs as well as the unmodified Soar version (UM). 
 This gives good support that our modifications have not slowed down the retrieval processes in the serialized case. 
 The single thread (ST) case was a bit slower than the case with 1 worker, but it has to manage two databases on the same processor. 
-The retrieval time shows linear growth as expected, since the agent has to search linearly through all of the episodes to find a match. 
-For the results on the left with an equal distribution of episodes, we get an improvement of performance until about 16 processors. 
-This represents the greatest possibility for speedup because all the episodes need to be searched, and they are distributed evenly 
-among the processors. For the results on the right with an exponential distribution of processors, after 8 processors adding any more 
-does not improve performance. In addition, the times are slower than for the equal distribution. This is to be expected, since some 
-processors have many more episodes than others, and so take much longer to do the search. 
+The retrieval time shows linear growth with the number of episodes 
+as expected, since the agent has to search linearly through all of the episodes to find a match. 
+For the results on the left with an even distribution strategy, we get an improvement of performance until about 16 processors. 
+This case represents the greatest possibility for speedup because all the episodes need to be searched, and they are distributed evenly 
+among the processors. For the results on the right with a shifted distribution strategy, there is no benefit to having more than 2 workers.
+This is because $80\%$ of the episodes are being stored on the last processor. This is as expected, the shifted strategy does poorly for 
+queries with long retrieval times. 
 
 
 \subsection{Short Retrievals}
-Description of the test case
-\begin{figure}[h]
-\caption{Results for short retrievals and equal episode distribution}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+Our next trial was to cover short retrievals: when the cue matches a recent episode.  
+If the episode is at the very end of the history, then the retrieval time will be constant and parallelization 
+won't do any good. We thus examined where the agent was searching about a tenth back through its history. 
+This range still makes parallelization a challenge, but it is possible to get some net benefit. 
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.55\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/ret_short_eq}
+                \label{fig:retseq}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.55\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/ret_short_shift}
+                \label{fig:retsshift}
+        \end{subfigure}
+        \caption{Running time for short retrievals}
+	\label{fig:short}
 \end{figure}
 
-\begin{figure}[h]
-\caption{Results for short retrievals and exponential episode distribution}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
-\end{figure}
+The results as shown in figure \ref{fig:short} show that indeed it is hard to parallelize short retrievals. As long as the episode is within the window 
+of the first processor (which occurs up through 8 processors) there is no benefit to having it parallelized. 
 
-Discussion of results
+our version with 1 worker performs as well as the unmodified Soar version (UM). 
+This gives good support that our modifications have not slowed down the retrieval processes in the serialized case. 
+The single thread (ST) case was a bit slower than the case with 1 worker, but it has to manage two databases on the same processor. 
+The retrieval time shows linear growth with the number of episodes 
+as expected, since the agent has to search linearly through all of the episodes to find a match. 
+For the results on the left with an even distribution strategy, we get an improvement of performance until about 16 processors. 
+This case represents the greatest possibility for speedup because all the episodes need to be searched, and they are distributed evenly 
+among the processors. For the results on the right with a shifted distribution strategy, there is no benefit to having more than 2 workers.
+This is because $80\%$ of the episodes are being stored on the last processor. This is as expected, the shifted strategy does poorly for 
+queries with long retrieval times. 
 
 \subsection{Random Retrievals}
 Description of the test case
