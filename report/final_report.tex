@@ -531,11 +531,11 @@ Discussion of results
         \hline
         ~  & Equal Long & Equal Short & Equal Rand & Shift Long & Shift Short & Shift Rand & Dyn Long & Dyn Short & Dyn Rand \\ \hline
         1  & 1          & 1                  & 1               & 1            & 1        & 1      & ~          & ~         & ~        \\  \hline
-        2  & 1.83          & 1.12           & 1.65           & 1.37         & 1.02       & 1.65         & ~        & ~         & ~        \\ \hline
-        4  & 3.16          & 2.84           & 4.05           & 1.28         & 1.16        & 4.06        & ~        & ~         & ~        \\ \hline
-        8  & 5.37          & 4.18          & 3.02         & 1.34         & 1.65        & 3.02        & ~        & ~         & ~        \\ \hline
-        16 & 7.99          & 5.11           & 1.65          & 1.39         & 2.08       & 1.65         & ~        & ~         & ~        \\ \hline
-        32 & 9.43          & 6.83          & 5.12          & 1.27         & .40        & 5.12        & ~        & ~         & ~        \\
+        2  & 1.83          & 1.02           & 1.12           & 1.37         & 1.02       & 1.65         & ~        & ~         & ~        \\ \hline
+        4  & 3.16          & .97          & 2.84           & 1.28         & 1.16        & 4.06        & ~        & ~         & ~        \\ \hline
+        8  & 5.37          & .97          & 4.18         & 1.34         & 1.65        & 3.02        & ~        & ~         & ~        \\ \hline
+        16 & 7.99          & 1.24           & 5.11          & 1.39         & 2.08       & 1.65         & ~        & ~         & ~        \\ \hline
+        32 & 9.43          & 1.76          & 6.83          & 1.27         & 2.46       & 5.12        & ~        & ~         & ~        \\
         \hline
     \end{tabular}
 \end{table}
@@ -561,6 +561,14 @@ Description of results
 
 
 \section{Conclusions}
+Overall we successfully modified Soar's episodic memory to work in parallel. Our tests show that this implementation 
+is just as efficient for retrievals with one worker processor as before, and so our modifications do not impose a performance hit
+for retrievals. Storage times do increase more than before, but we believe that further work could reduce this cost. 
+In addition to ensuring a correct working version with data distributed across a number of processors, we also 
+created a version which automatically tunes the episode distribution based upon the types of queries that are performed. 
+Our tests showed that this performs at least as well as our fixed strategies. We have shown that parallelizing episodic memory
+does not result in linear speedup, but does have a significant performance improvement to retrievals. Thus our implementation
+could extend the viable lifetimes of reactive agents that use episodic memory in dynamic environments. 
 
 \section{References}
 
