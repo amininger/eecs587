@@ -226,7 +226,7 @@ importance, full graph matching, the match score, and if a tie recency. The
 division of episodes ensures that if a worker processor has a lower id than
 another, it episodes will always be more recent.
 
-\subsection{Dynamic Load Balancing}
+\subsection{Dynamic Load Balancing}\label{sec:load}
 
 As mentioned before, our implementation requires some form of load balancing
 because new episodes keep coming, and they need to be spread out over
@@ -481,43 +481,113 @@ adding more processors doesn't help the shift strategy for random retreivals.
 
 \subsection{Dynamic Partitioning}
 
-So far we have analyzed the behaviors of the three different agents, agents with short retrievals, long retrievals, and random retrievals, on two different episode partitioning strategies, even and shifted.  If an even split strategy is used, long retrievals are balanced efficient, but short retrievals are not.  If the shifted strategy is used, short retrievals are improved by long retrievals take much longer. But as discussed before the episodic memory mechanism cannot pressume specific agent retrieval behavior.
+So far we have analyzed the behaviors of the three different agents, agents with short retrievals, long retrievals, and random retrievals, on two different episode partitioning strategies, even and shifted.  If an even split strategy is used, long retrievals are balanced efficiently, but short retrievals are not.  If the shifted strategy is used, short retrievals are improved by long retrievals take much longer. However, as discussed before the episodic memory mechanism cannot presuppose specific agent retrieval behavior.
 
-As explain in section 3.2, a dynamic paritioning scheme was developed to help ameliorate this issue.
-\begin{figure}[h]
-\caption{Histogram with long retrievals}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+As explain in section \ref{sec:load}, a dynamic paritioning scheme was developed to help ameliorate this issue.  The dynamic strategy also has a tuning parameter that controls how fast the partioning scheme adapts.  For experimental analysis tuning parameters of 0.1, 0.2, and 0.4 (the fastest), were evaluated for each test.
+
+Before analyzing the timing results of this strategy, the actual partioning results are investigated below.  For characterizing this partioning, we look at the partioning with 8 workers on the dynamic strategy (with tuning=0.1), querying at 500 episodes, 10000 episodes, and 500000 episodes on the 3 different agents.
+ 
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/firstquery2}
+                \label{fig:longdynam1}
+        \end{subfigure}%
+        %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+        %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/longmiddlequery}
+                \label{fig:longdynam2}
+        \end{subfigure}%
+        %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+        %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/longfinalquery}
+                \label{fig:longdynam3}
+        \end{subfigure}
+        \caption{Episode partioning with the Dynamic strategy (tuning=0.1) on 8 workers with long retrievals at the first query, a 20th percentile query, and the final query}\label{fig:longdynam}
 \end{figure}
 
-\begin{figure}[h]
-\caption{Histogram with short retrievals}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\subsubsection{Partitioning}
+
+The partitioning results for long retrievals can be seen in Figure \ref{fig:longdynam}.  As expected, and desired, long retrievals maintain the same distribution as the even split strategy.  This is expected because the dynamic strategy starts at even partitioning and only moves away from this when retrievals occur earlier than the last worker.
+
+The partitioning results for short retrievals can be seen in Figure \ref{fig:shortdynam}. The partitioning clearly tends towards the shifted strategy, as desired, with the percentage stored in the last worker increasing with the number of retrievals as shown in the rightmost graphs.  However, the results appear to be even better than just matching the shifted strategy. In the shifted strategy a fixed size of 75\% is used to split the episodes between the last worker and the rest.  The short retrieval agent is always access at 10\% so having the last worker hold about 90\% of the episodes would be the best for this specific agent. Looking at these paritioning results in the final query, the last processor holds 44958 of 50010 episodes, or 89.898\%! This suggests that not only the the dynamic strategy able to handle both long and short retrieval type agents, but that it actually outperforms the shifted strategy as well.
+
+The last partioning results, for random retrievals, can be seen in Figure \ref{fig:randdynam}. The random retrievals cause the final percentage size to increase, but not up to the value of the shifted strategy.  In fact the percentage in the last worker appears to reach an equilibirum at 50\% (actually 50.6\% in the final query).  This is also the expected behavoior as half of the retrievals at this point should occur in the first group of workers, and the other half in the last worker.  Each time a retrieval happens in either section the other is increased, leading to this equilibrium at 50\%.
+
+\subsubsection{Dynamic Strategy Timing Results}
+
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/firstquery2}
+                \label{fig:shortdynam1}
+        \end{subfigure}%
+        %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+        %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/shortmiddlequery}
+                \label{fig:shortdynam2}
+        \end{subfigure}%
+        %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+        %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/shortfinalquery}
+                \label{fig:shortdynam3}
+        \end{subfigure}
+        \caption{Episode partioning with the Dynamic strategy (tuning=0.1) on 8 workers with short retrievals at the first query, a 20th percentile query, and the final query}\label{fig:shortdynam}
 \end{figure}
 
-\begin{figure}[h]
-\caption{Histogram with random retrievals}
-\centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+In figure \ref{fig:shortdynam}.
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/firstquery2}
+                \label{fig:randdynam1}
+        \end{subfigure}%
+        %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+        %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/randmiddlequery}
+                \label{fig:randdynam2}
+        \end{subfigure}%
+        %add desired spacing between images, e. g. ~, \quad, \qquad etc. 
+        %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.33\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/randfinalquery}
+                \label{fig:randdynam3}
+        \end{subfigure}
+        \caption{Episode partioning with the Dynamic strategy (tuning=0.1) on 8 workers with random retrievals at the first query, a 20th percentile query, and the final query}\label{fig:randdynam}
 \end{figure}
 
 Discussion of histograms
 
 \begin{figure}[h]
-\caption{Performance for short retrievals and parameter tuning}
+\caption{Performance comparison of episode partioning strategies with 8 workers doing short retrievals}\label{fig:shortdynamcomp}
 \centering
 \includegraphics[width=0.75\textwidth]{images/alldynamicshort}
 \end{figure}
 
 \begin{figure}[h]
-\caption{Performance for long retrievals and parameter tuning}
+\caption{Performance comparison of episode partioning strategies with 8 workers doing long retrievals}\label{fig:longdynamcomp}
 \centering
 \includegraphics[width=0.75\textwidth]{images/alldynamiclong}
 \end{figure}
 
 \begin{figure}[h]
-\caption{Performance for random retrievals and parameter tuning}
+\caption{Performance comparison of episode partioning strategies with 8 workers doing random retrievals}\label{fig:randdynamcomp}
 \centering
 \includegraphics[width=0.75\textwidth]{images/alldynamicrand}
 \end{figure}
