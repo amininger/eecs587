@@ -546,8 +546,6 @@ The last partioning results, for random retrievals, can be seen in Figure \ref{f
         \caption{Episode partioning with the Dynamic strategy (tuning=0.1) on 8 workers with short retrievals at the first query, a 20th percentile query, and the final query}\label{fig:shortdynam}
 \end{figure}
 
-In figure \ref{fig:shortdynam}.
-
 \begin{figure}
         \centering
         \begin{subfigure}[b]{0.33\textwidth}
@@ -572,7 +570,6 @@ In figure \ref{fig:shortdynam}.
         \caption{Episode partioning with the Dynamic strategy (tuning=0.1) on 8 workers with random retrievals at the first query, a 20th percentile query, and the final query}\label{fig:randdynam}
 \end{figure}
 
-Discussion of histograms
 
 \begin{figure}[h]
 \caption{Performance comparison of episode partioning strategies with 8 workers doing short retrievals}\label{fig:shortdynamcomp}
@@ -592,20 +589,28 @@ Discussion of histograms
 \includegraphics[width=0.75\textwidth]{images/alldynamicrand}
 \end{figure}
 
-Discussion of results
+In this section the results of the dynamic strategy timings are compared against the other strategies with various tuning parameters, and 8 workers processors over 50,000 episodes for each retrieval behavior.
+
+In figure \ref{fig:shortdynamcomp} the short retrieval results are shown. The dynamic strategies not only does better than the even strategy, but, as predicted above in the partitioning analysis, also does better than the shifted strategy.  Even more promising the growth rate of the retrieval time for the dynamic strategy is signicantly slower than either of the other strategies.  If we had the computation time to run on larger number of agents, we would expect to see a larger gap growing between the strategies.  This helps support our claim that the parellization work could be particularily useful for the support of very long lived agents.  In the figure you can also see that the slowest learning dynamic strategy, tuning = 0.1, takes slightly longer to match the other strategies.
+
+In figure \ref{fig:longdynamcomp} the long retrieval results are shown. The results here are less interesting, but as desired and predicted by the paritioning analysis above, the dynamic strategies behave identically to the even strategy.  This strategy is definately the most efficient division of labor for long retrievals, so this is good behavoir for the strategy.
+
+In figure \ref{fig:randdynamcomp} the random retrieval results are showm.  These are not compared against the other strategies, because those results were so noisy that they would distract from the dynamic results. As both the fixed and shifted strategies were noisy, it is unsurprising that the dynamic results are also very noisy.  However as mentioned before, although we wanted to used random retrieval as a test case, this is a very unlikely agent behavior.
+
+With theses results we can claim that the dynamic strategy is successful at operating as good or better than the fixed and shifted strategies, even when each of those is in their prefered retrieval case.
 
 \begin{table}[h]
 \caption{Table of speedup (average over last 5 queries)}
 \centering
     \begin{tabular}{|l|r|r|r|r|r|r|r|r|r|}
         \hline
-        ~  & Equal Long & Equal Short & Equal Rand & Shift Long & Shift Short & Shift Rand & Dyn Long & Dyn Short & Dyn Rand \\ \hline
-        1  & 1          & 1                  & 1               & 1            & 1        & 1      & ~          & ~         & ~        \\  \hline
-        2  & 1.83          & 1.02           & 1.12           & 1.37         & 1.02       & 1.65         & ~        & ~         & ~        \\ \hline
-        4  & 3.16          & .97          & 2.84           & 1.28         & 1.16        & 4.06        & ~        & ~         & ~        \\ \hline
-        8  & 5.37          & .97          & 4.18         & 1.34         & 1.65        & 3.02        & ~        & ~         & ~        \\ \hline
-        16 & 7.99          & 1.24           & 5.11          & 1.39         & 2.08       & 1.65         & ~        & ~         & ~        \\ \hline
-        32 & 9.43          & 1.76          & 6.83          & 1.27         & 2.46       & 5.12        & ~        & ~         & ~        \\
+        ~  & Even Lng & Even Shrt & Even Rand & Shift Lng & Shift Shrt & Shift Rand & Dyn Lng & Dyn Shrt & Dyn Rnd \\ \hline
+        1  & 1          & 1                  & 1               & 1            & 1        & 1      & 1        & 1         & 1        \\  \hline
+        2  & 1.83          & 1.02           & 1.12           & 1.37         & 1.02       & 1.65   & 1.80     & 1.07      & 1.25     \\ \hline
+        4  & 3.16          & .97          & 2.84           & 1.28         & 1.16        & 4.06    & 3.32     & 1.76      & 2.18     \\ \hline
+        8  & 5.37          & .97          & 4.18         & 1.34         & 1.65        & 3.02      & 5.49     & 2.47      & 1.87     \\ \hline
+        16 & 7.99          & 1.24           & 5.11          & 1.39         & 2.08       & 1.65    & 8.86     & 2.49      & 3.43     \\ \hline
+        32 & 9.43          & 1.76          & 6.83          & 1.27         & 2.46       & 5.12     & 10.51    & 2.05      & 3.36     \\
         \hline
     \end{tabular}
 \end{table}
