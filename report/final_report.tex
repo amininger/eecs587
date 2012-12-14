@@ -480,7 +480,10 @@ adding more processors doesn't help the shift strategy for random retreivals.
 
 
 \subsection{Dynamic Partitioning}
-Description of the modifications
+
+So far we have analyzed the behaviors of the three different agents, agents with short retrievals, long retrievals, and random retrievals, on two different episode partitioning strategies, even and shifted.  If an even split strategy is used, long retrievals are balanced efficient, but short retrievals are not.  If the shifted strategy is used, short retrievals are improved by long retrievals take much longer. But as discussed before the episodic memory mechanism cannot pressume specific agent retrieval behavior.
+
+As explain in section 3.2, a dynamic paritioning scheme was developed to help ameliorate this issue.
 \begin{figure}[h]
 \caption{Histogram with long retrievals}
 \centering
@@ -504,13 +507,19 @@ Discussion of histograms
 \begin{figure}[h]
 \caption{Performance for short retrievals and parameter tuning}
 \centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\includegraphics[width=0.75\textwidth]{images/alldynamicshort}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Performance for long retrievals and parameter tuning}
+\centering
+\includegraphics[width=0.75\textwidth]{images/alldynamiclong}
 \end{figure}
 
 \begin{figure}[h]
 \caption{Performance for random retrievals and parameter tuning}
 \centering
-\includegraphics[width=0.75\textwidth]{images/ret_worst_eq}
+\includegraphics[width=0.75\textwidth]{images/alldynamicrand}
 \end{figure}
 
 Discussion of results

@@ -10,7 +10,7 @@ def get_parens(line, num):
 	return line[open:close-1]
 
 def parseFile(fin, fout, case):
-	for i in range(0, 50000, 1000):
+	for i in range(0, 50000, 500):
 		fout.write(str(i) + ", ")
 	for line in fin:
 		if(case == STORING and line.find("Storing") != -1):
@@ -26,22 +26,8 @@ def parseFile(fin, fout, case):
 		
 		
 
-fin = open("long.data", 'r')
-fout = open("long.ret.csv", "w")
-parseFile(fin, fout, RETRIEVING)
-
-fin.close()
-fout.close()
-
-fin = open("short.data", 'r')
-fout = open("short.ret.csv", "w")
-parseFile(fin, fout, RETRIEVING)
-
-fin.close()
-fout.close()
-
-fin = open("rand.data", 'r')
-fout = open("rand.ret.csv", "w")
+fin = open("mid_dynamic_results3", 'r')
+fout = open("mid_dynamic.ret.csv", "w")
 parseFile(fin, fout, RETRIEVING)
 
 fin.close()
